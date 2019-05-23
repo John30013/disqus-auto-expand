@@ -1,0 +1,10 @@
+manifest.json:
+"background": {
+  "scripts": ["defaults.js", "background.js"],
+  "persistent": false
+},
+
+
+left: .3125rem;
+top: 0.5rem;
+
