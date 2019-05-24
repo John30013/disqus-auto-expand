@@ -18,7 +18,7 @@
       <span class="label">More replies
         <small>“see more replies” links.</small>
       </span>
-      <span class="checkbox"><input type="checkbox" id="moreReplies" checked>
+      <span class="toggle"><input type="checkbox" id="moreReplies" checked>
         <label for="moreReplies">More replies</label>
       </span>
     </p>
@@ -27,7 +27,7 @@
         <small>“see # new replies” links that appear when others reply to a post
           that is already visible.</small>
       </span>
-      <span class="checkbox"><input type="checkbox" id="newReplies" checked>
+      <span class="toggle"><input type="checkbox" id="newReplies" checked>
         <label for="newReplies">New replies</label>
       </span>
     </p>
@@ -35,7 +35,7 @@
       <span class="label">Long items
         <small>"see more" links that cut off the end of long posts and media items.</small>
       </span>
-      <span class="checkbox"><input type="checkbox" id="longItems" checked>
+      <span class="toggle"><input type="checkbox" id="longItems" checked>
         <label for="longItems">Long items</label>
       </span>
     </p>
@@ -44,15 +44,15 @@
     <h2>Additional options</h2>
     <p>
       <label for="checkInterval">Check for changes
-        <small>choose 1&ndash;30 seconds.</small>
+        <small>choose 1&ndash;30 seconds; 0 to disable.</small>
       </label>
-      <span>every <input type="number" id="checkInterval" min="1" max="30" step="1" required> seconds</span>
+      <span>every <input inputmode="numeric" id="checkInterval" pattern="[0-9]|[12][0-9]|30" required> seconds</span>
     </p>
     <p>
       <span class="label">Use dark theme
         <small>for this configuration page.</small>
       </span>
-      <span class="checkbox"><input type="checkbox" id="useDarkTheme">
+      <span class="toggle"><input type="checkbox" id="useDarkTheme">
         <label for="useDarkTheme">Use dark theme</label>
       </span>
     </p>
@@ -60,7 +60,7 @@
     <span class="label">Log debug output
       <small>to the JavaScript console.</small>
     </span>
-    <span class="checkbox"><input type="checkbox" id="doDebug">
+    <span class="toggle"><input type="checkbox" id="doDebug">
       <label for="doDebug">Log debug info</label>
     </span>
   </p>
