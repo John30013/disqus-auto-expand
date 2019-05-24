@@ -1,9 +1,14 @@
 let _options = {...defaultConfig};
+let _timer = null;
 
 // Listen for option updates.
 chrome.extension.onMessage.addListener(function (msg, sender, sendResponse) {
+  _options.doDebug && console.debug('Got message: %o', msg);
   if (msg.action === 'refreshOptions') {
     refreshOptions();
+  }
+  else if (msg.action === 'logDebug' && msg.message) {
+    _options.doDebug && console.debug(msg.message, ...msg.params);
   }
 });
 
@@ -16,6 +21,17 @@ showItems();
 
 /* ====== Helper functions ====== */
 function showItems() {
+  // Since showItems() can be called by refreshOptions() when checkInterval is 
+  // set to zero, clear any pending timeout first. It's a no-op if this call is
+  // the result of the timer timing out.
+  if (_timer) {
+    window.clearTimeout(_timer);
+  }
+  if (!_options.checkInterval) {
+    _options.doDebug && console.debug('showItems(): stopping the timeout loop.');
+    return;
+  }
+
   _options.doDebug && console.debug('showItems: starting.');
   let repliesSelector = [];
   if (_options.moreReplies) {
@@ -40,13 +56,17 @@ function showItems() {
     });
   }
   // Check again after the checkInterval.
-  window.setTimeout(showItems, _options.checkInterval * 1000);
+  _timer = window.setTimeout(showItems, _options.checkInterval * 1000);
   _options.doDebug && console.debug('showItems: exiting.');
 }
 
 function refreshOptions() {
   chrome.storage.sync.get(defaultConfig, (options) => {
+    const oldCheckInterval = +_options.checkInterval;
     _options = options;
+    if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
+      showItems();
+    }
     _options.doDebug && console.debug("Got sync'd options: %o", _options);
   });
 }
