@@ -1,0 +1,223 @@
+// Light (default) theme
+$theme-lite-color-bkgd: #eeeeee;
+$theme-lite-color-brdr: #666666;
+$theme-lite-color-ctrl: #0000000f;
+$theme-lite-color-ctrl-focus: #ffffffc0;
+$theme-lite-color-ctrl-invalid: #ff00000f;
+$theme-lite-color-error: #660000;
+$theme-lite-color-text: #222222;
+
+// Dark theme
+$theme-dark-color-bkgd: #222222;
+$theme-dark-color-brdr: #999999;
+$theme-dark-color-ctrl: #00000033;
+$theme-dark-color-ctrl-focus: #00000080;
+$theme-dark-color-ctrl-invalid: #ff000033;
+$theme-dark-color-error: #ff9999;
+$theme-dark-color-text: #dddddd;
+
+// Font stack
+$font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+html {
+  border: 0;
+  font-family: $font-family;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+body {
+  --color-bkgd: #{$theme-lite-color-bkgd};
+  --color-brdr: #{$theme-lite-color-brdr};
+  --color-ctrl: #{$theme-lite-color-ctrl};
+  --color-ctrl-focus: #{$theme-lite-color-ctrl-focus};
+  --color-ctrl-invalid: #{$theme-lite-color-ctrl-invalid};
+  --color-error: #{$theme-lite-color-error};
+  --color-text: #{$theme-lite-color-text};
+  &.theme-dark {
+    --color-bkgd: #{$theme-dark-color-bkgd};
+    --color-brdr: #{$theme-dark-color-brdr};
+    --color-ctrl: #{$theme-dark-color-ctrl};
+    --color-ctrl-focus: #{$theme-dark-color-ctrl-focus};
+    --color-ctrl-invalid: #{$theme-dark-color-ctrl-invalid};
+    --color-error: #{$theme-dark-color-error};
+    --color-text: #{$theme-dark-color-text};
+  }
+
+  background-color: var(--color-bkgd);
+  color: var(--color-text);
+  font-size: 1rem;
+  margin: 0;
+  padding: .5rem;
+  width: 21rem;
+
+  a:link, a:visited {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  a:focus {
+    outline: none;
+    text-decoration: underline;
+  }
+}
+
+header {
+  background-image: url(images/disqus_eye_48.png);
+  background-position: 0 .5rem;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid var(--color-text);
+  margin: 0 0 .5rem;
+  padding: 0 0 0.5rem 4rem;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+  }
+  p {
+    font-size: 1.25rem;
+    font-weight: normal;
+    margin: 0 0 .5rem;
+    padding: 0;
+    &:last-child {
+      margin: 0;
+    }
+  }
+}
+section {
+  // border: 1px solid lightcoral;
+  display: table;
+  margin: .5rem 0 0;
+  width: 100%;
+  h2 {
+    border-bottom: 1px dotted var(--color-text);
+    display: table-caption;
+    font-size: 1.25rem;
+    font-weight: normal;
+    margin: 0 0 .5rem;
+    padding: 0 0 .5rem;
+  }
+  p {
+    // border: 1px dotted lightseagreen;
+    display: table-row;
+
+    & > span, & > label {
+      // border: 1px dotted orchid;
+      display: table-cell;
+      border-bottom: .5rem solid transparent;
+
+      &:first-child {
+        font-weight: 500;
+        padding-right: 1rem;
+        width: 11rem;
+
+        small {
+          display: block;
+          font-weight: normal;
+          font-size: .8571rem;
+        }
+      }
+    }
+    
+    input#checkInterval {
+      width: 1.25rem;
+    }
+  }
+}
+
+/* Text-like inputs */
+input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea {
+  background-color: var(--color-ctrl);
+  border: 0;
+  border-bottom: 1px solid var(--color-brdr);
+  color: var(--color-text);
+  font-family: $font-family;
+  font-size: 1rem;
+  font-weight: normal;
+  position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
+
+  &:focus {
+    background-color: var(--color-ctrl-focus);
+    border-bottom-width: 2px;
+    font-weight: 500;
+    outline: 0;
+  }
+  &:disabled {
+    opacity: 50%;
+  }
+  &:invalid {
+    background-color: var(--color-ctrl-invalid);
+    border-bottom-color: var(--color-error);
+    color: var(--color-error);
+  }
+}
+
+input[type=number] {
+  padding: 0 .25rem;
+  text-align: end;
+  /* Remove spinner in FF */
+  -moz-appearance: textfield;
+  /* Remove spinner in Chrome */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* Styled checkbox */
+.checkbox {
+
+  input[type="checkbox"] { /* "hide" the HTML checkbox */
+    position: absolute;
+    left: -9999px;
+    
+    & + label::after { /* Hide the checkmark when the HTML checbox isn't checked */
+      content: none;
+    }
+    &:checked + label::after { /* Show the checkmark when the HTML checkbox is checked */
+      content: "";
+    }
+    &:focus + label::before { /* Focus state: make the box thicker */
+      background-color: var(--color-ctrl-focus);
+      outline: (1 / 16) * 1rem solid var(--color-brdr);
+    }
+  }
+
+  label {
+    display: inline-block;
+    padding-left: 1.375rem; /* nominal 16px wide checkbox + 6px padding before the text */
+    position: relative;
+    top: .25rem;
+    /* Hide the text of the label */
+    height: 1.5rem;
+    overflow: hidden;
+    width: 0;
+
+    &::before, &::after {
+      content: "";
+      display: inline-block; /* Needed for the line-height to take effect */
+      position: absolute;
+    }
+    &::before{ /* Outer box */
+      background-color: var(--color-ctrl);
+      border: 1px solid var(--color-brdr);
+      box-sizing: border-box;
+      height: 1rem;
+      width: 1rem;
+      left: (1 / 16) * 1rem;  /* Leave space for the focus outline */
+      /* (24px line-height - 16px height of fake checkbox) / 2 - 1px for the border to vertically center it. */
+      top: (((24 - 16) / 2 - 1) / 16) * 1rem;
+    }
+    &::after { /* Checkmark */
+      height: .25rem;
+      width: (9 / 16) * 1rem;
+      border-left: .125rem solid;
+      border-bottom: .125rem solid;
+      transform: rotate(-45deg);
+      left: .2rem;
+      top: .4rem;
+    }
+  }
+}

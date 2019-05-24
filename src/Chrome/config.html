@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Disqus Auto Expander config</title>
+  <link rel="stylesheet" href="config.css">
+</head>
+<body>
+    <a href="https://www.github.com/John30013/disqus-auto-expand/">
+      <header>
+        <h1>Disqus Auto Expander</h1>
+        <p>Configuration options</p>
+    </header>
+  </a>
+  <section>
+    <h2>Items to auto-expand</h2>
+    <p>
+      <span class="label">More replies
+        <small>“see more replies” links.</small>
+      </span>
+      <span class="checkbox"><input type="checkbox" id="moreReplies" checked>
+        <label for="moreReplies">More replies</label>
+      </span>
+    </p>
+    <p>
+      <span class="label">New replies
+        <small>“see # new replies” links that appear when others reply to a post
+          that is already visible.</small>
+      </span>
+      <span class="checkbox"><input type="checkbox" id="newReplies" checked>
+        <label for="newReplies">New replies</label>
+      </span>
+    </p>
+    <p>
+      <span class="label">Long items
+        <small>"see more" links that cut off the end of long posts and media items.</small>
+      </span>
+      <span class="checkbox"><input type="checkbox" id="longItems" checked>
+        <label for="longItems">Long items</label>
+      </span>
+    </p>
+  </section>
+  <section>
+    <h2>Additional options</h2>
+    <p>
+      <label for="checkInterval">Check for changes
+        <small>choose 1&ndash;30 seconds.</small>
+      </label>
+      <span>every <input type="number" id="checkInterval" min="1" max="30" step="1" required> seconds</span>
+    </p>
+    <p>
+      <span class="label">Use dark theme
+        <small>for this configuration page.</small>
+      </span>
+      <span class="checkbox"><input type="checkbox" id="useDarkTheme">
+        <label for="useDarkTheme">Use dark theme</label>
+      </span>
+    </p>
+  <p>
+    <span class="label">Log debug output
+      <small>to the JavaScript console.</small>
+    </span>
+    <span class="checkbox"><input type="checkbox" id="doDebug">
+      <label for="doDebug">Log debug info</label>
+    </span>
+  </p>
+  </section>
+  <script src="defaultConfig.js"></script>
+  <script src="config.js"></script>
+</body>
+</html>
