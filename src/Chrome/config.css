@@ -32,7 +32,7 @@ body.theme-dark {
   --color-text: #dddddd;
 }
 
-body a:link, body a:visited {
+body a:link, body a:visited, body a:hover, body a:active {
   color: var(--color-text);
   text-decoration: none;
 }
@@ -75,6 +75,15 @@ section {
   width: 100%;
 }
 
+section:last-of-type {
+  border-top: 1px dotted var(--color-text);
+  padding: .5rem 0 0;
+}
+
+section a.link, section a.visited, section a.active, section a:hover {
+  text-decoration: underline;
+}
+
 section h2 {
   border-bottom: 1px dotted var(--color-text);
   display: table-caption;
@@ -102,11 +111,12 @@ section p > span:first-child, section p > label:first-child {
 section p > span:first-child small, section p > label:first-child small {
   display: block;
   font-weight: normal;
-  font-size: .8571rem;
+  font-size: .857rem;
 }
 
 section p input#checkInterval {
   width: 1.25rem;
+  text-align: center;
 }
 
 /* Text-like inputs */
@@ -118,6 +128,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
   font-weight: normal;
+  padding: 0 .25rem;
   position: relative;
   /* Keeps the input from moving when focused (bottom border gets thicker). */
 }
