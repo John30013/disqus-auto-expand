@@ -4,7 +4,6 @@
   "version": "0.1",
   "description": "Automatically shows all replies (including new replies) and media items",
   "permissions": [
-    "*://*/*",
     "activeTab", 
     "declarativeContent",
     "storage"
@@ -26,6 +25,7 @@
     "48": "images/disqus_eye_48.png",
     "128": "images/disqus_eye_128.png"
   },
+  "options_page": "config.html",
   "page_action": {
     "default_icon": {
       "16": "images/disqus_eye_16.png",
