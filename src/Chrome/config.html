@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="config.css">
 </head>
 <body>
-    <a href="https://www.github.com/John30013/disqus-auto-expand/">
+    <a href="https://www.github.com/John30013/disqus-auto-expand/" target="dae-info">
       <header>
         <h1>Disqus Auto Expander</h1>
         <p>Configuration options</p>
@@ -46,7 +46,7 @@
       <label for="checkInterval">Check for changes
         <small>choose 1&ndash;30 seconds; 0 to disable.</small>
       </label>
-      <span>every <input inputmode="numeric" id="checkInterval" pattern="[0-9]|[12][0-9]|30" required> seconds</span>
+      <span>every <input inputmode="numeric" id="checkInterval" pattern="0?[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0" required> seconds</span>
     </p>
     <p>
       <span class="label">Use dark theme
@@ -64,6 +64,16 @@
       <label for="doDebug">Log debug info</label>
     </span>
   </p>
+  </section>
+  <section id="info">
+    <p>
+      <span class="label">Version</span>
+      <span id="version">0.0.0</span>
+    </p>
+    <p>
+      <span class="label">Information</span>
+      <span><a href="https://github.com/John30013/disqus-auto-expand" target="dae-info">Github Repo</a></span>
+    </p>
   </section>
   <script src="defaultConfig.js"></script>
   <script src="config.js"></script>
