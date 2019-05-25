@@ -3,11 +3,13 @@ let _options = {...defaultConfig};
 function logDebug(message, ...params) {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     chrome.tabs.sendMessage(tabs[0].id, 
-      { "action": "logDebug", "message": message, "params": params });
+      { action: 'logDebug', caller: 'config', message: message, params: params });
   });
-
 }
+
 // Initialize configuration controls from storage.
+const manifest = chrome.runtime.getManifest();
+document.querySelector('span#version').innerHTML = manifest.version;
 chrome.storage.sync.get(defaultConfig, options => {
   logDebug('config.js loaded.');
   logDebug('Setting options from storage: %o', options);
