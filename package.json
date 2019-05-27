@@ -1,0 +1,24 @@
+{
+  "name": "disqus-auto-expand",
+  "version": "0.1.0",
+  "description": "Browser extensions for Chrome and Firefox that automatically expands collapsed replies and long items.",
+  "main": "content.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/John30013/disqus-auto-expand.git"
+  },
+  "keywords": [
+    "disqus",
+    "browser",
+    "extension"
+  ],
+  "author": "John M. Pisello",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/John30013/disqus-auto-expand/issues"
+  },
+  "homepage": "https://github.com/John30013/disqus-auto-expand#readme"
+}
