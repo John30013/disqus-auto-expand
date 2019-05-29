@@ -46,6 +46,16 @@ function createObserver() {
           );
         if (entry.isIntersecting) {
           foundIntersects = true;
+          // For mobile media View/Hide links (only for media items uploaed to Disqus),
+          // Disqus doesn't add a data-tid attribute when the item is first activated. 
+          // Since processNewLinks() relies on data-tid to indicate an item that has
+          // already been processed, we add it ourselves.
+          if (link.classList.contains('post-media-link') && link.innerText === 'View') {
+            if (_options.hideOpenedMobileMediaLinks) {
+              link.classList.add('hidden');
+            }
+            link.dataset.tid = link.dataset.luid;
+          }
           link.click();
           _options.doDebug &&
             console.debug(
@@ -109,7 +119,7 @@ function processNewLinks() {
       'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
     );
   }
-  // Observe replies links that haven't already been observed.
+  // Observe "replies" links that haven't already been observed.
   if (repliesSelector.length) {
     document.querySelectorAll(repliesSelector.join(",")).forEach(observeLink);
   }
@@ -119,7 +129,12 @@ function processNewLinks() {
   if (_options.longItems) {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
-
+  // Observe View/Hide links for embedded media on mobile browsers.
+  const mobileMediaSelector =
+    "a.post-media-link:not([data-tid]):not([data-luid])";
+  if (_options.mobileMedia) {
+    document.querySelectorAll(mobileMediaSelector).forEach(observeLink);
+  }
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
 
