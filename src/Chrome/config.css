@@ -1,7 +1,7 @@
 html {
   border: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   margin: 0;
 }
@@ -12,6 +12,7 @@ body {
   --color-ctrl: #0000000f;
   --color-ctrl-focus: #ffffffc0;
   --color-ctrl-invalid: #ff00000f;
+  --color-ctrl-on: #459cf9;
   --color-error: #660000;
   --color-text: #222222;
   background-color: var(--color-bkgd);
@@ -19,7 +20,6 @@ body {
   font-size: 1rem;
   margin: 0;
   padding: .5rem;
-  width: 21rem;
 }
 
 body.theme-dark {
@@ -28,6 +28,7 @@ body.theme-dark {
   --color-ctrl: #00000033;
   --color-ctrl-focus: #00000080;
   --color-ctrl-invalid: #ff000033;
+  --color-ctrl-on: #459cf9;
   --color-error: #ff9999;
   --color-text: #dddddd;
 }
@@ -69,13 +70,19 @@ header p:last-child {
   margin: 0;
 }
 
+div.grid {
+  display: grid;
+  grid-template-columns: 21rem 21rem;
+  grid-column-gap: 1rem;
+}
+
 section {
   display: table;
   margin: .5rem 0 0;
   width: 100%;
 }
 
-section:last-of-type {
+section.noHeading {
   border-top: 1px dotted var(--color-text);
   padding: .5rem 0 0;
 }
@@ -84,7 +91,7 @@ section a.link, section a.visited, section a.active, section a:hover {
   text-decoration: underline;
 }
 
-section h2 {
+section h2, section h3 {
   border-bottom: 1px dotted var(--color-text);
   display: table-caption;
   font-size: 1.25rem;
@@ -150,6 +157,10 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:i
   color: var(--color-error);
 }
 
+input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, select::selection, textarea::selection {
+  background-color: var(--color-ctrl-on);
+}
+
 .toggle input[type="checkbox"] {
   position: absolute;
   left: -9999px;
@@ -182,7 +193,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:i
 }
 
 .toggle input:checked + label::after {
-  background: currentColor;
+  background-color: var(--color-ctrl-on);
   left: 100%;
   transform: translateX(-100%);
 }
@@ -194,6 +205,10 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:i
 
 .toggle input:disabled + label {
   cursor: not-allowed;
-  opacity: 50%;
+  opacity: .5;
+}
+
+.toggle input:disabled + label::after {
+  background-color: var(--color-ctrl);
 }
 /*# sourceMappingURL=config.css.map */

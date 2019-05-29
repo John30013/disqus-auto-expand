@@ -62,6 +62,9 @@ document.body.addEventListener('input', event => {
     if (target.id === 'useDarkTheme') {
       document.body.classList.toggle('theme-dark', target.checked);
       logDebug('--> document.body className: %s', document.body.className);
+    } else if (target.id === 'mobileMedia') {
+      document.querySelector("#hideOpenedMobileMediaLinks").toggleAttribute('disabled', !value);
+
     }
     updateConfigValue(target.id, value);
   }
