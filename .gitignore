@@ -1,6 +1,5 @@
-.private/**/*
-.vscode/**/*
-node_modules/**/*
+.private
+.vscode
 package-lock.json
 src/**/*.map
-
+node_modules
