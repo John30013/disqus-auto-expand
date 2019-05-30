@@ -78,9 +78,6 @@ document.body.addEventListener('input', event => {
       // removeIf(!allowDebug)
       logDebug('--> document.body className: %s', document.body.className);
       // endRemoveIf(!allowDebug)
-    } else if (target.id === 'mobileMedia') {
-      document.querySelector("#hideOpenedMobileMediaLinks").toggleAttribute('disabled', !value);
-
     }
     updateConfigValue(target.id, value);
   }

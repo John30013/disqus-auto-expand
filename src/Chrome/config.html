@@ -2,108 +2,88 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Disqus Auto Expander config</title>
   <link rel="stylesheet" href="config.css">
 </head>
-<body>
-    <a href="https://www.github.com/John30013/disqus-auto-expand/" target="dae-info">
+<body class="theme-lite">
+    <a class="header-link" href="https://www.github.com/John30013/disqus-auto-expand/" target="dae-info">
       <header>
         <h1>Disqus Auto Expander</h1>
         <p>Configuration options</p>
     </header>
   </a>
-  <div class="grid">
-    <section>
-      <h2>Items to auto-expand</h2>
-      <p>
-        <span class="label">More replies
-          <small>“See more replies” links.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="moreReplies" checked>
-          <label for="moreReplies">More replies</label>
-        </span>
-      </p>
-      <p>
-        <span class="label">New replies
-          <small>“See # new replies” links that appear when others reply to a post
-            that is already visible.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="newReplies" checked>
-          <label for="newReplies">New replies</label>
-        </span>
-      </p>
-      <p>
-        <span class="label">Long items
-          <small>"See more" links that cut off long posts and media items.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="longItems" checked>
-          <label for="longItems">Long items</label>
-        </span>
-      </p>
-    </section>
-    <section>
-      <h3>Mobile browsers only</h3>
-      <p>
-        <span class="label">Embedded media items
-          <small>Uploaded images, Tweets, YouTube videos, etc.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="mobileMedia">
-          <label for="mobileMedia">Uploaded media</label>
-        </span>
-      </p>
-      <p>
-        <span class="label">Hide links after opening
-          <small>&hellip;embedded media items.
-            <em><strong>Note:</strong> If you choose this option you won’t be able
-              to hide embedded media items.</em></small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="hideOpenedMobileMediaLinks" disabled>
-          <label for="hideOpenedMobileMediaLinks">Hide link after expanding</label>
-        </span>
-      </p>
-    </section>
-    <section>
-      <h2>Additional options</h2>
-      <p>
-        <label for="checkInterval">Check for changes
-          <small>Choose 1&ndash;30 seconds; 0 to disable.</small>
-        </label>
-        <span>every <input inputmode="numeric" id="checkInterval"
-            pattern="0?[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
-            required> seconds</span>
-      </p>
-      <p>
-        <span class="label">Use dark theme
-          <small>&hellip;for this configuration page.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="useDarkTheme">
-          <label for="useDarkTheme">Use dark theme</label>
-        </span>
-      </p>
-      <!-- removeIf(!allowDebug) -->
-      <p>
-        <span class="label">Log debug output
-          <small>&hellip;to the JavaScript console.</small>
-        </span>
-        <span class="toggle"><input type="checkbox" id="doDebug">
-          <label for="doDebug">Log debug info</label>
-        </span>
-      </p>
-      <!-- endRemoveIf(!allowDebug) -->
-    </section>
-    <section>
-      <h2>Extension details</h2>
-      <p>
-        <span class="label">Version</span>
-        <span id="version">0.0.0</span>
-      </p>
-      <p>
-        <span class="label">More information</span>
-        <span><a href="https://github.com/John30013/disqus-auto-expand"
-            target="dae-info">Github repository</a></span>
-      </p>
-    </section>
-  </div>
+  <section>
+    <h2>Items to auto-expand</h2>
+    <p>
+      <span class="label">More replies
+        <small>“See more replies” links.</small>
+      </span>
+      <span class="input input-toggle"><input type="checkbox" id="moreReplies" checked>
+        <label for="moreReplies">More replies</label>
+      </span>
+    </p>
+    <p>
+      <span class="label">New replies
+        <small>“See # new replies” links that appear when others reply to a post
+          that is already visible.</small>
+      </span>
+      <span class="input input-toggle"><input type="checkbox" id="newReplies" checked>
+        <label for="newReplies">New replies</label>
+      </span>
+    </p>
+    <p>
+      <span class="label">Long items
+        <small>"See more" links that cut off long posts and media items.</small>
+      </span>
+      <span class="input input-toggle"><input type="checkbox" id="longItems" checked>
+        <label for="longItems">Long items</label>
+      </span>
+    </p>
+  </section>
+  <section>
+    <h2>Additional options</h2>
+    <p>
+      <label for="checkInterval">Check for changes
+        <small>Choose 1&ndash;30 seconds; enter 0&#160;to disable.</small>
+      </label>
+      <span class="input">every <input inputmode="numeric" id="checkInterval"
+          pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
+          required> seconds</span>
+    </p>
+    <p>
+      <span class="label">Use dark theme
+        <small>&hellip;for this configuration page.</small>
+      </span>
+      <span class="input input-toggle"><input type="checkbox" id="useDarkTheme">
+        <label for="useDarkTheme">Use dark theme</label>
+      </span>
+    </p>
+    <!-- removeIf(!allowDebug) -->
+    <p>
+      <span class="label">Log debug output
+        <small>&hellip;to the JavaScript console.</small>
+      </span>
+      <span class="input input-toggle"><input type="checkbox" id="doDebug">
+        <label for="doDebug">Log debug info</label>
+      </span>
+    </p>
+    <!-- endRemoveIf(!allowDebug) -->
+  </section>
+  <section>
+    <h2>Extension details</h2>
+    <p>
+      <span class="label">Version</span>
+      <span id="version">0.0.0</span>
+    </p>
+    <p>
+      <span class="label">More information
+        <small>&hellip; including help, bug reporting, and feedback.</small>
+      </span>
+      <span>Please visit the <a href="https://github.com/John30013/disqus-auto-expand"
+          target="dae-info">Github repository</a>.</span>
+    </p>
+  </section>
   <script src="defaultConfig.js"></script>
   <script src="config.js"></script>
 </body>

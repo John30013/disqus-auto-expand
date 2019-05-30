@@ -2,7 +2,7 @@ html {
   border: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.25rem;
   margin: 0;
 }
 
@@ -15,11 +15,14 @@ body {
   --color-ctrl-on: #459cf9;
   --color-error: #660000;
   --color-text: #222222;
+  --color-text-sec: #666666;
+  --color-link: #459cf9;
   background-color: var(--color-bkgd);
   color: var(--color-text);
   font-size: 1rem;
   margin: 0;
   padding: .5rem;
+  max-width: 25rem;
 }
 
 body.theme-dark {
@@ -31,16 +34,23 @@ body.theme-dark {
   --color-ctrl-on: #459cf9;
   --color-error: #ff9999;
   --color-text: #dddddd;
+  --color-text-sec: #999999;
+  --color-link: #459cf9;
 }
 
-body a:link, body a:visited, body a:hover, body a:active {
-  color: var(--color-text);
+a:link, a:visited {
+  color: var(--color-link);
   text-decoration: none;
 }
 
-body a:focus {
+a:focus, a:hover, a:active {
   outline: none;
   text-decoration: underline;
+}
+
+a.header-link {
+  color: var(--color-text);
+  text-decoration: none;
 }
 
 header {
@@ -48,6 +58,7 @@ header {
   background-position: 0 .5rem;
   background-repeat: no-repeat;
   border-bottom: 1px solid var(--color-text);
+  line-height: 1.25;
   margin: 0 0 .5rem;
   padding: 0 0 0.5rem 4rem;
 }
@@ -70,12 +81,6 @@ header p:last-child {
   margin: 0;
 }
 
-div.grid {
-  display: grid;
-  grid-template-columns: 21rem 21rem;
-  grid-column-gap: 1rem;
-}
-
 section {
   display: table;
   margin: .5rem 0 0;
@@ -92,7 +97,8 @@ section a.link, section a.visited, section a.active, section a:hover {
 }
 
 section h2, section h3 {
-  border-bottom: 1px dotted var(--color-text);
+  border-bottom: 1px dotted;
+  color: var(--color-text-sec);
   display: table-caption;
   font-size: 1.25rem;
   font-weight: normal;
@@ -112,13 +118,22 @@ section p > span, section p > label {
 section p > span:first-child, section p > label:first-child {
   font-weight: 500;
   padding-right: 1rem;
-  width: 11rem;
 }
 
 section p > span:first-child small, section p > label:first-child small {
   display: block;
   font-weight: normal;
   font-size: .857rem;
+  margin-top: .125rem;
+}
+
+section p > span:last-child, section p > label:last-child {
+  width: 8.25rem;
+}
+
+section p > span.input {
+  text-align: start;
+  white-space: nowrap;
 }
 
 section p input#checkInterval {
@@ -157,58 +172,70 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:i
   color: var(--color-error);
 }
 
+input:not([type=checkbox]):not([type=radio]):not([type=range])::-moz-selection, select::-moz-selection, textarea::-moz-selection {
+  background-color: var(--color-ctrl-on);
+}
+
 input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, select::selection, textarea::selection {
   background-color: var(--color-ctrl-on);
 }
 
-.toggle input[type="checkbox"] {
+.input-toggle {
+  --radius: .375rem;
+}
+
+.input-toggle input[type="checkbox"] {
   position: absolute;
   left: -9999px;
 }
 
-.toggle label {
+.input-toggle label {
   background: var(--color-ctrl);
   border: 0.0625rem solid var(--color-brdr);
-  border-radius: 1rem;
+  border-radius: var(--radius);
   cursor: pointer;
   display: block;
-  text-indent: -9999px;
+  text-indent: 100%;
+  overflow: hidden;
   position: relative;
   top: .25rem;
   width: 2rem;
   height: 1rem;
 }
 
-.toggle label::after {
+.input-toggle label::after {
   background: var(--color-ctrl);
   border: 0.0625rem solid var(--color-brdr);
-  border-radius: .5rem;
+  border-radius: var(--radius);
   content: '';
+  -webkit-transition: 0.3s;
   transition: 0.3s;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: .875rem;
-  height: .875rem;
+  top: -.0625rem;
+  left: -.0625rem;
+  width: 1rem;
+  height: 1rem;
 }
 
-.toggle input:checked + label::after {
+.input-toggle input:checked + label::after {
   background-color: var(--color-ctrl-on);
-  left: 100%;
-  transform: translateX(-100%);
+  left: calc(100% - .0625rem);
+  -webkit-transform: translateX(calc(-100% + .125rem));
+          transform: translateX(calc(-100% + .125rem));
 }
 
-.toggle input:focus + label {
+.input-toggle input:focus + label {
   background-color: var(--color-ctrl-focus);
-  box-shadow: 0 0 0 0.0625rem var(--color-brdr);
+  -webkit-box-shadow: 0 0 0 0.0625rem var(--color-brdr);
+          box-shadow: 0 0 0 0.0625rem var(--color-brdr);
 }
 
-.toggle input:disabled + label {
+.input-toggle input:disabled + label {
   cursor: not-allowed;
   opacity: .5;
 }
 
-.toggle input:disabled + label::after {
+.input-toggle input:disabled + label::after {
   background-color: var(--color-ctrl);
 }
 /*# sourceMappingURL=config.css.map */

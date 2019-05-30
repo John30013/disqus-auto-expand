@@ -1,22 +1,24 @@
 // Light (default) theme
 $theme-lite-color-bkgd: #eeeeee;
+$theme-lite-color-brand: #459cf9;
 $theme-lite-color-brdr: #666666;
 $theme-lite-color-ctrl: #0000000f;
 $theme-lite-color-ctrl-focus: #ffffffc0;
 $theme-lite-color-ctrl-invalid: #ff00000f;
-$theem-lite-color-ctrl-on: #459cf9;
 $theme-lite-color-error: #660000;
 $theme-lite-color-text: #222222;
+$theme-lite-color-text-sec: #666666;
 
 // Dark theme
 $theme-dark-color-bkgd: #222222;
+$theme-dark-color-brand: #459cf9;
 $theme-dark-color-brdr: #999999;
 $theme-dark-color-ctrl: #00000033;
 $theme-dark-color-ctrl-focus: #00000080;
 $theme-dark-color-ctrl-invalid: #ff000033;
-$theem-dark-color-ctrl-on: #459cf9;
 $theme-dark-color-error: #ff9999;
 $theme-dark-color-text: #dddddd;
+$theme-dark-color-text-sec: #999999;
 
 // Font stack
 $font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,7 +27,7 @@ html {
   border: 0;
   font-family: $font-family;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.25rem;
   margin: 0;
 }
 body {
@@ -34,18 +36,22 @@ body {
   --color-ctrl: #{$theme-lite-color-ctrl};
   --color-ctrl-focus: #{$theme-lite-color-ctrl-focus};
   --color-ctrl-invalid: #{$theme-lite-color-ctrl-invalid};
-  --color-ctrl-on: #{$theem-lite-color-ctrl-on};
+  --color-ctrl-on: #{$theme-lite-color-brand};
   --color-error: #{$theme-lite-color-error};
   --color-text: #{$theme-lite-color-text};
+  --color-text-sec: #{$theme-lite-color-text-sec};
+  --color-link: #{$theme-lite-color-brand};
   &.theme-dark {
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
     --color-ctrl: #{$theme-dark-color-ctrl};
     --color-ctrl-focus: #{$theme-dark-color-ctrl-focus};
     --color-ctrl-invalid: #{$theme-dark-color-ctrl-invalid};
-    --color-ctrl-on: #{$theem-dark-color-ctrl-on};
+    --color-ctrl-on: #{$theme-dark-color-brand};
     --color-error: #{$theme-dark-color-error};
     --color-text: #{$theme-dark-color-text};
+    --color-text-sec: #{$theme-dark-color-text-sec};
+    --color-link: #{$theme-dark-color-brand};
   }
 
   background-color: var(--color-bkgd);
@@ -53,16 +59,21 @@ body {
   font-size: 1rem;
   margin: 0;
   padding: .5rem;
-  // width: 21rem;
+  max-width: 25rem;
+}
 
-  a:link, a:visited, a:hover, a:active {
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  a:focus {
-    outline: none;
-    text-decoration: underline;
-  }
+a:link, a:visited {
+  color: var(--color-link);
+  text-decoration: none;
+}
+a:focus, a:hover, a:active {
+  outline: none;
+  text-decoration: underline;
+}
+
+a.header-link {
+  color: var(--color-text);
+  text-decoration: none;
 }
 
 header {
@@ -70,6 +81,7 @@ header {
   background-position: 0 .5rem;
   background-repeat: no-repeat;
   border-bottom: 1px solid var(--color-text);
+  line-height: 1.25;
   margin: 0 0 .5rem;
   padding: 0 0 0.5rem 4rem;
 
@@ -90,11 +102,6 @@ header {
   }
 }
 
-div.grid {
-  display: grid;
-  grid-template-columns: 21rem 21rem;
-  grid-column-gap: 1rem;
-}
 section {
   display: table;
   margin: .5rem 0 0;
@@ -109,7 +116,8 @@ section {
     text-decoration: underline;
   }
   h2, h3 {
-    border-bottom: 1px dotted var(--color-text);
+    border-bottom: 1px dotted;
+    color: var(--color-text-sec);
     display: table-caption;
     font-size: 1.25rem;
     font-weight: normal;
@@ -126,14 +134,21 @@ section {
       &:first-child {
         font-weight: 500;
         padding-right: 1rem;
-        width: 11rem;
 
         small {
           display: block;
           font-weight: normal;
           font-size: .857rem;
+          margin-top: .125rem;
         }
       }
+      &:last-child {
+        width: 8.25rem;
+      }
+    }
+    & > span.input {
+      text-align: start;
+      white-space: nowrap;
     }
     
     input#checkInterval {
@@ -174,7 +189,8 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   }
 }
 
-.toggle {
+.input-toggle {
+  --radius: .375rem;
 
   input[type="checkbox"] {
     position: absolute;
@@ -185,12 +201,14 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   label {
     background: var(--color-ctrl);
     border: .0625rem solid var(--color-brdr);
-    border-radius: 1rem;
+    border-radius: var(--radius);
     cursor: pointer;
     display: block;
-    text-indent: -9999px;
+    text-indent: 100%;
+    overflow: hidden;
     position: relative;
     top: .25rem;
+    // left: calc(100% - 2.25rem);
     width: 2rem;
     height: 1rem;
   }
@@ -199,20 +217,20 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   label::after {
     background: var(--color-ctrl);
     border: .0625rem solid var(--color-brdr);
-    border-radius: .5rem;
+    border-radius: var(--radius);
     content: '';
     transition: 0.3s;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: .875rem;
-    height: .875rem;
+    top: -.0625rem;
+    left: -.0625rem;
+    width: 1rem;
+    height: 1rem;
   }
   // Toggle knob/thumb in the on position.
   input:checked + label::after {
     background-color: var(--color-ctrl-on);
-    left: 100%;
-    transform: translateX(-100%);
+    left: calc(100% - .0625rem);
+    transform: translateX(calc(-100% + .125rem));
   }
 
   input:focus + label {
