@@ -1,2 +1,6 @@
 .private/**/*
-src/**/config.css.map
+.vscode/**/*
+node_modules/**/*
+package-lock.json
+src/**/*.map
+dist/Chrome.pem
