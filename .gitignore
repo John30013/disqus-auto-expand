@@ -3,3 +3,4 @@
 package-lock.json
 src/**/*.map
 node_modules
+dist/**/*.pem
