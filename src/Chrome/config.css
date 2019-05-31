@@ -22,6 +22,7 @@ body {
   font-size: 1rem;
   margin: 0;
   padding: .5rem;
+  min-width: 20rem;
   max-width: 25rem;
 }
 
@@ -61,6 +62,7 @@ header {
   line-height: 1.25;
   margin: 0 0 .5rem;
   padding: 0 0 0.5rem 4rem;
+  white-space: nowrap;
 }
 
 header h1 {
@@ -96,7 +98,7 @@ section a.link, section a.visited, section a.active, section a:hover {
   text-decoration: underline;
 }
 
-section h2, section h3 {
+section > h2 {
   border-bottom: 1px dotted;
   color: var(--color-text-sec);
   display: table-caption;
@@ -106,37 +108,42 @@ section h2, section h3 {
   padding: 0 0 .5rem;
 }
 
-section p {
+section:hover > h2, section:focus-within > h2 {
+  color: var(--color-text);
+}
+
+section > p {
   display: table-row;
 }
 
-section p > span, section p > label {
+section > p > span, section > p > label {
   display: table-cell;
   border-bottom: .5rem solid transparent;
 }
 
-section p > span:first-child, section p > label:first-child {
+section > p > span:first-child, section > p > label:first-child {
   font-weight: 500;
   padding-right: 1rem;
+  min-width: 10rem;
 }
 
-section p > span:first-child small, section p > label:first-child small {
+section > p > span:first-child > small, section > p > label:first-child > small {
   display: block;
   font-weight: normal;
   font-size: .857rem;
   margin-top: .125rem;
 }
 
-section p > span:last-child, section p > label:last-child {
-  width: 8.25rem;
+section > p > span:last-child, section > p > label:last-child {
+  width: 9rem;
 }
 
-section p > span.input {
+section > p > span.input {
   text-align: start;
   white-space: nowrap;
 }
 
-section p input#checkInterval {
+section > p input#checkInterval {
   width: 1.25rem;
   text-align: center;
 }
@@ -162,10 +169,6 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):focus, select:foc
   outline: 0;
 }
 
-input:not([type=checkbox]):not([type=radio]):not([type=range]):disabled, select:disabled, textarea:disabled {
-  opacity: 50%;
-}
-
 input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:invalid, textarea:invalid {
   background-color: var(--color-ctrl-invalid);
   border-bottom-color: var(--color-error);
@@ -180,16 +183,17 @@ input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, selec
   background-color: var(--color-ctrl-on);
 }
 
+/* Toggle switch (styled checkbox) input */
 .input-toggle {
   --radius: .375rem;
 }
 
-.input-toggle input[type="checkbox"] {
+.input-toggle > input[type="checkbox"] {
   position: absolute;
   left: -9999px;
 }
 
-.input-toggle label {
+.input-toggle > label {
   background: var(--color-ctrl);
   border: 0.0625rem solid var(--color-brdr);
   border-radius: var(--radius);
@@ -203,7 +207,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, selec
   height: 1rem;
 }
 
-.input-toggle label::after {
+.input-toggle > label::after {
   background: var(--color-ctrl);
   border: 0.0625rem solid var(--color-brdr);
   border-radius: var(--radius);
@@ -217,25 +221,16 @@ input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, selec
   height: 1rem;
 }
 
-.input-toggle input:checked + label::after {
+.input-toggle > input:checked + label::after {
   background-color: var(--color-ctrl-on);
   left: calc(100% - .0625rem);
   -webkit-transform: translateX(calc(-100% + .125rem));
           transform: translateX(calc(-100% + .125rem));
 }
 
-.input-toggle input:focus + label {
+.input-toggle > input:focus + label {
   background-color: var(--color-ctrl-focus);
   -webkit-box-shadow: 0 0 0 0.0625rem var(--color-brdr);
           box-shadow: 0 0 0 0.0625rem var(--color-brdr);
-}
-
-.input-toggle input:disabled + label {
-  cursor: not-allowed;
-  opacity: .5;
-}
-
-.input-toggle input:disabled + label::after {
-  background-color: var(--color-ctrl);
 }
 /*# sourceMappingURL=config.css.map */
