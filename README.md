@@ -13,7 +13,7 @@ Before following any of the instructions below, you should first clone or downlo
 ### Chrome desktop browser
 1. Open your Chrome browser.
 1. Either browse to [“chrome://extensions”](chrome://extensions) or open the “Customize and control Google Chrome” menu (three vertical dots) › “More tools” › “Extensions”:  
-![A screen shot of the “Extensions” menu in Google Chrome](docs/chrome_menu.png)
+![A screen shot of the “Extensions” menu in Google Chrome](docs/chrome_extensions_menu.png)
 1. Enable "Developer mode" using the toggle at the top right of the Extensions page:  
 ![Developer mode toggle](./docs/chrome_developer_mode_toggle.png).  
 This will display three new buttons below the “Extensions” menu at the top left of the page:  
@@ -38,10 +38,27 @@ Chrome for Android does not currently support installing extensions. However, ot
 *__Note:__ Yandex currently only supports installing extensions from the Google Play Store. I will deploy this extension to the Google Play Store once it has passed beta testing.*
 
 ### Firefox desktop browser
-Coming soon!
+_Coming soon!_
 
 ### Firefox for Android
-Coming soon!
+_Coming soon!_
 
 ## Configuration and operation
-Coming soon!
+The extension is designed to work automatically, and it is configured with the most useful options (i.e., expand all replies and long media items; and check for new links every 5 seconds).
+
+You can change the configuration to choose (a) which links to automatically expand, and (b) how often to check for new links. There are three ways to access the configuration screen:
+1. On a desktop browser, when you are on a web page that contains a Disqus discussion area, the extension’s icon turns blue: ![Disqus Auto Expand extension icon in the active state](docs/dax_icon_blue.png). You can click the icon to display the configuration page in a popup view:  
+![Screen shot of configuration popup when the extension is active](docs/dax_config_page.png)  
+_**Note:** you may need to scroll down to see all of the options in the popup view._
+
+1. On a Desktop browser, when you are on a web page that _does not_ contain a Disqus discussion area, the extension’s icon turns gray: ![Disqus Auto Expand extension icon in the inactive state](docs/dax_icon_gray.png). You can click the icon to display the extension management popup and choose “Options”:  
+![Screen shot of Chrome's standard extension management popup](docs/chrome_extension_management_popup.png)
+
+1. On a Desktop or Mobile browser you can access the “Extension options” page by choosing the “Details” button on the extension’s tile in the browser’s “Extensions” page:  
+![Screen shot of the Disqus Auto Expand extension, installed in the Chrome browser's Extensions page](docs/chrome_extension_tile.png)  
+Then on the details page scroll down and select the section titled “Extension options”:  
+![Screen shot of the "Extension options" section](docs/chrome_extension_options.png)
+
+Either of the last two options will display a new browser tab or window containing the extension’s configuration page, which is identical to the popup shown in the first option above.
+
+On the configuration popup or page you can change any of the options shown. Changes take effect immediately (there is no “Save” button) and—if you are signed in to your browser’s synchronization service—will be synchronized to your other browsers.
