@@ -1,1 +1,236 @@
-html{border:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;font-size:16px;line-height:1.25rem;margin:0}body,body.theme-dark{--color-ctrl-on: #459cf9;--color-link: #459cf9}body{--color-bkgd: #eeeeee;--color-brdr: #666666;--color-ctrl: #0000000f;--color-ctrl-focus: #ffffffc0;--color-ctrl-invalid: #ff00000f;--color-error: #660000;--color-text: #222222;--color-text-sec: #666666;background-color:var(--color-bkgd);color:var(--color-text);font-size:1rem;margin:0;padding:.5rem;min-width:20rem;max-width:25rem}body.theme-dark{--color-bkgd: #222222;--color-brdr: #999999;--color-ctrl: #00000033;--color-ctrl-focus: #00000080;--color-ctrl-invalid: #ff000033;--color-error: #ff9999;--color-text: #dddddd;--color-text-sec: #999999}a:link,a:visited{color:var(--color-link);text-decoration:none}a:active,a:focus,a:hover{outline:0;text-decoration:underline}a.header-link{color:var(--color-text);text-decoration:none}header{background-image:url(images/disqus_eye_48.png);background-position:0 .5rem;background-repeat:no-repeat;border-bottom:1px solid var(--color-text);line-height:1.25;margin:0 0 .5rem;padding:0 0 .5rem 4rem;white-space:nowrap}header h1,header p{font-weight:400;padding:0}header h1{margin:0;font-size:1.5rem}header p{font-size:1.25rem;margin:0 0 .5rem}header p:last-child{margin:0}section{display:table;margin:.5rem 0 0;width:100%}section.noHeading{border-top:1px dotted var(--color-text);padding:.5rem 0 0}section a.active,section a.link,section a.visited,section a:hover{text-decoration:underline}section>h2{border-bottom:1px dotted;color:var(--color-text-sec);display:table-caption;font-size:1.25rem;font-weight:400;margin:0 0 .5rem;padding:0 0 .5rem}section:focus-within>h2,section:hover>h2{color:var(--color-text)}section>p{display:table-row}section>p>label,section>p>span{display:table-cell;border-bottom:.5rem solid transparent}section>p>label:first-child,section>p>span:first-child{font-weight:500;padding-right:1rem;min-width:10rem}section>p>label:first-child>small,section>p>span:first-child>small{display:block;font-weight:400;font-size:.857rem;margin-top:.125rem}section>p>label:last-child,section>p>span:last-child{width:9rem}section>p>span.input{text-align:start;white-space:nowrap}section>p input#checkInterval{width:1.25rem;text-align:center}input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{background-color:var(--color-ctrl);border:0;border-bottom:1px solid var(--color-brdr);color:var(--color-text);font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;font-size:1rem;font-weight:400;padding:0 .25rem;position:relative}input:not([type=checkbox]):not([type=radio]):not([type=range]):focus,select:focus,textarea:focus{background-color:var(--color-ctrl-focus);border-bottom-width:2px;font-weight:500;outline:0}input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid,select:invalid,textarea:invalid{background-color:var(--color-ctrl-invalid);border-bottom-color:var(--color-error);color:var(--color-error)}input:not([type=checkbox]):not([type=radio]):not([type=range])::-moz-selection,select::-moz-selection,textarea::-moz-selection{background-color:var(--color-ctrl-on)}input:not([type=checkbox]):not([type=radio]):not([type=range])::selection,select::selection,textarea::selection{background-color:var(--color-ctrl-on)}.input-toggle{--radius: .375rem}.input-toggle>input[type=checkbox]{position:absolute;left:-9999px}.input-toggle>label,.input-toggle>label::after{background:var(--color-ctrl);border:.0625rem solid var(--color-brdr);border-radius:var(--radius);height:1rem}.input-toggle>label{cursor:pointer;display:block;text-indent:100%;overflow:hidden;position:relative;top:.25rem;width:2rem}.input-toggle>label::after{content:'';-webkit-transition:.3s;transition:.3s;position:absolute;top:-.0625rem;left:-.0625rem;width:1rem}.input-toggle>input:checked+label::after{background-color:var(--color-ctrl-on);left:calc(100% - .0625rem);-webkit-transform:translateX(calc(-100% + .125rem));transform:translateX(calc(-100% + .125rem))}.input-toggle>input:focus+label{background-color:var(--color-ctrl-focus);-webkit-box-shadow:0 0 0 .0625rem var(--color-brdr);box-shadow:0 0 0 .0625rem var(--color-brdr)}
+html {
+  border: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.25rem;
+  margin: 0;
+}
+
+body {
+  --color-bkgd: #eeeeee;
+  --color-brdr: #666666;
+  --color-ctrl: #0000000f;
+  --color-ctrl-focus: #ffffffc0;
+  --color-ctrl-invalid: #ff00000f;
+  --color-ctrl-on: #459cf9;
+  --color-error: #660000;
+  --color-text: #222222;
+  --color-text-sec: #666666;
+  --color-link: #459cf9;
+  background-color: var(--color-bkgd);
+  color: var(--color-text);
+  font-size: 1rem;
+  margin: 0;
+  padding: .5rem;
+  min-width: 20rem;
+  max-width: 25rem;
+}
+
+body.theme-dark {
+  --color-bkgd: #222222;
+  --color-brdr: #999999;
+  --color-ctrl: #00000033;
+  --color-ctrl-focus: #00000080;
+  --color-ctrl-invalid: #ff000033;
+  --color-ctrl-on: #459cf9;
+  --color-error: #ff9999;
+  --color-text: #dddddd;
+  --color-text-sec: #999999;
+  --color-link: #459cf9;
+}
+
+a:link, a:visited {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:focus, a:hover, a:active {
+  outline: none;
+  text-decoration: underline;
+}
+
+a.header-link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+header {
+  background-image: url(images/disqus_eye_48.png);
+  background-position: 0 .5rem;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid var(--color-text);
+  line-height: 1.25;
+  margin: 0 0 .5rem;
+  padding: 0 0 0.5rem 4rem;
+  white-space: nowrap;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}
+
+header p {
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0 0 .5rem;
+  padding: 0;
+}
+
+header p:last-child {
+  margin: 0;
+}
+
+section {
+  display: table;
+  margin: .5rem 0 0;
+  width: 100%;
+}
+
+section.noHeading {
+  border-top: 1px dotted var(--color-text);
+  padding: .5rem 0 0;
+}
+
+section a.link, section a.visited, section a.active, section a:hover {
+  text-decoration: underline;
+}
+
+section > h2 {
+  border-bottom: 1px dotted;
+  color: var(--color-text-sec);
+  display: table-caption;
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0 0 .5rem;
+  padding: 0 0 .5rem;
+}
+
+section:hover > h2, section:focus-within > h2 {
+  color: var(--color-text);
+}
+
+section > p {
+  display: table-row;
+}
+
+section > p > span, section > p > label {
+  display: table-cell;
+  border-bottom: .5rem solid transparent;
+}
+
+section > p > span:first-child, section > p > label:first-child {
+  font-weight: 500;
+  padding-right: 1rem;
+  min-width: 10rem;
+}
+
+section > p > span:first-child > small, section > p > label:first-child > small {
+  display: block;
+  font-weight: normal;
+  font-size: .857rem;
+  margin-top: .125rem;
+}
+
+section > p > span:last-child, section > p > label:last-child {
+  width: 9rem;
+}
+
+section > p > span.input {
+  text-align: start;
+  white-space: nowrap;
+}
+
+section > p input#checkInterval {
+  width: 1.25rem;
+  text-align: center;
+}
+
+/* Text-like inputs */
+input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea {
+  background-color: var(--color-ctrl);
+  border: 0;
+  border-bottom: 1px solid var(--color-brdr);
+  color: var(--color-text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  font-weight: normal;
+  padding: 0 .25rem;
+  position: relative;
+  /* Keeps the input from moving when focused (bottom border gets thicker). */
+}
+
+input:not([type=checkbox]):not([type=radio]):not([type=range]):focus, select:focus, textarea:focus {
+  background-color: var(--color-ctrl-focus);
+  border-bottom-width: 2px;
+  font-weight: 500;
+  outline: 0;
+}
+
+input:not([type=checkbox]):not([type=radio]):not([type=range]):invalid, select:invalid, textarea:invalid {
+  background-color: var(--color-ctrl-invalid);
+  border-bottom-color: var(--color-error);
+  color: var(--color-error);
+}
+
+input:not([type=checkbox]):not([type=radio]):not([type=range])::-moz-selection, select::-moz-selection, textarea::-moz-selection {
+  background-color: var(--color-ctrl-on);
+}
+
+input:not([type=checkbox]):not([type=radio]):not([type=range])::selection, select::selection, textarea::selection {
+  background-color: var(--color-ctrl-on);
+}
+
+/* Toggle switch (styled checkbox) input */
+.input-toggle {
+  --radius: .375rem;
+}
+
+.input-toggle > input[type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+}
+
+.input-toggle > label {
+  background: var(--color-ctrl);
+  border: 0.0625rem solid var(--color-brdr);
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: block;
+  text-indent: 100%;
+  overflow: hidden;
+  position: relative;
+  top: .25rem;
+  width: 2rem;
+  height: 1rem;
+}
+
+.input-toggle > label::after {
+  background: var(--color-ctrl);
+  border: 0.0625rem solid var(--color-brdr);
+  border-radius: var(--radius);
+  content: '';
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+  position: absolute;
+  top: -.0625rem;
+  left: -.0625rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.input-toggle > input:checked + label::after {
+  background-color: var(--color-ctrl-on);
+  left: calc(100% - .0625rem);
+  -webkit-transform: translateX(calc(-100% + .125rem));
+          transform: translateX(calc(-100% + .125rem));
+}
+
+.input-toggle > input:focus + label {
+  background-color: var(--color-ctrl-focus);
+  -webkit-box-shadow: 0 0 0 0.0625rem var(--color-brdr);
+          box-shadow: 0 0 0 0.0625rem var(--color-brdr);
+}
+/*# sourceMappingURL=config.css.map */

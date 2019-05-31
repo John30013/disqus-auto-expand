@@ -1,1 +1,97 @@
-let _options={...defaultConfig};function logDebug(e,...t){chrome.tabs.query({active:!0,currentWindow:!0},function(o){chrome.tabs.sendMessage(o[0].id,{action:"logDebug",caller:"config",message:e,params:t})})}const manifest=chrome.runtime.getManifest();function updateConfigValue(e,t){chrome.storage.sync.set({[e]:t},()=>{logDebug('--\x3e Updated config option "%s" to (%s) "%s"',e,typeof t,t)}),"useDarkTheme"!==e&&chrome.tabs.query({active:!0,currentWindow:!0},function(e){chrome.tabs.sendMessage(e[0].id,{action:"refreshOptions"})})}document.querySelector("span#version").innerHTML=manifest.version,chrome.storage.sync.get(defaultConfig,e=>{logDebug("config.js loaded."),logDebug("Setting options from storage: %o",e);for(let t in e){let o=document.getElementById(t);o?"checkbox"===o.type?(o.checked=e[t],"useDarkTheme"===t&&(document.body.classList.toggle("theme-dark",o.checked),logDebug("--\x3e document.body classNames: %s",document.body.classNames)),logDebug("--\x3e %s checkbox %s.",o.checked?"Checked":"Unchecked",t)):"numeric"===o.getAttribute("inputmode")&&(o.value=""+e[t],logDebug("--\x3e %s set to %s.",t,o.value,o)):logDebug('--\x3e Skipped option "%s" with no control.',t)}}),document.body.addEventListener("input",e=>{logDebug("Handling change event on %s",e.target.id,e);let t=e.target,o=null,n=null;"checkInterval"===t.id?(n&&clearTimeout(n),n=setTimeout(e=>{e.validity.valid?updateConfigValue(e.id,+e.value):chrome.storage.sync.get(e.id,t=>{e.value=t[e.id]})},350,t)):(o=t.checked,"useDarkTheme"===t.id&&(document.body.classList.toggle("theme-dark",t.checked),logDebug("--\x3e document.body className: %s",document.body.className)),updateConfigValue(t.id,o))});
+let _options = {...defaultConfig};
+
+// removeIf(!allowDebug)
+function logDebug(message, ...params) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, 
+      { action: 'logDebug', caller: 'config', message: message, params: params });
+  });
+}
+// endRemoveIf(!allowDebug)
+
+// Initialize configuration controls from storage.
+const manifest = chrome.runtime.getManifest();
+document.querySelector('span#version').innerHTML = manifest.version;
+chrome.storage.sync.get(defaultConfig, options => {
+  // removeIf(!allowDebug)
+  logDebug('config.js loaded.');
+  logDebug('Setting options from storage: %o', options);
+  // endRemoveIf(!allowDebug)
+  for (let key in options) {
+    let input = document.getElementById(key);
+    if (!input) {
+      // removeIf(!allowDebug)
+      logDebug('--> Skipped option "%s" with no control.', key);
+      // endRemoveIf(!allowDebug)
+      continue;
+    }
+    if (input.type === 'checkbox') {
+      input.checked = options[key];
+      if (key === 'useDarkTheme') {
+        document.body.classList.toggle('theme-dark', input.checked);
+        // removeIf(!allowDebug)
+        logDebug('--> document.body classNames: %s', document.body.classNames);
+        // endRemoveIf(!allowDebug)
+      }
+      // removeIf(!allowDebug)
+      logDebug('--> %s checkbox %s.', (input.checked ? 'Checked' : 'Unchecked'), key);
+      // endRemoveIf(!allowDebug)
+    }
+    else if (input.getAttribute('inputmode') === 'numeric') {
+      input.value = '' + options[key];
+      // removeIf(!allowDebug)
+      logDebug('--> %s set to %s.', key, input.value, input);
+      // endRemoveIf(!allowDebug)
+    }
+  }
+});
+
+// Handle changes in the configuration controls.
+document.body.addEventListener('input', event => {
+  // removeIf(!allowDebug)
+  logDebug('Handling change event on %s', event.target.id, event);
+  // endRemoveIf(!allowDebug)
+  let target = event.target,
+    value = null,
+    typingDebounceTimer = null;
+  if (target.id === 'checkInterval') {
+    if (typingDebounceTimer) {
+      clearTimeout(typingDebounceTimer);
+    }
+    typingDebounceTimer = setTimeout(target => {
+      if (target.validity.valid) {
+        updateConfigValue(target.id, +target.value);
+      }
+      else {
+        // Restore the previous value.
+        chrome.storage.sync.get(target.id, (value) => {
+          target.value = value[target.id];
+        });
+        return;
+      }
+    }, 350, target);
+  }
+  else {
+    value = target.checked;
+    if (target.id === 'useDarkTheme') {
+      document.body.classList.toggle('theme-dark', target.checked);
+      // removeIf(!allowDebug)
+      logDebug('--> document.body className: %s', document.body.className);
+      // endRemoveIf(!allowDebug)
+    }
+    updateConfigValue(target.id, value);
+  }
+});
+
+function updateConfigValue(key, value) {
+  chrome.storage.sync.set({[key]: value}, () => {
+    // removeIf(!allowDebug)
+    logDebug('--> Updated config option "%s" to (%s) "%s"', key, (typeof value), value);
+    // endRemoveIf(!allowDebug)
+  });
+  if (key !== 'useDarkTheme') {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "refreshOptions" });
+    });
+  }
+}

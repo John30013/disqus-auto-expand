@@ -11,7 +11,7 @@ const gulp = require("gulp"),
 
 // Options specified at the command line.
 const allowDebug = false || argv.allowDebug,
-  minify = true || !argv.noMinify;
+  minify = false || argv.minify;
 let src, dest, manifest;
 
 // Tasks
@@ -30,7 +30,7 @@ const scripts = function() {
 scripts.description = `Process and deploy Javascript files (${src}*.js).`;
 scripts.flags = {
   '--allowDebug': 'Keep debug related logic in the JavaScript (default: false)',
-  '--minify': 'Minify the JavaScript source code (default: true)',
+  '--minify': 'Minify the Javascript source code (default: false)',
 };
 
 const styles = function() {
@@ -40,7 +40,7 @@ const styles = function() {
 };
 styles.description = `Process and deploy CSS files (${src}*.css).`;
 styles.flags = {
-  '--minify': 'Minify the CSS source code (default: true)',
+  '--minify': 'Minify the CSS source code (default: false)',
 };
 
 const html = function() {
@@ -56,7 +56,7 @@ const html = function() {
 html.description = `Process and deploy HTML files (${src}*.html).`;
 html.flags = {
   '--allowDebug': 'Keep debug related logic in the HTML (default: false)',
-  '--minify': 'Minify the HTML source code (default: true)',
+  '--minify': 'Minify the HTML source code (default: false)',
 };
 
 const copyFiles = function() {
@@ -101,8 +101,8 @@ const buildChrome = function(done) {
 };
 buildChrome.description = 'Cleans and builds the Chrome version of the extension.';
 buildChrome.flags = {
-  '--allowDebug': 'Keep debug related logic in the HTML (default: false)',
-  '--minify': 'Minify the HTML source code (default: true)',
+  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
+  '--minify': 'Minify the extension\'s source code (default: false)',
 };
 
 const cleanFirefox = function(done) {
@@ -116,8 +116,8 @@ const buildFirefox = function(done) {
 };
 buildFirefox.description = 'Cleans and builds the Firefox version of the extension.';
 buildFirefox.flags = {
-  '--allowDebug': 'Keep debug related logic in the HTML (default: false)',
-  '--minify': 'Minify the HTML source code (default: true)',
+  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
+  '--minify': 'Minify the extension\'s source code (default: false)',
 };
 
 const defaultTasks = function(done) {
@@ -125,8 +125,8 @@ const defaultTasks = function(done) {
 };
 defaultTasks.description = 'Cleans and builds the Chrome and Firefox versions of the extension.';
 defaultTasks.flags = {
-  '--allowDebug': 'Keep debug related logic in the HTML (default: false)',
-  '--minify': 'Minify the HTML source code (default: true)',
+  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
+  '--minify': 'Minify the extension\'s source code (default: false)',
 };
 
 module.exports = {

@@ -1,1 +1,8 @@
-const defaultConfig={moreReplies:!0,newReplies:!0,longItems:!0,checkInterval:5,useDarkTheme:!1,doDebug:!1};
+const defaultConfig = { 
+  'moreReplies': true, 
+  'newReplies': true, 
+  'longItems': true, 
+  'checkInterval': 5,
+  'useDarkTheme': false,
+  'doDebug': false 
+};
