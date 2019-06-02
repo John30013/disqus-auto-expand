@@ -1,0 +1,250 @@
+// Light (default) theme
+$theme-lite-color-bkgd: #eeeeee;
+$theme-lite-color-brand: #459cf9;
+$theme-lite-color-brdr: #666666;
+$theme-lite-color-ctrl: #0000000f;
+$theme-lite-color-ctrl-focus: #ffffffc0;
+$theme-lite-color-ctrl-invalid: #ff00000f;
+$theme-lite-color-error: #660000;
+$theme-lite-color-text: #222222;
+$theme-lite-color-text-sec: #666666;
+
+// Dark theme
+$theme-dark-color-bkgd: #222222;
+$theme-dark-color-brand: #459cf9;
+$theme-dark-color-brdr: #999999;
+$theme-dark-color-ctrl: #00000033;
+$theme-dark-color-ctrl-focus: #00000080;
+$theme-dark-color-ctrl-invalid: #ff000033;
+$theme-dark-color-error: #ff9999;
+$theme-dark-color-text: #dddddd;
+$theme-dark-color-text-sec: #999999;
+
+// Font stack
+$font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+html {
+  border: 0;
+  font-family: $font-family;
+  font-size: 16px;
+  line-height: 1.25rem;
+  margin: 0;
+}
+body {
+  --color-bkgd: #{$theme-lite-color-bkgd};
+  --color-brdr: #{$theme-lite-color-brdr};
+  --color-ctrl: #{$theme-lite-color-ctrl};
+  --color-ctrl-focus: #{$theme-lite-color-ctrl-focus};
+  --color-ctrl-invalid: #{$theme-lite-color-ctrl-invalid};
+  --color-ctrl-on: #{$theme-lite-color-brand};
+  --color-error: #{$theme-lite-color-error};
+  --color-text: #{$theme-lite-color-text};
+  --color-text-sec: #{$theme-lite-color-text-sec};
+  --color-link: #{$theme-lite-color-brand};
+  &.theme-dark {
+    --color-bkgd: #{$theme-dark-color-bkgd};
+    --color-brdr: #{$theme-dark-color-brdr};
+    --color-ctrl: #{$theme-dark-color-ctrl};
+    --color-ctrl-focus: #{$theme-dark-color-ctrl-focus};
+    --color-ctrl-invalid: #{$theme-dark-color-ctrl-invalid};
+    --color-ctrl-on: #{$theme-dark-color-brand};
+    --color-error: #{$theme-dark-color-error};
+    --color-text: #{$theme-dark-color-text};
+    --color-text-sec: #{$theme-dark-color-text-sec};
+    --color-link: #{$theme-dark-color-brand};
+  }
+
+  background-color: var(--color-bkgd);
+  color: var(--color-text);
+  font-size: 1rem;
+  margin: 0;
+  padding: .5rem;
+  min-width: 20rem;
+  max-width: 25rem;
+}
+
+a:link, a:visited {
+  color: var(--color-link);
+  text-decoration: none;
+}
+a:focus, a:hover, a:active {
+  outline: none;
+  text-decoration: underline;
+}
+
+a.header-link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+header {
+  background-image: url(images/disqus_eye_48.png);
+  background-position: 0 .5rem;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid var(--color-text);
+  line-height: 1.25;
+  margin: 0 0 .5rem;
+  padding: 0 0 0.5rem 4rem;
+  white-space: nowrap;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+  }
+  p {
+    font-size: 1.25rem;
+    font-weight: normal;
+    margin: 0 0 .5rem;
+    padding: 0;
+    &:last-child {
+      margin: 0;
+    }
+  }
+}
+
+section {
+  display: table;
+  margin: .5rem 0 0;
+  width: 100%;
+
+  &.noHeading {
+    border-top: 1px dotted var(--color-text);
+    padding: .5rem 0 0;
+  }
+
+  a.link, a.visited, a.active, a:hover {
+    text-decoration: underline;
+  }
+  > h2 {
+    border-bottom: 1px dotted;
+    color: var(--color-text-sec);
+    display: table-caption;
+    font-size: 1.25rem;
+    font-weight: normal;
+    margin: 0 0 .5rem;
+    padding: 0 0 .5rem;
+  }
+  &:hover, &:focus-within {
+    > h2 {
+      color: var(--color-text);
+    }
+  }
+
+  > p {
+    display: table-row;
+
+    & > span, & > label {
+      display: table-cell;
+      border-bottom: .5rem solid transparent;
+      // outline: 1px dotted red;
+
+      &:first-child {
+        font-weight: 500;
+        padding-right: 1rem;
+        min-width: 10rem;
+
+        & > small {
+          display: block;
+          font-weight: normal;
+          font-size: .857rem;
+          margin-top: .125rem;
+        }
+      }
+      &:last-child {
+        width: 9rem;
+      }
+    }
+    & > span.input {
+      text-align: start;
+      white-space: nowrap;
+    }
+    
+    input#checkInterval {
+      width: 1.25rem;
+      text-align: center;
+    }
+  }
+}
+
+/* Text-like inputs */
+input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea {
+  background-color: var(--color-ctrl);
+  border: 0;
+  border-bottom: 1px solid var(--color-brdr);
+  color: var(--color-text);
+  font-family: $font-family;
+  font-size: 1rem;
+  font-weight: normal;
+  padding: 0 .25rem;
+  position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
+
+  &:focus {
+    background-color: var(--color-ctrl-focus);
+    border-bottom-width: 2px;
+    font-weight: 500;
+    outline: 0;
+  }
+  &:invalid {
+    background-color: var(--color-ctrl-invalid);
+    border-bottom-color: var(--color-error);
+    color: var(--color-error);
+  }
+  &::selection {
+    background-color: var(--color-ctrl-on);
+  }
+}
+
+/* Toggle switch (styled checkbox) input */
+.input-toggle {
+  --radius: .375rem;
+
+  > input[type="checkbox"] {
+    position: absolute;
+    left: -9999px;
+  }
+
+  // Toggle track (losenge).
+  > label {
+    background: var(--color-ctrl);
+    border: .0625rem solid var(--color-brdr);
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: block;
+    text-indent: 100%;
+    overflow: hidden;
+    position: relative;
+    top: .25rem;
+    // left: calc(100% - 2.25rem);
+    width: 2rem;
+    height: 1rem;
+
+    // Toggle knob/thumb (in the default off position).
+    &::after {
+      background: var(--color-ctrl);
+      border: .0625rem solid var(--color-brdr);
+      border-radius: var(--radius);
+      content: '';
+      transition: 0.3s;
+      position: absolute;
+      top: -.0625rem;
+      left: -.0625rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  // Toggle knob/thumb in the on position.
+  > input:checked + label::after {
+    background-color: var(--color-ctrl-on);
+    left: calc(100% - .0625rem);
+    transform: translateX(calc(-100% + .125rem));
+  }
+
+  // Focussed state.
+  > input:focus + label {
+    background-color: var(--color-ctrl-focus);
+    box-shadow: 0 0 0 .0625rem var(--color-brdr);
+  }
+}
