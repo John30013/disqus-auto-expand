@@ -1,7 +1,8 @@
 let _options = { ...defaultConfig },
   _timer = null,
   _observer = null,
-  _observedLinks = {};
+  _observedLinks = {},
+  _linkCounter = 0;
 
 // Listen for option updates and debug messages from config page.
 listenForMessages();
@@ -37,34 +38,21 @@ function createObserver() {
     if (_options.checkInterval) {
       let foundIntersects = false;
       entries.forEach(entry => {
-        const link = entry.target;
+        const link = entry.target,
+          luid = link.dataset.luid;
         _options.doDebug &&
           console.debug(
-            'Checking intersection of "%s" link %s',
-            link.className,
-            link.dataset.luid
-          );
+            'Checking intersection of "%s" link %s', link.className, luid);
+        hideMediaLink = false;
         if (entry.isIntersecting) {
           foundIntersects = true;
-          // For mobile media View/Hide links (only for media items uploaed to Disqus),
-          // Disqus doesn't add a data-tid attribute when the item is first activated. 
-          // Since processNewLinks() relies on data-tid to indicate an item that has
-          // already been processed, we add it ourselves.
-          if (link.classList.contains('post-media-link') && link.innerText === 'View') {
-            if (_options.hideOpenedMobileMediaLinks) {
-              link.classList.add('hidden');
-            }
-            link.dataset.tid = link.dataset.luid;
-          }
+          _options.doDebug && console.debug('--> link.classList: %o; link.innerText: "%s"', link.classList, link.innerText);
           link.click();
-          _options.doDebug &&
-            console.debug(
-              "--> Clicked %s (now %d observed)",
-              link.dataset.luid,
-              Object.keys(_observedLinks).length,
-              _observedLinks
-            );
           unobserveLink(link);
+          _options.doDebug &&
+            console.debug("--> Clicked %s (now %d observed)",
+              luid, Object.keys(_observedLinks).length, _observedLinks
+            );
         }
       });
       // Clean up old observed links. Disqus seems to output some (mostly "see more")
@@ -76,20 +64,25 @@ function createObserver() {
         _options.doDebug && console.debug("--> Checking for old links");
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
+          
         Object.keys(_observedLinks)
-          .filter(luid => now - luid >= maxAge)
-          .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid]));
+          .filter(luid => now - luid.substr(0, luid.indexOf('-')) >= maxAge)
+          .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
       }
     }
 
     // Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
     // Returns an object with data about the unobserved link (currently used for debug output only).
-    function unobserveLink(link) {
+    function unobserveLink(link, removeDaxTag) {
       const luid = link.dataset.luid;
       _observer.unobserve(link);
       delete _observedLinks[luid];
       delete link.dataset.luid;
-      _options.doDebug && console.debug('--> unobserved "%s" link %s', link.className, luid);
+      link.removeAttribute('data-luid');
+      if (removeDaxTag) {
+        link.classList.remove('dax-tagged');
+      }
+      _options.doDebug && console.debug('--> unobserved "%s" link %s', link.className, luid, link);
     }
   }
 }
@@ -129,11 +122,27 @@ function processNewLinks() {
   if (_options.longItems) {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
-  // Observe View/Hide links for embedded media on mobile browsers.
-  const mobileMediaSelector =
-    "a.post-media-link:not([data-tid]):not([data-luid])";
-  if (_options.mobileMedia) {
-    document.querySelectorAll(mobileMediaSelector).forEach(observeLink);
+  // Observe View/Hide links for embedded media. Detecting these is more 
+  // complex because Disqus appears to rewrite the link whenever it is 
+  // clicked (at least the ones for direct disqus uploads, as opposed to, 
+  // say, embedded Twitter links). Unopened links' parent elements (span) 
+  // have a next sibling (div) with a class of 'media-activated' if the 
+  // link is open.
+  const hiddenMediaSelector =
+    "a.post-media-link:not(.dax-tagged)";
+  if (_options.hiddenMedia) {
+    document.querySelectorAll(hiddenMediaSelector)
+      .forEach(link => {
+        const parent = link.parentElement,
+        nextSibling = parent.nextSibling;
+        if (nextSibling && !nextSibling.classList.contains('media-activated') 
+            && !nextSibling.classList.contains('dax-tagged')) {
+          observeLink(link);
+          // Tag the sibling element so if the user subsequently closes 
+          // the media item it won't be automatically reopened.
+          nextSibling.classList.add('dax-tagged');
+        }
+      });
   }
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
@@ -143,7 +152,9 @@ function processNewLinks() {
   function observeLink(link) {
     let luid = link.dataset.luid;
     if (!luid) {
-      link.dataset.luid = luid = Date.now();
+      luid = `${Date.now()}-${_linkCounter++}`;
+      link.setAttribute('data-luid', luid);
+      link.classList.add('dax-tagged');
       _observer.observe(link);
       _observedLinks[luid] = link;
       _options.doDebug &&

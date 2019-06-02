@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
-  "version": "0.1",
-  "description": "Automatically shows all replies (including new replies) and media items",
+  "version": "0.2",
+  "description": "Automatically shows all replies (including new replies) and media items in Disqus discussions.",
   "permissions": [
     "activeTab", 
     "declarativeContent",

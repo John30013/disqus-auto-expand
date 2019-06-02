@@ -63,13 +63,13 @@ document.body.addEventListener('input', event => {
         updateConfigValue(target.id, +target.value);
       }
       else {
-        // Restore the previous value.
+        // Restore the previous value after 1 second.
         chrome.storage.sync.get(target.id, (value) => {
           target.value = value[target.id];
         });
         return;
       }
-    }, 350, target);
+    }, 1000, target);
   }
   else {
     value = target.checked;
