@@ -23,7 +23,7 @@ function logDebug(message, ...params) {
 // endRemoveIf(!allowDebug)
 
 // Initialize configuration controls from storage.
-const manifest = chrome.runtime.getManifest();
+const manifest = browser.runtime.getManifest();
 document.querySelector("span#version").innerHTML = manifest.version;
 
 browser.storage.sync.get(defaultConfig)
