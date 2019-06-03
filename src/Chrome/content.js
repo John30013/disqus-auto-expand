@@ -18,8 +18,7 @@ processNewLinks();
 
 /* ===== Helper functions. ===== */
 function listenForMessages() {
-  chrome.extension.onMessage.addListener(function(msg) {
-    // _options.doDebug && console.debug('Got message: %o', msg);
+  chrome.runtime.onMessage.addListener(msg => {
     if (msg.action === "refreshOptions") {
       refreshOptions();
     } else if (msg.action === "logDebug" && msg.message) {
@@ -42,16 +41,23 @@ function createObserver() {
           luid = link.dataset.luid;
         _options.doDebug &&
           console.debug(
-            'Checking intersection of "%s" link %s', link.className, luid);
+            'Checking intersection of "%s" link %s', 
+            link.className, luid
+          );
         hideMediaLink = false;
         if (entry.isIntersecting) {
           foundIntersects = true;
-          _options.doDebug && console.debug('--> link.classList: %o; link.innerText: "%s"', link.classList, link.innerText);
+          _options.doDebug &&
+            console.debug(
+              '--> link.classList: %o; link.innerText: "%s"',
+              link.classList, link.innerText
+            );
           link.click();
           unobserveLink(link);
           _options.doDebug &&
             console.debug("--> Clicked %s (now %d observed)",
-              luid, Object.keys(_observedLinks).length, _observedLinks
+              luid, Object.keys(_observedLinks).length, 
+              _observedLinks
             );
         }
       });
@@ -61,13 +67,15 @@ function createObserver() {
       // five minutes. If some non-zombie links get unobserved, they will be
       // observed again the next time the processNewLinks timer fires.
       if (foundIntersects) {
-        _options.doDebug && console.debug("--> Checking for old links");
+        _options.doDebug && 
+          console.debug("--> Checking for old links");
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
-          
         Object.keys(_observedLinks)
-          .filter(luid => now - luid.substr(0, luid.indexOf('-')) >= maxAge)
-          .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
+          .filter(luid => 
+            now - luid.substr(0, luid.indexOf('-')) >= maxAge)
+          .forEach(oldLuid => 
+            unobserveLink(_observedLinks[oldLuid], true));
       }
     }
 
@@ -78,11 +86,13 @@ function createObserver() {
       _observer.unobserve(link);
       delete _observedLinks[luid];
       delete link.dataset.luid;
-      link.removeAttribute('data-luid');
-      if (removeDaxTag) {
-        link.classList.remove('dax-tagged');
-      }
-      _options.doDebug && console.debug('--> unobserved "%s" link %s', link.className, luid, link);
+    link.removeAttribute("data-luid");
+    if (removeDaxTag) {
+      link.classList.remove("dax-tagged");
+    }
+    _options.doDebug &&
+      console.debug('--> unobserved "%s" link %s',
+        link.className, luid, link);
     }
   }
 }
@@ -117,9 +127,9 @@ function processNewLinks() {
     document.querySelectorAll(repliesSelector.join(",")).forEach(observeLink);
   }
   // Observe "see more" links that haven't already been observed.
-  const longItemsSelector =
-    'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
   if (_options.longItems) {
+    const longItemsSelector =
+      'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
   // Observe View/Hide links for embedded media. Detecting these is more 
@@ -128,9 +138,8 @@ function processNewLinks() {
   // say, embedded Twitter links). Unopened links' parent elements (span) 
   // have a next sibling (div) with a class of 'media-activated' if the 
   // link is open.
-  const hiddenMediaSelector =
-    "a.post-media-link:not(.dax-tagged)";
   if (_options.hiddenMedia) {
+    let hiddenMediaSelector = "a.post-media-link:not(.dax-tagged)";
     document.querySelectorAll(hiddenMediaSelector)
       .forEach(link => {
         const parent = link.parentElement,
@@ -143,6 +152,10 @@ function processNewLinks() {
           nextSibling.classList.add('dax-tagged');
         }
       });
+      
+    // Handle media buttons too.
+    hiddenMediaSelector = "a.media-button:not([data-tid])";
+    document.querySelectorAll(hiddenMediaSelector).forEach(observeLink);
   }
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
@@ -158,11 +171,8 @@ function processNewLinks() {
       _observer.observe(link);
       _observedLinks[luid] = link;
       _options.doDebug &&
-        console.debug(
-          '--> Observing "%s" link %s (now %d observed)',
-          link.className,
-          luid,
-          Object.keys(_observedLinks).length,
+        console.debug('--> Observing "%s" link %s (now %d observed)',
+          link.className, luid, Object.keys(_observedLinks).length,
           _observedLinks
         );
     }
@@ -170,13 +180,18 @@ function processNewLinks() {
 }
 
 function refreshOptions() {
-  chrome.storage.sync.get(defaultConfig, options => {
-    const oldCheckInterval = +_options.checkInterval;
-    _options = options;
-    _options.doDebug && console.debug("Got sync'd options: %o", _options);
-
-    if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
-      processNewLinks();
-    }
-  });
+  chrome.storage.sync.get(defaultConfig, 
+    options => {
+      if (chrome.runtime.lastError) {
+        console.error(`Couldn't get configuration form sync'd storage: ${chrome.runtime.lastError}`);
+        return;
+      }
+      const oldCheckInterval = +_options.checkInterval;
+      _options = options;
+      _options.doDebug && console.debug("Got sync'd options: %o", _options);
+      // Check if we need to resume processing links.
+      if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
+        processNewLinks();
+      }
+    });
 }

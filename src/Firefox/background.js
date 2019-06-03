@@ -1,4 +1,3 @@
-console && console.debug('background.js: started.');
 browser.runtime.onInstalled.addListener(() => {
   browser.storage.sync.get(null)
     .then(config => {
@@ -10,5 +9,8 @@ browser.runtime.onInstalled.addListener(() => {
       } else {
         console.debug('Found existing config: %o', config);
       }
+    })
+    .catch(error => {
+      console.error(`Couldn't get configuration options from sync'd storage: ${error}`);
     });
 });

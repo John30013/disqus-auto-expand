@@ -69,6 +69,11 @@ body {
   font-size: 1rem;
   margin: 0;
   padding: .5rem;
+
+  @media screen and (max-width: $mobileBreakpoint) {
+    min-width: 20rem;
+    // max-width: $mobileBreakpoint;
+  }
 }
 
 a:link, a:visited {
@@ -298,5 +303,4 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
       background-color: var(--color-ctrl);
     }
   }
-
 }
