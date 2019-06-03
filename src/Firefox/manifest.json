@@ -27,7 +27,9 @@
     "32": "images/disqus_eye_32.png",
     "48": "images/disqus_eye_48.png"
   },
-  "options_ui": { "page": "config.html" },
+  "options_ui": { 
+    "page": "config.html" 
+  },
   "page_action": {
     "browser_style": true,
     "default_icon": {
