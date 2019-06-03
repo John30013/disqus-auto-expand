@@ -12,7 +12,7 @@ const gulp = require("gulp"),
 // Options specified at the command line.
 const allowDebug = false || argv.allowDebug,
   minify = false || argv.minify;
-let src, dest, manifest;
+let src, dest;
 
 // Tasks
 const scripts = function() {
