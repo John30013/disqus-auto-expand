@@ -187,7 +187,7 @@ function refreshOptions() {
         processNewLinks();
       }
     })
-    .catch(error) {
+    .catch(error => {
       console.error(`Couldn't get configuration form sync'd storage: ${error}`)
-    }
+    });
 }
