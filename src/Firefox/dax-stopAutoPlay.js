@@ -11,3 +11,10 @@
 // Blocking this in the browser (at least FF) doesn't seem to work. So this code
 // will rewrite these URLs in the <iframe src> attribute to remove the &auto_play
 // and &autoplay query parameters.
+const origLocation = window.location.href;
+console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`)
+const newLocation = origLocation.replace(/&auto_?play=\w+/ig, '');
+if (newLocation !== origLocation) {
+  console.debug(`--> Autoplay parameters found; reloading to: ${newLocation}.`);
+  window.location.href = newLocation;
+}

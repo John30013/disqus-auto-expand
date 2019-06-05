@@ -163,14 +163,13 @@ function processNewLinks() {
   // Observe View/Hide links for embedded media. Detecting these is more 
   // complex because Disqus appears to rewrite the link whenever it is 
   // clicked (at least the ones for direct disqus uploads, as opposed to, 
-  // say, embedded Twitter links). Unopened links' parent elements (span) 
-  // have a next sibling (div) with a class of 'media-activated' if the 
-  // link is open.
-  const hiddenMediaSelector =
-    "a.post-media-link:not(.dax-tagged)";
+  // say, embedded Twitter links), and it does not add a data-tid attribute. 
+  // These links' parent elements (span) have a next sibling 
+  // (div.media-container) that get an additional class of 'media-activated' 
+  // while the media is shown.
   if (_options.hiddenMedia) {
-    document.querySelectorAll(hiddenMediaSelector)
-    .forEach(link => {
+    let hiddenMediaSelector = "a.post-media-link:not(.dax-tagged)";
+    document.querySelectorAll(hiddenMediaSelector).forEach(link => {
       const mediaContainer = link.parentElement 
         ? link.parentElement.nextSibling 
         : null;
@@ -182,6 +181,13 @@ function processNewLinks() {
         mediaContainer.classList.add('dax-tagged');
       }
     });
+    // Some embedded media uses the "media-button" class instead of the 
+    // "post-media-link" class.
+    // FWIW, these have an associated "media-content-placeholder", but we don't
+    // have to deal with it because the media-button gets a data-tid attribute 
+    // once it's clicked.
+    hiddenMediaSelector = "a.media-button.media-button-expand:not([data-tid])";
+    document.querySelectorAll(hiddenMediaSelector).forEach(observeLink);
   }
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);

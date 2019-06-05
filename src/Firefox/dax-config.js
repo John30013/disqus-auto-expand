@@ -18,10 +18,15 @@ function logDebug(message, ...params) {
 }
 // endRemoveIf(!allowDebug)
 
-// Initialize configuration controls from storage.
+// Initialize some text in the config UI.
 const manifest = browser.runtime.getManifest();
 document.querySelector("span#version").innerHTML = manifest.version;
+document.querySelectorAll('a.extensionStore').forEach(link => {
+  link.href = '';
+  link.innerText = 'Firefox Add-ons site';
+});
 
+// Initialize configuration controls from storage.
 browser.storage.sync.get(defaultConfig)
   .then(options => {
     // removeIf(!allowDebug)

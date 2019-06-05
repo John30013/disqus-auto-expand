@@ -9,14 +9,14 @@
     "storage"
   ],
     "background": {
-      "scripts": ["defaultConfig.js", "background.js"],
+      "scripts": ["dax-defaultConfig.js", "dax-background.js"],
       "persistent": false
     },
     "content_scripts": [
     {
       "matches": ["*://disqus.com/embed/comments/*"],
       "all_frames": true,
-      "js": ["defaultConfig.js", "content.js"]
+      "js": ["dax-defaultConfig.js", "dax-content.js"]
     }
   ],
   "icons": {
@@ -25,14 +25,14 @@
     "48": "images/disqus_eye_48.png"
   },
   "options_ui": {
-    "page": "config.html"
+    "page": "dax-config.html"
   },
   "page_action": {
     "default_icon": {
       "16": "images/disqus_eye_16.png",
       "32": "images/disqus_eye_32.png"
     },
-    "default_popup": "config.html",
+    "default_popup": "dax-config.html",
     "default_title": "Disqus Auto Expander"
   }
 }

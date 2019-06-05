@@ -63,17 +63,19 @@ These are the links Disqus displays when a comment has more than 6 replies (“M
 **Note:** when one of these links is expanded, it may expose more links. Those links will be expanded as you scroll them into view.
 
 #### Long items and hidden media
-These are links Disqus displays when a comment or media item is very long (“Long items”), or when a user has uploaded an image or linked to a media item such as a Tweet or video (“Hidden media items”). Enabling these options will expand these links as they come into view.
+These are links Disqus displays when a comment or media item is very long (“Long items”), or when a user has uploaded an image or included the URL of a media item such as a Tweet or video (“Hidden media items”). Enabling these options will expand these links as they come into view.
 
-Disqus hides media items when the Disqus menu shows “Display Media”:  
+By default, on mobile devices Disqus hides media items, and shows them by default on other devices. When the Disqus menu shows “Display Media” that means it is currently in “Hide Media” mode:  
 ![Screen shot of expanded Disqus menu with the "Display Media" option selected](docs/disqus_menu_display_media.png)  
-Choosing that option in the Disqus menu will cause Disqus to display all media items as the discussion content loads, and the option will change to “Hide Media”.
+Choosing that option in the Disqus menu will cause Disqus to display all media items as the discussion content loads, and the option will change to “Hide Media”. If you choose that option, you do not need to use the “Hidden media items” option in this extension.
 
-**Important notes:** If you enable the “Hidden media items” option, you will likely use more data, since all embedded media will be downloaded automatically.
+**Important notes:** If you enable the “Hidden media items” option in this extension, you will likely use more data, since all embedded media will be downloaded automatically.
 
-Also, if an embedded audio or video player is revealed, it might play automatically. Such behavior is controlled by your browser, not this extension. The following resources can help you manage auto-play in your browser, but I have found that even after following these instructions, some media continue to auto-play (especially on Google Chrome). _Caveat emptor._
+Also, if an embedded audio or video player is revealed, it might play automatically. Such behavior is controlled by your browser, not this extension. The following resources can help you manage autoplay in your browser, 
 - [How to Disable Autoplay Videos on Sites in Google Chrome](https://www.groovypost.com/howto/disable-autoplay-videos-on-sites-in-google-chrome/)
 - [Stop videos from automatically playing with new autoplay controls from Firefox](https://blog.mozilla.org/firefox/block-autoplay/)
+
+Even after following these instructions, the browser may still allow some media to autoplay (this seems to depend on whether you have previously interacted with the source of that media). This extension tries to prevent autoplay media embedded by Disqus, regardless of the autoplay settings in your browser.
 
 #### Additional options
 These options control other aspects of the extension.
