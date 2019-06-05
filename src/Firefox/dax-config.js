@@ -22,7 +22,7 @@ function logDebug(message, ...params) {
 const manifest = browser.runtime.getManifest();
 document.querySelector("span#version").innerHTML = manifest.version;
 document.querySelectorAll('a.extensionStore').forEach(link => {
-  link.href = '';
+  link.href = 'https://addons.mozilla.org/firefox/addon/disqus-auto-expander/';
   link.innerText = 'Firefox Add-ons site';
 });
 

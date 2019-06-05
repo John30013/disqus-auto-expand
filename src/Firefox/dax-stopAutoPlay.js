@@ -1,3 +1,7 @@
+// Blocking this in the browser doesn't seem to work consistently. So this code
+// will rewrite these URLs in the <iframe src> attribute to remove the &auto_play
+// and &autoplay query parameters.
+//
 // Here's the format of an embedly embedded media item with autoplay:
 // *://cdn.embedly.com/widgets/media.html
 //   ?src=https%3A%2F%2Fwww.youtube.com%2Fembed%2FMfa6n7IH4NU%3Ffeature%3Doembed
@@ -7,14 +11,18 @@
 //   &type=text%2Fhtml
 //   &schema=youtube
 //   &auto_play=true&autoplay=1
-//
-// Blocking this in the browser (at least FF) doesn't seem to work. So this code
-// will rewrite these URLs in the <iframe src> attribute to remove the &auto_play
-// and &autoplay query parameters.
-const origLocation = window.location.href;
-console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`)
-const newLocation = origLocation.replace(/&auto_?play=\w+/ig, '');
-if (newLocation !== origLocation) {
-  console.debug(`--> Autoplay parameters found; reloading to: ${newLocation}.`);
-  window.location.href = newLocation;
+try {
+  const origLocation = window.location.href;
+  const config = await browser.storage.get(defaultConfig);
+  /* config.doDebug && */ console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`);
+  if (config.stopAutoplay) {
+    const newLocation = origLocation.replace(/[?&]auto[_-]?(?:play|start)=[^&]+/ig, '');
+    if (newLocation !== origLocation) {
+      console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
+      window.location.href = newLocation;
+    }
+  }
+}
+catch (error) {
+  console.error(`Couldn't get configuration from storage: ${error}.`);
 }

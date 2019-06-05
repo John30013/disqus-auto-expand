@@ -54,7 +54,8 @@ function createObserver() {
             );
           link.click();
           link.classList.add('dax-clicked');
-          // Additional handling for .post-media-link links (View/Hide uploaded/embedded media item).
+/*
+           // Additional handling for .post-media-link links (View/Hide uploaded/embedded media item).
           // See processNewLinks() for details.
           if (link.classList.contains('post-media-link')) {
             const mediaContainer = link.parentElement 
@@ -64,6 +65,7 @@ function createObserver() {
               mediaContainer.classList.add('dax-clicked');
             }
           }
+ */
           unobserveLink(link);
           _options.doDebug &&
             console.debug("--> Clicked %s (now %d observed)",
@@ -95,7 +97,8 @@ function createObserver() {
     */
     function unobserveLink(link, removeDaxTags) {
       const luid = link.dataset.luid;
-      let mediaContainer;
+/*
+       let mediaContainer;
       if (link.classList.contains("post-media-link")) {
         mediaContainer = link.parentElement
           ? link.parentElement.nextSibling
@@ -108,24 +111,25 @@ function createObserver() {
             link.luid, link);
           return;
       }
+ */
       _observer.unobserve(link);
       delete _observedLinks[luid];
       delete link.dataset.luid;
       link.removeAttribute("data-luid");
       if (removeDaxTags) {
         link.classList.remove("dax-tagged", "dax-clicked");
-        if (mediaContainer) {
+/*         if (mediaContainer) {
           mediaContainer.classList.remove("dax-tagged", "dax-clicked");
         }
-      }
+ */      }
       _options.doDebug &&
         console.debug('--> unobserved "%s" link %s',
           link.className, luid, link);
     } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
-
 function processNewLinks() {
+
   // Since processNewLinks() can be called by refreshOptions() when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
@@ -160,6 +164,7 @@ function processNewLinks() {
   if (_options.longItems) {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
+/* 
   // Observe View/Hide links for embedded media. Detecting these is more 
   // complex because Disqus appears to rewrite the link whenever it is 
   // clicked (at least the ones for direct disqus uploads, as opposed to, 
@@ -189,6 +194,8 @@ function processNewLinks() {
     hiddenMediaSelector = "a.media-button.media-button-expand:not([data-tid])";
     document.querySelectorAll(hiddenMediaSelector).forEach(observeLink);
   }
+ */
+
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
 

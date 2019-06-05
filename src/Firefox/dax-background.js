@@ -1,16 +1,22 @@
-browser.runtime.onInstalled.addListener(() => {
-  browser.storage.sync.get(null)
-    .then(config => {
-      if (!Object.keys(config).length) {
-        browser.storage.sync.set(defaultConfig)
-          .then(() => {
-            console.debug("Default config stored: %o", defaultConfig);
-          });
-      } else {
-        console.debug('Found existing config: %o', config);
+browser.runtime.onInstalled.addListener(async () => {
+  // Make sure current configuration options are available in storage.
+  try {
+    let config = await browser.storage.sync.get(null);
+    if (!Object.keys(config).length) {
+      await browser.storage.sync.set(defaultConfig);
+      console.debug("Stored default config: %o", defaultConfig);
+    } else {
+      config.doDebug && console.debug('Found existing config: %o', config);
+      // Check for and remove obsolete config items.
+      for (let key in config) {
+        if (!defaultConfig.hasOwnProperty(key)) {
+          await browser.storage.sync.remove(key);
+          config.doDebug && console.debug('--> removed obsolete config value %s', key);
+        }
       }
-    })
-    .catch(error => {
-      console.error(`Couldn't get configuration options from sync'd storage: ${error}`);
-    });
+    }
+  }
+  catch(error) {
+    console.error(`Couldn't get configuration options from storage: ${error}`);
+  }
 });

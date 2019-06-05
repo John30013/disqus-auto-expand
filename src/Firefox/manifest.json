@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
-  "version": "0.1",
-  "description": "Automatically shows all replies (including new replies) and media items in Disqus discussions.",
+  "version": "0.2",
+  "description": "Automatically shows all replies in Disqus discussions.",
     "applications": {
       "gecko": {
         "id": "disqus-auto-expander@john30013.com"
@@ -24,7 +24,7 @@
     {
       "matches": ["*://cdn.embedly.com/widgets/media.html*"],
       "all_frames": true,
-      "js": ["dax-stopAutoPlay.js"]
+      "js": ["dax-defaultConfig.js", "dax-stopAutoPlay.js"]
     }
   ],
   "icons": {
