@@ -17,6 +17,10 @@ browser.runtime.onInstalled.addListener(async () => {
     }
   }
   catch(error) {
-    console.error(`Couldn't get configuration options from storage: ${error}`);
+    console.error(`Storage operation failed: ${error}.`);
   }
 });
+
+if (document.getElementById('disqus_thread') === null) {
+  browser.pageAction.hide();
+}
