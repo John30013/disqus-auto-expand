@@ -54,16 +54,6 @@ function createObserver() {
             );
           link.click();
           link.classList.add('dax-clicked');
-          // Additional handling for .post-media-link links (View/Hide uploaded/embedded media item).
-          // See processNewLinks() for details.
-          if (link.classList.contains('post-media-link')) {
-            const mediaContainer = link.parentElement
-              ? link.parentElement.nextSibling
-              : null;
-            if (mediaContainer) {
-              mediaContainer.classList.add('dax-clicked');
-            }
-          }
           unobserveLink(link);
           _options.doDebug &&
             console.debug("--> Clicked %s (now %d observed)",
@@ -143,32 +133,6 @@ function processNewLinks() {
     const longItemsSelector =
       'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
-  }
-  // Observe View/Hide links for embedded media. Detecting these is more 
-  // complex because Disqus appears to rewrite the link whenever it is 
-  // clicked (at least the ones for direct disqus uploads, as opposed to, 
-  // say, embedded Twitter links). Unopened links' parent elements (span) 
-  // have a next sibling (div) with a class of 'media-activated' if the 
-  // link is open.
-  if (_options.hiddenMedia) {
-    let hiddenMediaSelector = "a.post-media-link:not(.dax-tagged)";
-    document.querySelectorAll(hiddenMediaSelector)
-      .forEach(link => {
-        const mediaContainer = link.parentElement
-          ? link.parentElement.nextSibling
-          : null;
-        if (mediaContainer && !mediaContainer.classList.contains('media-activated') 
-            && !mediaContainer.classList.contains('dax-tagged')) {
-          observeLink(link);
-          // Tag the sibling element so if the user subsequently closes 
-          // the media item it won't be automatically reopened.
-          mediaContainer.classList.add('dax-tagged');
-        }
-      });
-
-    // Handle media buttons too.
-    hiddenMediaSelector = "a.media-button:not([data-tid])";
-    document.querySelectorAll(hiddenMediaSelector).forEach(observeLink);
   }
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);

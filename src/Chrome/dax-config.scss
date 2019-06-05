@@ -25,9 +25,10 @@ $font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
 // Mobile breakpoint
 $oneRem: 14px;
-$mobileBreakpoint: $oneRem * 43 - 1;
-$maxWidth: $oneRem * 43;
-$minWidth: $oneRem * 20;
+$mobileBreakpoint: $oneRem * 40;
+$mobileMinWidth: $oneRem * 20;
+$desktopWidth: $mobileBreakpoint + 14;
+$desktopMaxWidth: $desktopWidth;
 
 @mixin white-space {
   white-space: nowrap;
@@ -71,14 +72,23 @@ body {
 
   background-color: var(--color-bkgd);
   color: var(--color-text);
+  display: grid;
+  grid-template: 
+    "header header" auto
+    "col-1  col-2"  auto
+    "footer footer" auto
+    / 1fr 1fr;
+  column-gap: 1rem;
+  align-items: start;
   font-size: 100%;
   margin: 0;
   padding: .5rem;
-  max-width: $maxWidth;
-  width: $maxWidth;
+  max-width: $desktopMaxWidth;
+  width: $desktopWidth;
 
   @media screen and (max-width: $mobileBreakpoint) {
-    min-width: $minWidth;
+    display: block;
+    min-width: $mobileMinWidth;
     width: auto;
   }
 }
@@ -92,32 +102,36 @@ a:focus, a:hover, a:active {
   text-decoration: underline;
 }
 
-a.header-link {
-  color: var(--color-text);
-  text-decoration: none;
+header, footer {
+  line-height: 1.5;
+  margin: 0 0 .5rem;
+  padding: 0 0 .5rem;
+}
 
-  header {
-    background-image: url(images/disqus_eye_48.png);
-    background-position: 0 .5rem;
-    background-repeat: no-repeat;
-    background-size: fit;
-    border-bottom: 1px solid var(--color-text);
-    line-height: 1.5;
-    margin: 0 0 .5rem;
-    padding: 0 0 .5rem 4rem;
-    @include white-space();
-  
-    h1 {
-      font-size: 1.5rem;
-      font-weight: normal;
-      margin: 0;
-      padding: 0;
-    }
-    p {
+header {
+  background-image: url(images/disqus_eye_48.png);
+  background-position: 0 .5rem;
+  background-repeat: no-repeat;
+  background-size: fit;
+  border-bottom: 1px solid var(--color-text);
+  grid-area: header;
+  margin-bottom: 1rem;
+  padding-left: 4rem;
+  @include white-space();
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+
+    small {
+      display: block;
       font-size: 1.25rem;
       font-weight: normal;
       margin: 0 0 .5rem;
       padding: 0;
+      
       &:last-child {
         margin: 0;
       }
@@ -125,91 +139,77 @@ a.header-link {
   }
 }
 
-div.grid {
-  display: grid;
-  grid-template-columns: 20rem 21rem;
-  grid-column-gap: 1rem;
+h2 {
+  color: var(--color-text-sec);
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0 0 .5rem;
+  padding: 0 0 .5rem;
+  border-bottom: 1px dotted;
+}
 
-  @media screen and (max-width: $mobileBreakpoint) {
-    display: block;
-  }
+p {
+  color: inherit;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
 }
 
 section {
-  display: table;
+/*   @media screen and (max-width: $mobileBreakpoint) {
+    display: block;
+  }
+  display: grid;
+  grid-template-rows: 1.7rem auto;
+  grid-template-columns: 100%;
+  grid-row-gap: 1rem;
+  align-items: start;
+ */
   margin: .5rem 0 0;
   width: 100%;
 
-  &.noHeading {
-    border-top: 1px dotted var(--color-text);
-    padding: .5rem 0 0;
-    margin-top: 2.4375rem;
-
-    @media screen and (max-width: $mobileBreakpoint) {
-      border-top: none;
-      padding-top: 0;
-      margin-top: 0;
-    }
+  &:first-child {
+    grid-area: col-1;
   }
-
-  a.link, a.visited, a.active, a:hover {
-    text-decoration: underline;
+  &:last-child {
+    grid-area: col-2;
   }
-  > header {
-    color: var(--color-text-sec);
-    display: table-caption;
-    font-size: 1.25rem;
-    font-weight: normal;
-    margin: 0 0 .5rem;
-    padding: 0;
-    
-    h2, h3 {
-      border-bottom: 1px dotted;
-      color: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      margin: 0;
-      padding: 0 0 .5rem;
-    }
-    p {
-      color: inherit;
-      font-size: 1rem;
-      margin: 0;
-      padding: 0;
-    }
+  > h2 {
+    margin-bottom: .5rem;
+    padding-bottom: .5rem;
   }
-  &:hover, &:focus-within {
-    header {
-      color: var(--color-text);
-    }
-  }
-
   > p {
-    display: table-row;
+    display: grid;
+    grid-template: 
+      "label input" 1.5rem
+      "help  help"  auto
+      / auto 9rem;
+    margin-bottom: 1rem;
 
     & > span, & > label {
-      display: table-cell;
-      border-bottom: .5rem solid transparent;
       // outline: 1px dotted red;
 
       &:first-child {
         font-weight: 500;
+        grid-area: label;
         padding-right: 1rem;
         min-width: 10rem;
         white-space: nowrap;
 
-        & > small {
-          display: block;
-          font-weight: normal;
-          font-size: .857rem;
-          margin-top: .125rem;
-          white-space: normal;
-        }
       }
       &:last-child {
-        width: 9rem;
+        grid-area: input;
       }
     }
+    & > small {
+      display: block;
+      font-weight: normal;
+      font-size: .857rem;
+      grid-area: help;
+      margin-top: .125rem;
+      white-space: normal;
+    }
+
     & > span.input {
       text-align: start;
       @include white-space();
@@ -219,6 +219,24 @@ section {
       width: 1.25rem;
       text-align: center;
     }
+  }
+
+  &:hover, &:focus-within {
+    h2 {
+      color: var(--color-text);
+    }
+  }
+}
+
+footer {
+  border-top: 1px solid var(--color-text);
+  margin-top: .5rem;
+  padding-top: 1rem;
+  grid-area: footer;
+
+  b {
+    font-weight: 500;
+    color: var(--color-text-sec);
   }
 }
 

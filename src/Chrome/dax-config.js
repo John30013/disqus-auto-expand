@@ -19,10 +19,15 @@ function logDebug(message, ...params) {
 }
 // endRemoveIf(!allowDebug)
 
-// Initialize configuration controls from storage.
+// Initialize some text in the config UI.
 const manifest = chrome.runtime.getManifest();
 document.querySelector("span#version").innerHTML = manifest.version;
+document.querySelectorAll('a.extensionStore').forEach(link => {
+  link.href = 'https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US';
+  link.innerText = 'Chrome Web Store';
+});
 
+// Initialize configuration controls from storage.
 chrome.storage.sync.get(defaultConfig, 
   options => {
     if (chrome.runtime.lastError) {
@@ -114,16 +119,16 @@ document.body.addEventListener("input", event => {
 function updateConfigValue(key, value) {
   chrome.storage.sync.set({[key]: value}, 
     () => {
+      if (chrome.runtime.lastError) {
+        console.error(
+          `Couldn't store option ${key} with value ${value}: ${chrome.runtime.lastError}.`
+        );
+      }
       // removeIf(!allowDebug)
       logDebug('--> Updated config option "%s" to (%s) "%s"',
         key, typeof value, value);
       // endRemoveIf(!allowDebug)
     });
-  if (chrome.runtime.lastError) {
-    console.error(
-      `Couldn't store option ${key} with value ${value}: ${chrome.runtime.lastError}.`
-    );
-  }
   if (key !== "useDarkTheme") {
     chrome.tabs.query({ active: true, currentWindow: true }, 
       tabs => {
