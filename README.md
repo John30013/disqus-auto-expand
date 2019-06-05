@@ -63,13 +63,15 @@ These are the links Disqus displays when a comment has more than 6 replies (“M
 **Note:** when one of these links is expanded, it may expose more links. Those links will be expanded as you scroll them into view.
 
 #### Long items and hidden media
-These are links Disqus displays when a comment or media item is very long (“Long items”), or when a user has uploaded an image or linked to a media item such as a Tweet or video (“Hidden media items”). Enabling these options will expand these links as they come into view. 
+These are links Disqus displays when a comment or media item is very long (“Long items”), or when a user has uploaded an image or linked to a media item such as a Tweet or video (“Hidden media items”). Enabling these options will expand these links as they come into view.
 
 Disqus hides media items when the Disqus menu shows “Display Media”:  
 ![Screen shot of expanded Disqus menu with the "Display Media" option selected](docs/disqus_menu_display_media.png)  
 Choosing that option in the Disqus menu will cause Disqus to display all media items as the discussion content loads, and the option will change to “Hide Media”.
 
-**Note:** If you enable the “Hidden media items” option and an embedded video or audio player is revealed, the media might begin playing automatically. This behavior is controlled by your browser, not this extension. The following resources can help you manage auto-play on your browser:
+**Important notes:** If you enable the “Hidden media items” option, you will likely use more data, since all embedded media will be downloaded automatically.
+
+Also, if an embedded audio or video player is revealed, it might play automatically. Such behavior is controlled by your browser, not this extension. The following resources can help you manage auto-play in your browser, but I have found that even after following these instructions, some media continue to auto-play (especially on Google Chrome). _Caveat emptor._
 - [How to Disable Autoplay Videos on Sites in Google Chrome](https://www.groovypost.com/howto/disable-autoplay-videos-on-sites-in-google-chrome/)
 - [Stop videos from automatically playing with new autoplay controls from Firefox](https://blog.mozilla.org/firefox/block-autoplay/)
 

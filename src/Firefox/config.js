@@ -41,8 +41,8 @@ browser.storage.sync.get(defaultConfig)
         if (key === "useDarkTheme") {
           document.body.classList.toggle("theme-dark", input.checked);
           // removeIf(!allowDebug)
-          logDebug("--> document.body classNames: %s", 
-            document.body.classNames);
+          logDebug("--> document.body classes: %s", 
+          document.body.className);
           // endRemoveIf(!allowDebug)
         }
         // removeIf(!allowDebug)
@@ -52,7 +52,7 @@ browser.storage.sync.get(defaultConfig)
       } else if (input.getAttribute("inputmode") === "numeric") {
         input.value = "" + options[key];
         // removeIf(!allowDebug)
-        logDebug("--> %s set to %s.", key, input.value, input);
+        logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
       }
     }
@@ -67,7 +67,7 @@ browser.storage.sync.get(defaultConfig)
 // Handle changes in the configuration controls.
 document.body.addEventListener("input", event => {
   // removeIf(!allowDebug)
-  logDebug("Handling change event on %s", event.target.id, event);
+  logDebug("Handling change event on %s", event.target.id);
   // endRemoveIf(!allowDebug)
   let target = event.target,
     value = null,

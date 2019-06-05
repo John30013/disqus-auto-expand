@@ -50,8 +50,8 @@ chrome.storage.sync.get(defaultConfig,
           document.body.classList.toggle("theme-dark", input.checked);
           // removeIf(!allowDebug)
           logDebug(
-            "--> document.body classNames: %s", 
-            document.body.classNames);
+            "--> document.body class: %s", 
+            document.body.className);
           // endRemoveIf(!allowDebug)
         }
         // removeIf(!allowDebug)
@@ -61,7 +61,7 @@ chrome.storage.sync.get(defaultConfig,
       } else if (input.getAttribute("inputmode") === "numeric") {
         input.value = "" + options[key];
         // removeIf(!allowDebug)
-        logDebug("--> %s set to %s.", key, input.value, input);
+        logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
       }
     }

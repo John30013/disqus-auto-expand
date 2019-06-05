@@ -24,7 +24,10 @@ $theme-dark-color-text-sec: #999999;
 $font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
 // Mobile breakpoint
-$mobileBreakpoint: 700px;
+$oneRem: 14px;
+$mobileBreakpoint: $oneRem * 43 - 1;
+$maxWidth: $oneRem * 43;
+$minWidth: $oneRem * 20;
 
 @mixin white-space {
   white-space: nowrap;
@@ -32,11 +35,13 @@ $mobileBreakpoint: 700px;
     white-space: normal;
   }
 }
-
+* {
+  box-sizing: border-box;
+}
 html {
   border: 0;
   font-family: $font-family;
-  font-size: 14px;
+  font-size: $oneRem;
   line-height: 1.25rem;
   margin: 0;
 }
@@ -66,13 +71,15 @@ body {
 
   background-color: var(--color-bkgd);
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: 100%;
   margin: 0;
   padding: .5rem;
+  max-width: $maxWidth;
+  width: $maxWidth;
 
   @media screen and (max-width: $mobileBreakpoint) {
-    min-width: 20rem;
-    // max-width: $mobileBreakpoint;
+    min-width: $minWidth;
+    width: auto;
   }
 }
 
@@ -95,9 +102,9 @@ a.header-link {
     background-repeat: no-repeat;
     background-size: fit;
     border-bottom: 1px solid var(--color-text);
-    line-height: 1.25;
+    line-height: 1.5;
     margin: 0 0 .5rem;
-    padding: 0 0 0.5rem 4rem;
+    padding: 0 0 .5rem 4rem;
     @include white-space();
   
     h1 {
@@ -120,7 +127,7 @@ a.header-link {
 
 div.grid {
   display: grid;
-  grid-template-columns: 21rem 21rem;
+  grid-template-columns: 20rem 21rem;
   grid-column-gap: 1rem;
 
   @media screen and (max-width: $mobileBreakpoint) {
@@ -189,12 +196,14 @@ section {
         font-weight: 500;
         padding-right: 1rem;
         min-width: 10rem;
+        white-space: nowrap;
 
         & > small {
           display: block;
           font-weight: normal;
           font-size: .857rem;
           margin-top: .125rem;
+          white-space: normal;
         }
       }
       &:last-child {
@@ -211,6 +220,13 @@ section {
       text-align: center;
     }
   }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+.semibold {
+  font-weight: 500;
 }
 
 /* Text-like inputs */
@@ -243,7 +259,8 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
 
 /* Toggle switch (styled checkbox) input */
 .input-toggle {
-  --radius: .375rem;
+  --radius: 5px;
+  line-height: 1.5;
 
   > input[type="checkbox"] {
     position: absolute;
@@ -253,13 +270,15 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   // Toggle track (losenge).
   > label {
     background: var(--color-ctrl);
-    border: .0625rem solid var(--color-brdr);
+    border: 1px solid var(--color-brdr);
     border-radius: var(--radius);
+    box-sizing: content-box;
     cursor: pointer;
     display: block;
-    text-indent: 100%;
+    margin-bottom: 5px;
     overflow: hidden;
     position: relative;
+    text-indent: 100%;
     top: .25rem;
     // left: calc(100% - 2.25rem);
     width: 2rem;
@@ -268,13 +287,14 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
     // Toggle knob/thumb (in the default off position).
     &::after {
       background: var(--color-ctrl);
-      border: .0625rem solid var(--color-brdr);
+      border: 1px solid var(--color-brdr);
       border-radius: var(--radius);
+      box-sizing: content-box;
       content: '';
       transition: 0.3s;
       position: absolute;
-      top: -.0625rem;
-      left: -.0625rem;
+      top: -1px;
+      left: -1px;
       width: 1rem;
       height: 1rem;
     }
@@ -283,14 +303,14 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   // Toggle knob/thumb in the on position.
   > input:checked + label::after {
     background-color: var(--color-ctrl-on);
-    left: calc(100% - .0625rem);
-    transform: translateX(calc(-100% + .125rem));
+    left: calc(100% - 1px);
+    transform: translateX(calc(-100% + 2px));
   }
 
   // Focussed state.
   > input:focus + label {
     background-color: var(--color-ctrl-focus);
-    box-shadow: 0 0 0 .0625rem var(--color-brdr);
+    box-shadow: 0 0 0 1px var(--color-ctrl-on);
   }
 
   // Disabled state.
