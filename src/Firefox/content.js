@@ -53,6 +53,17 @@ function createObserver() {
               link.classList, link.innerText
             );
           link.click();
+          link.classList.add('dax-clicked');
+          // Additional handling for .post-media-link links (View/Hide uploaded/embedded media item).
+          // See processNewLinks() for details.
+          if (link.classList.contains('post-media-link')) {
+            const mediaContainer = link.parentElement 
+              ? link.parentElement.nextSibling 
+              : null;
+            if (mediaContainer) {
+              mediaContainer.classList.add('dax-clicked');
+            }
+          }
           unobserveLink(link);
           _options.doDebug &&
             console.debug("--> Clicked %s (now %d observed)",
@@ -79,23 +90,40 @@ function createObserver() {
       }
     }
 
-    // Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
-    // Returns an object with data about the unobserved link (currently used for debug output only).
-    function unobserveLink(link, removeDaxTag) {
+    /**
+    * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
+    */
+    function unobserveLink(link, removeDaxTags) {
       const luid = link.dataset.luid;
+      let mediaContainer;
+      if (link.classList.contains("post-media-link")) {
+        mediaContainer = link.parentElement
+          ? link.parentElement.nextSibling
+          : null;
+      }
+      if (!removeDaxTags && mediaContainer && 
+        !mediaContainer.classList.contains('media-activated')) {
+          _options.doDebug && console.debug(
+            '--> Not unobserving link %s: media container is not activated', 
+            link.luid, link);
+          return;
+      }
       _observer.unobserve(link);
       delete _observedLinks[luid];
       delete link.dataset.luid;
-    link.removeAttribute("data-luid");
-    if (removeDaxTag) {
-      link.classList.remove("dax-tagged");
-    }
-    _options.doDebug &&
-      console.debug('--> unobserved "%s" link %s',
-        link.className, luid, link);
-    }
-  }
-}
+      link.removeAttribute("data-luid");
+      if (removeDaxTags) {
+        link.classList.remove("dax-tagged", "dax-clicked");
+        if (mediaContainer) {
+          mediaContainer.classList.remove("dax-tagged", "dax-clicked");
+        }
+      }
+      _options.doDebug &&
+        console.debug('--> unobserved "%s" link %s',
+          link.className, luid, link);
+    } // end of unobserveLink().
+  } // end of processObservedEntries().
+} // end of createObserver().
 
 function processNewLinks() {
   // Since processNewLinks() can be called by refreshOptions() when checkInterval is
@@ -143,14 +171,15 @@ function processNewLinks() {
   if (_options.hiddenMedia) {
     document.querySelectorAll(hiddenMediaSelector)
     .forEach(link => {
-      const parent = link.parentElement,
-        nextSibling = parent.nextSibling;
-      if (nextSibling && !nextSibling.classList.contains("media-activated") 
-          && !nextSibling.classList.contains("dax-tagged")) {
+      const mediaContainer = link.parentElement 
+        ? link.parentElement.nextSibling 
+        : null;
+      if (mediaContainer && !mediaContainer.classList.contains('media-activated') 
+          && !mediaContainer.classList.contains('dax-tagged')) {
         observeLink(link);
-        // Tag the sibling element so if the user subsequently closes
+        // Tag the sibling element so if the user subsequently closes 
         // the media item it won't be automatically reopened.
-        nextSibling.classList.add("dax-tagged");
+        mediaContainer.classList.add('dax-tagged');
       }
     });
   }
@@ -187,7 +216,7 @@ function refreshOptions() {
         processNewLinks();
       }
     })
-    .catch(error) {
+    .catch(error => {
       console.error(`Couldn't get configuration form sync'd storage: ${error}`)
-    }
+    });
 }
