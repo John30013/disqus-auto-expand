@@ -54,18 +54,6 @@ function createObserver() {
             );
           link.click();
           link.classList.add('dax-clicked');
-/*
-           // Additional handling for .post-media-link links (View/Hide uploaded/embedded media item).
-          // See processNewLinks() for details.
-          if (link.classList.contains('post-media-link')) {
-            const mediaContainer = link.parentElement 
-              ? link.parentElement.nextSibling 
-              : null;
-            if (mediaContainer) {
-              mediaContainer.classList.add('dax-clicked');
-            }
-          }
- */
           unobserveLink(link);
           _options.doDebug &&
             console.debug("--> Clicked %s (now %d observed)",
@@ -97,37 +85,20 @@ function createObserver() {
     */
     function unobserveLink(link, removeDaxTags) {
       const luid = link.dataset.luid;
-/*
-       let mediaContainer;
-      if (link.classList.contains("post-media-link")) {
-        mediaContainer = link.parentElement
-          ? link.parentElement.nextSibling
-          : null;
-      }
-      if (!removeDaxTags && mediaContainer && 
-        !mediaContainer.classList.contains('media-activated')) {
-          _options.doDebug && console.debug(
-            '--> Not unobserving link %s: media container is not activated', 
-            link.luid, link);
-          return;
-      }
- */
       _observer.unobserve(link);
       delete _observedLinks[luid];
       delete link.dataset.luid;
       link.removeAttribute("data-luid");
       if (removeDaxTags) {
         link.classList.remove("dax-tagged", "dax-clicked");
-/*         if (mediaContainer) {
-          mediaContainer.classList.remove("dax-tagged", "dax-clicked");
-        }
- */      }
+      }
       _options.doDebug &&
         console.debug('--> unobserved "%s" link %s',
           link.className, luid, link);
     } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
+
 function processNewLinks() {
 
   // Since processNewLinks() can be called by refreshOptions() when checkInterval is
@@ -164,38 +135,6 @@ function processNewLinks() {
   if (_options.longItems) {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
-/* 
-  // Observe View/Hide links for embedded media. Detecting these is more 
-  // complex because Disqus appears to rewrite the link whenever it is 
-  // clicked (at least the ones for direct disqus uploads, as opposed to, 
-  // say, embedded Twitter links), and it does not add a data-tid attribute. 
-  // These links' parent elements (span) have a next sibling 
-  // (div.media-container) that get an additional class of 'media-activated' 
-  // while the media is shown.
-  if (_options.hiddenMedia) {
-    let hiddenMediaSelector = "a.post-media-link:not(.dax-tagged)";
-    document.querySelectorAll(hiddenMediaSelector).forEach(link => {
-      const mediaContainer = link.parentElement 
-        ? link.parentElement.nextSibling 
-        : null;
-      if (mediaContainer && !mediaContainer.classList.contains('media-activated') 
-          && !mediaContainer.classList.contains('dax-tagged')) {
-        observeLink(link);
-        // Tag the sibling element so if the user subsequently closes 
-        // the media item it won't be automatically reopened.
-        mediaContainer.classList.add('dax-tagged');
-      }
-    });
-    // Some embedded media uses the "media-button" class instead of the 
-    // "post-media-link" class.
-    // FWIW, these have an associated "media-content-placeholder", but we don't
-    // have to deal with it because the media-button gets a data-tid attribute 
-    // once it's clicked.
-    hiddenMediaSelector = "a.media-button.media-button-expand:not([data-tid])";
-    document.querySelectorAll(hiddenMediaSelector).forEach(observeLink);
-  }
- */
-
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
 
