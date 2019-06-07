@@ -27,7 +27,7 @@ $font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 $oneRem: 14px;
 $mobileBreakpoint: $oneRem * 40;
 $mobileMinWidth: $oneRem * 20;
-$desktopWidth: $mobileBreakpoint + 14;
+$desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
 @mixin white-space {
@@ -56,7 +56,7 @@ body {
   --color-error: #{$theme-lite-color-error};
   --color-text: #{$theme-lite-color-text};
   --color-text-sec: #{$theme-lite-color-text-sec};
-  --color-link: #{$theme-lite-color-brand};
+  --color-link: #{darken($theme-lite-color-brand, 20%)};
   &.theme-dark {
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
@@ -72,19 +72,11 @@ body {
 
   background-color: var(--color-bkgd);
   color: var(--color-text);
-  display: grid;
-  grid-template: 
-    "header header" auto
-    "col-1  col-2"  auto
-    "footer footer" auto
-    / 1fr 1fr;
-  column-gap: 1rem;
-  align-items: start;
   font-size: 100%;
   margin: 0;
   padding: .5rem;
-  max-width: $desktopMaxWidth;
-  width: $desktopWidth;
+  max-width: $desktopWidth;
+  min-width: $desktopWidth;
 
   @media screen and (max-width: $mobileBreakpoint) {
     display: block;
@@ -102,6 +94,29 @@ a:focus, a:hover, a:active {
   text-decoration: underline;
 }
 
+h2 {
+  color: var(--color-text);
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0 0 .5rem;
+  padding: 0 0 .5rem;
+  border-bottom: 1px dotted;
+}
+
+p {
+  color: inherit;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+.semibold {
+  font-weight: 500;
+}
+
 header, footer {
   line-height: 1.5;
   margin: 0 0 .5rem;
@@ -114,7 +129,6 @@ header {
   background-repeat: no-repeat;
   background-size: fit;
   border-bottom: 1px solid var(--color-text);
-  grid-area: header;
   margin-bottom: 1rem;
   padding-left: 4rem;
   @include white-space();
@@ -139,41 +153,32 @@ header {
   }
 }
 
-h2 {
-  color: var(--color-text-sec);
-  font-size: 1.25rem;
-  font-weight: normal;
-  margin: 0 0 .5rem;
-  padding: 0 0 .5rem;
-  border-bottom: 1px dotted;
+footer {
+  border-top: 1px solid var(--color-text);
+  margin-top: .5rem;
+  padding-top: 1rem;
+
+  b {
+    font-weight: 600;
+    color: var(--color-text-sec);
+  }
 }
 
-p {
-  color: inherit;
-  font-size: 1rem;
-  margin: 0;
-  padding: 0;
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+  align-items: start;
+
+  @media screen and (max-width: $mobileBreakpoint) {
+    display: block;
+  }
 }
 
 section {
-/*   @media screen and (max-width: $mobileBreakpoint) {
-    display: block;
-  }
-  display: grid;
-  grid-template-rows: 1.7rem auto;
-  grid-template-columns: 100%;
-  grid-row-gap: 1rem;
-  align-items: start;
- */
   margin: .5rem 0 0;
   width: 100%;
 
-  &:first-child {
-    grid-area: col-1;
-  }
-  &:last-child {
-    grid-area: col-2;
-  }
   > h2 {
     margin-bottom: .5rem;
     padding-bottom: .5rem;
@@ -202,6 +207,7 @@ section {
       }
     }
     & > small {
+      color: var(--color-text-sec);
       display: block;
       font-weight: normal;
       font-size: .857rem;
@@ -220,31 +226,6 @@ section {
       text-align: center;
     }
   }
-
-  &:hover, &:focus-within {
-    h2 {
-      color: var(--color-text);
-    }
-  }
-}
-
-footer {
-  border-top: 1px solid var(--color-text);
-  margin-top: .5rem;
-  padding-top: 1rem;
-  grid-area: footer;
-
-  b {
-    font-weight: 500;
-    color: var(--color-text-sec);
-  }
-}
-
-.nowrap {
-  white-space: nowrap;
-}
-.semibold {
-  font-weight: 500;
 }
 
 /* Text-like inputs */
