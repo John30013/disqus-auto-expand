@@ -11,18 +11,24 @@
 //   &type=text%2Fhtml
 //   &schema=youtube
 //   &auto_play=true&autoplay=1
-try {
-  const origLocation = window.location.href;
-  const config = await browser.storage.get(defaultConfig);
-  /* config.doDebug && */ console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`);
-  if (config.stopAutoplay) {
-    const newLocation = origLocation.replace(/[?&]auto[_-]?(?:play|start)=[^&]+/ig, '');
-    if (newLocation !== origLocation) {
-      console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
-      window.location.href = newLocation;
+(async function () {
+  try {
+    const origLocation = window.location.href;
+    const config = await browser.storage.sync.get(defaultConfig);
+    config.doDebug && 
+      console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`);
+    if (config.stopAutoplay) {
+      const newLocation = origLocation.replace(
+        /[?&]auto[_-]?(?:play|start)=[^&]+/gi,
+        ""
+      );
+      if (newLocation !== origLocation) {
+        config.doDebug &&
+          console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
+        window.location.href = newLocation;
+      }
     }
+  } catch (error) {
+    console.error(`Couldn't get configuration from storage: ${error}.`);
   }
-}
-catch (error) {
-  console.error(`Couldn't get configuration from storage: ${error}.`);
-}
+})();
