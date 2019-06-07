@@ -2,8 +2,8 @@ const defaultConfig = {
   'moreReplies': true, 
   'newReplies': true, 
   'longItems': true, 
-  'hiddenMedia': false,
   'checkInterval': 5,
+  'stopAutoplay': true,
   'useDarkTheme': false,
   'doDebug': false 
 };

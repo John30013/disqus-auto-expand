@@ -1,39 +1,43 @@
 {
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
-  "version": "0.1",
-  "description": "Automatically shows all replies (including new replies) and media items",
+  "version": "0.2",
+  "description": "Automatically shows all replies in Disqus discussions.",
   "permissions": [
     "activeTab", 
     "declarativeContent",
     "storage"
   ],
     "background": {
-      "scripts": ["defaultConfig.js", "background.js"],
+      "scripts": ["dax-defaultConfig.js", "dax-background.js"],
       "persistent": false
     },
     "content_scripts": [
     {
       "matches": ["*://disqus.com/embed/comments/*"],
       "all_frames": true,
-      "js": ["defaultConfig.js", "content.js"]
+      "js": ["dax-defaultConfig.js", "dax-content.js"]
+    },
+    {
+      "matches": ["*://cdn.embedly.com/widgets/media.html*"],
+      "all_frames": true,
+      "js": ["dax-defaultConfig.js", "dax-stopAutoPlay.js"]
     }
   ],
   "icons": {
     "16": "images/disqus_eye_16.png",
     "32": "images/disqus_eye_32.png",
-    "48": "images/disqus_eye_48.png",
-    "128": "images/disqus_eye_128.png"
+    "48": "images/disqus_eye_48.png"
   },
-  "options_page": "config.html",
+  "options_ui": {
+    "page": "dax-config.html"
+  },
   "page_action": {
     "default_icon": {
       "16": "images/disqus_eye_16.png",
-      "32": "images/disqus_eye_32.png",
-      "48": "images/disqus_eye_48.png",
-      "128": "images/disqus_eye_128.png"
+      "32": "images/disqus_eye_32.png"
     },
-    "default_popup": "config.html",
+    "default_popup": "dax-config.html",
     "default_title": "Disqus Auto Expander"
   }
 }
