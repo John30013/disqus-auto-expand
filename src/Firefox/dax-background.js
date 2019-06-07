@@ -20,7 +20,3 @@ browser.runtime.onInstalled.addListener(async () => {
     console.error(`Storage operation failed: ${error}.`);
   }
 });
-
-if (document.getElementById('disqus_thread') === null) {
-  browser.pageAction.hide();
-}
