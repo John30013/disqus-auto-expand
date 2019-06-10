@@ -30,7 +30,7 @@
         if (window.scrollY !== this._endY) {
           if (!this._isScrolling) {
             // Scrolling has started.
-            // this._startY = window.scrollY;
+            this._startY = this._endY;
             this._startTime = Date.now();
             this._distance = this._duration = 0;
             this._isScrolling = true;
@@ -91,10 +91,13 @@
   }
 
   let _userInteraction = '';
-  let _lastWheelEventTime = 0;
+  let _lastUserEvent = {'type': '', 'time': 0, 'ueHasStart': false};
+  let _allowJumpCorrection = true;
+
   const _maxScrollJump =
-      60 * parseInt(getComputedStyle(document.body).fontSize, 10);
+      10 * parseInt(getComputedStyle(document.body).fontSize, 10);
   const _scrollTracker = new ScrollTracker(window);
+  const _scrollTimingAllowance = 500;
 
   _scrollTracker.start(handleScrollEnd);
 
@@ -105,45 +108,77 @@
     );
 
   // Install handlers to detect user interaction.
-  window.addEventListener("mousedown", trackUserInteraction);
-  window.addEventListener("mouseup", trackUserInteraction);
-  window.addEventListener("keydown", trackUserInteraction);
-  window.addEventListener("keyup", trackUserInteraction);
-  window.addEventListener("touchstart", trackUserInteraction);
-  window.addEventListener("touchend", trackUserInteraction);
-  window.addEventListener("wheel", event => {
-    _lastWheelEventTime = Date.now();
-  });
-  // TODO: wheel: capture the time of the wheel event. 
-  // On scroll end, compare to the scroll start and end times. 
-  // If it's between them, it was user interaction.
-  function trackUserInteraction(event) {
+  window.addEventListener("mousedown", trackUserEvent);
+  window.addEventListener("keydown", trackUserEvent);
+  window.addEventListener("touchstart", trackUserEvent);
+  window.addEventListener("mouseup", trackUserEvent);
+  window.addEventListener("keyup", trackUserEvent);
+  window.addEventListener("touchend", trackUserEvent);
+  window.addEventListener("wheel", trackUserEvent);
+  window.addEventListener("resize", trackUserEvent);
+  
+  window.addEventListener("scroll", event => {
+      console.log("Got a scroll event!");
+  })
+  function trackUserEvent(event) {
+    _lastUserEvent = {
+      'type': event.type, 
+      'time': Date.now(),
+      'ueHasStart': true,
+    };
+    daxOptions.doDebug && console.debug('trackUserInterction(): ', _lastUserEvent);
     if (event.type === 'mousedown' || event.type === 'keydown' || event.type === 'touchstart') {
-      _userInteraction = event.type;
+      // Start event; nothing else to do.
       return;
-    } else if (event.type === 'mouseup' || event.type === 'keyup' || event.type === 'touchend') {
-      window.setTimeout(() => _userInteraction = '', 200);
-      // _userInteraction = '';
-      return;
+    } 
+    // End events.
+    if (event.type === 'wheel' || event.type === 'resize') {
+      // Events without start events have no duration.
+      _lastUserEvent.ueHasStart = false;
     }
+    // All end events: reset _lastUserEvent after the scroll timing allowance.
+    window.setTimeout(() => _lastUserEvent = {type: '', time: 0, ueHasStart: true}, _scrollTimingAllowance);
   };
 
   function handleScrollEnd(tracker) {
-    daxOptions.doDebug &&
-      console.debug('handleScrollEnd:', tracker.data);
-    // Check for scroll events during user interaction. If so, ignore the 
-    // event (for our purposes) by updating the current scroll position.
-    if (_userInteraction || 
-        _lastWheelEventTime >= tracker.startTime && _lastWheelEventTime <= tracker.endTime) {
-      daxOptions.doDebug && 
-        console.debug('Ignoring user scroll.');
+    const {type: ueType, time: ueTime, ueHasStart: ueHasStart} = _lastUserEvent;
+    const {startTime: trStart, endTime: trEnd, duration: trDur, interval: trInt} = tracker.data;
+
+    daxOptions.doDebug && (
+      console.debug('handleScrollEnd:', tracker.data),
+      console.debug(`--> last user ${ueType} event @ ${ueTime}.`)
+    );
+    if (ueTime === 0) {
       return;
     }
-    if (tracker.distance > _maxScrollJump) {
+    // Check for scroll events during user interaction. If so, ignore the 
+    // event (for our purposes) by updating the current scroll position.
+    if (ueType) {
+      if (ueHasStart) {
+        daxOptions.doDebug && 
+          console.debug('--> Ignoring user scroll.');
+      } else {
+        const startDiff = Math.abs(ueTime - trStart);
+        const endDiff = Math.abs(ueTime - trEnd);
+        daxOptions.doDebug &&
+          console.debug(`--> startDiff: ${startDiff}, endDiff: ${endDiff}, allowance: ${_scrollTimingAllowance}`);
+        if (startDiff <= _scrollTimingAllowance && 
+            (trDur <= trInt || endDiff <= _scrollTimingAllowance)) {
+            daxOptions.doDebug && 
+              console.debug('--> Ignoring user scroll.');
+        }
+      }
+      return;
+    }
+    // if (Math.abs(tracker.distance) > _maxScrollJump) {
+    if (_allowJumpCorrection) {
       window.scrollTo(0, tracker.startPos);
       daxOptions.doDebug &&
-        console.debug("--> Returned scroll position to %d",
+        console.debug("--> Non-user scroll jump: returned scroll position to %d",
           tracker.startPos);
+      // Prevent "bouncing", which only seems to happen following a window resize.
+      _allowJumpCorrection = false;
+      window.setTimeout(() => {_allowJumpCorrection = true}, 1000);
     }
   }
 })();

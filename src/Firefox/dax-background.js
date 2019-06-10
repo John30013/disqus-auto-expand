@@ -38,8 +38,7 @@ function handleContentMessage(msg) {
           _config.doDebug &&
             console.debug(
               'installJumpStopper request from "%s":',
-              msg.caller,
-              result
+              msg.caller, result
             );
         });
     })();
