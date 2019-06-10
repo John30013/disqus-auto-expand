@@ -116,6 +116,9 @@ p {
 .semibold {
   font-weight: 500;
 }
+.wrap {
+  white-space: normal !important;
+}
 
 header, footer {
   line-height: 1.5;
@@ -185,21 +188,21 @@ section {
   }
   > p {
     display: grid;
+    column-gap: 1rem;
     grid-template: 
-      "label input" 1.5rem
+      "label input" auto
       "help  help"  auto
-      / auto 9rem;
+      / auto 8rem;
     margin-bottom: 1rem;
 
     & > span, & > label {
-      // outline: 1px dotted red;
 
       &:first-child {
         font-weight: 500;
         grid-area: label;
-        padding-right: 1rem;
+        // padding-right: 1rem;
         min-width: 10rem;
-        white-space: nowrap;
+        // white-space: nowrap;
 
       }
       &:last-child {

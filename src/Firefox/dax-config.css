@@ -85,6 +85,10 @@ p {
   font-weight: 500;
 }
 
+.wrap {
+  white-space: normal !important;
+}
+
 header, footer {
   line-height: 1.5;
   margin: 0 0 .5rem;
@@ -163,16 +167,15 @@ section > h2 {
 
 section > p {
   display: grid;
-  grid-template: "label input" 1.5rem "help  help"  auto / auto 9rem;
+  column-gap: 1rem;
+  grid-template: "label input" auto "help  help"  auto / auto 8rem;
   margin-bottom: 1rem;
 }
 
 section > p > span:first-child, section > p > label:first-child {
   font-weight: 500;
   grid-area: label;
-  padding-right: 1rem;
   min-width: 10rem;
-  white-space: nowrap;
 }
 
 section > p > span:last-child, section > p > label:last-child {
