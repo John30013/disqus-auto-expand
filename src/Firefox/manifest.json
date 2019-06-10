@@ -3,14 +3,16 @@
   "name": "Disqus Auto Expander",
   "version": "0.2",
   "description": "Automatically shows all replies in Disqus discussions.",
-    "applications": {
-      "gecko": {
-        "id": "disqus-auto-expander@john30013.com"
-      }
-    },
-    "permissions": [
+  "applications": {
+    "gecko": {
+      "id": "disqus-auto-expander@john30013.com"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
     "activeTab", 
-    "storage"
+    "storage",
+    "tabs"
   ],
   "background": {
     "scripts": ["dax-defaultConfig.js", 

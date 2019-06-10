@@ -2,17 +2,34 @@ let _options = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
-  _linkCounter = 0;
+  _linkCounter = 0,
+  _bkgdPort = null;
+
+// Start the extension.
+refreshOptions();
+/* _options.doDebug && */
+  console.debug(`content.js is running in iframe ${window.name}.`);
 
 // Listen for option updates and debug messages from config page.
 listenForMessages();
 // Set up the IntersectionObserver to watch for auto-expand links coming into view.
 createObserver();
 
-// Start the extension.
-refreshOptions();
-_options.doDebug &&
-  console.debug(`content.js is running in iframe ${window.name}.`);
+// Connect to the background script and ask to install the stopPageJump script in the parent window.
+/* _options.doDebug &&  */console.debug('Connecting to background script.');
+_bkgdPort = browser.runtime.connect();
+/* _options.doDebug &&  */console.debug('Creating onDisconnect listener.');
+_bkgdPort.onDisconnect.addListener(port => {
+  if (port.error) {
+    console.warn('Background page message port closed unexpectedly: "%s"', port.error);
+  } else {
+    _options.doDebug && console.debug('Background page message port closed normally.');
+  }
+});
+/* _options.doDebug &&  */console.debug('Asking background script to install jump stopper.');
+_bkgdPort.postMessage({'request': 'installJumpStopper', 'caller': window.location.href});
+
+// Start processing.
 processNewLinks();
 /* ===== End of main code. ===== */
 
@@ -42,7 +59,8 @@ function createObserver() {
         _options.doDebug &&
           console.debug(
             'Checking intersection of "%s" link %s',
-            link.className, luid
+            link.className,
+            luid
           );
         hideMediaLink = false;
         if (entry.isIntersecting) {
@@ -50,14 +68,17 @@ function createObserver() {
           _options.doDebug &&
             console.debug(
               '--> link.classList: %o; link.innerText: "%s"',
-              link.classList, link.innerText
+              link.classList,
+              link.innerText
             );
           link.click();
-          link.classList.add('dax-clicked');
+          link.classList.add("dax-clicked");
           unobserveLink(link);
           _options.doDebug &&
-            console.debug("--> Clicked %s (now %d observed)",
-              luid, Object.keys(_observedLinks).length,
+            console.debug(
+              "--> Clicked %s (now %d observed)",
+              luid,
+              Object.keys(_observedLinks).length,
               _observedLinks
             );
         }
@@ -68,21 +89,18 @@ function createObserver() {
       // five minutes. If some non-zombie links get unobserved, they will be
       // observed again the next time the processNewLinks timer fires.
       if (foundIntersects) {
-        _options.doDebug && 
-          console.debug("--> Checking for old links");
+        _options.doDebug && console.debug("--> Checking for old links");
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
         Object.keys(_observedLinks)
-          .filter(luid => 
-            now - luid.substr(0, luid.indexOf("-")) >= maxAge)
-          .forEach(oldLuid =>
-            unobserveLink(_observedLinks[oldLuid], true));
+          .filter(luid => now - luid.substr(0, luid.indexOf("-")) >= maxAge)
+          .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
       }
     }
 
     /**
-    * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
-    */
+     * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
+     */
     function unobserveLink(link, removeDaxTags) {
       const luid = link.dataset.luid;
       _observer.unobserve(link);
@@ -93,14 +111,17 @@ function createObserver() {
         link.classList.remove("dax-tagged", "dax-clicked");
       }
       _options.doDebug &&
-        console.debug('--> unobserved "%s" link %s',
-          link.className, luid, link);
+        console.debug(
+          '--> unobserved "%s" link %s',
+          link.className,
+          luid,
+          link
+        );
     } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
 
 function processNewLinks() {
-
   // Since processNewLinks() can be called by refreshOptions() when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
@@ -130,11 +151,22 @@ function processNewLinks() {
     document.querySelectorAll(repliesSelector.join(",")).forEach(observeLink);
   }
   // Observe "see more" links that haven't already been observed.
-  const longItemsSelector =
-    'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
   if (_options.longItems) {
+    const longItemsSelector =
+      'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
+
+  // Make external links open in a new browser tab/window.
+  if (_options.openinNewWindow) {
+    const extLinkSelector = `a[href*='disq.us/url?'][rel*='noopener']:not([target])`;
+    document.querySelectorAll(extLinkSelector).forEach(link => {
+      link.target = "_blank";
+      _options.doDebug &&
+        console.debug('Added target="_blank" to external link:', link);
+    });
+  }
+
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
 
@@ -143,32 +175,39 @@ function processNewLinks() {
   function observeLink(link) {
     let luid = link.dataset.luid;
     if (!luid) {
-    luid = `${Date.now()}-${_linkCounter++}`;
-    link.setAttribute('data-luid', luid);
-    link.classList.add('dax-tagged');
-    _observer.observe(link);
-    _observedLinks[luid] = link;
-    _options.doDebug &&
-      console.debug('--> Observing "%s" link %s (now %d observed)',
-        link.className, luid, Object.keys(_observedLinks).length,
-        _observedLinks
-      );
+      luid = `${Date.now()}-${_linkCounter++}`;
+      link.setAttribute("data-luid", luid);
+      link.classList.add("dax-tagged");
+      _observer.observe(link);
+      _observedLinks[luid] = link;
+      _options.doDebug &&
+        console.debug(
+          '--> Observing "%s" link %s (now %d observed)',
+          link.className,
+          luid,
+          Object.keys(_observedLinks).length,
+          _observedLinks
+        );
     }
   }
 }
 
 function refreshOptions() {
-  browser.storage.sync.get(defaultConfig)
+  browser.storage.sync
+    .get(defaultConfig)
     .then(options => {
       const oldCheckInterval = +_options.checkInterval;
       _options = options;
       _options.doDebug && console.debug("--> Got sync'd options: %o", _options);
       // Check if we need to resume processing links.
-      if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
+      if (
+        oldCheckInterval === 0 &&
+        _options.checkInterval !== oldCheckInterval
+      ) {
         processNewLinks();
       }
     })
     .catch(error => {
-      console.error(`Couldn't get configuration form sync'd storage: ${error}`)
+      console.error(`Couldn't get configuration form sync'd storage: ${error}`);
     });
 }
