@@ -9,8 +9,10 @@
     }
   },
   "permissions": [
+    "<all_urls>",
     "activeTab", 
-    "storage"
+    "storage",
+    "tabs"
   ],
   "background": {
     "scripts": ["dax-defaultConfig.js", 

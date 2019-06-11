@@ -16,7 +16,6 @@
     }
 
     start(onScrollEnd, _interval) {
-      // let me = this;
       if (typeof _interval === "number" && _interval > 0) {
         this.stop();
         interval = _interval;
@@ -93,11 +92,12 @@
   let _userInteraction = '';
   let _lastUserEvent = {'type': '', 'time': 0, 'ueHasStart': false};
   let _allowJumpCorrection = true;
+  let _endEventDebounceTimer = 0;
 
   const _maxScrollJump =
       10 * parseInt(getComputedStyle(document.body).fontSize, 10);
   const _scrollTracker = new ScrollTracker(window);
-  const _scrollTimingAllowance = 500;
+  const _scrollTimingAllowance = 1000;
 
   _scrollTracker.start(handleScrollEnd);
 
@@ -119,25 +119,36 @@
   
   window.addEventListener("scroll", event => {
       console.log("Got a scroll event!");
-  })
+  });
+
   function trackUserEvent(event) {
+    // Short-circuit if it's a key event that's not a navigation key.
+    if (event.type.substr(0,3) === 'key') {
+      const keyClass = event.key.substr(0, 4);
+      if (keyClass.length < 3 || 
+          keyClass !== "Arro" &&
+          keyClass !== "Page" &&
+          keyClass !== "Home" &&
+          keyClass !== "End") {
+        return;
+      }
+    }
     _lastUserEvent = {
       'type': event.type, 
       'time': Date.now(),
       'ueHasStart': true,
     };
-    daxOptions.doDebug && console.debug('trackUserInterction(): ', _lastUserEvent);
-    if (event.type === 'mousedown' || event.type === 'keydown' || event.type === 'touchstart') {
-      // Start event; nothing else to do.
-      return;
-    } 
-    // End events.
-    if (event.type === 'wheel' || event.type === 'resize') {
-      // Events without start events have no duration.
-      _lastUserEvent.ueHasStart = false;
+    // daxOptions.doDebug && console.debug('tui(): ', _lastUserEvent);
+    // Handle "end" events. *down/*start events don't need further handling.
+    if ("down|tart".indexOf(event.type.slice(-4)) < 0) {
+      // Reset _lastUserEvent after the scroll timing allowance.
+      _endEventDebounceTimer && window.clearTimeout(_endEventDebounceTimer);
+      _endEventDebounceTimer = window.setTimeout(() => {
+        _lastUserEvent = {type: '', time: 0, ueHasStart: true};
+        daxOptions.doDebug &&
+          console.debug("tui(): reset _lastUserEvent", _lastUserEvent);
+      }, _scrollTimingAllowance);
     }
-    // All end events: reset _lastUserEvent after the scroll timing allowance.
-    window.setTimeout(() => _lastUserEvent = {type: '', time: 0, ueHasStart: true}, _scrollTimingAllowance);
   };
 
   function handleScrollEnd(tracker) {
@@ -148,26 +159,25 @@
       console.debug('handleScrollEnd:', tracker.data),
       console.debug(`--> last user ${ueType} event @ ${ueTime}.`)
     );
-    if (ueTime === 0) {
-      return;
-    }
+
     // Check for scroll events during user interaction. If so, ignore the 
     // event (for our purposes) by updating the current scroll position.
     if (ueType) {
-      if (ueHasStart) {
-        daxOptions.doDebug && 
-          console.debug('--> Ignoring user scroll.');
-      } else {
-        const startDiff = Math.abs(ueTime - trStart);
-        const endDiff = Math.abs(ueTime - trEnd);
-        daxOptions.doDebug &&
-          console.debug(`--> startDiff: ${startDiff}, endDiff: ${endDiff}, allowance: ${_scrollTimingAllowance}`);
-        if (startDiff <= _scrollTimingAllowance && 
-            (trDur <= trInt || endDiff <= _scrollTimingAllowance)) {
-            daxOptions.doDebug && 
-              console.debug('--> Ignoring user scroll.');
-        }
-      }
+      // if (ueHasStart) {
+      //   daxOptions.doDebug && 
+      //     console.debug('--> Ignoring user scroll.');
+      // } else {
+      //   const startDiff = Math.abs(ueTime - trStart);
+      //   const endDiff = Math.abs(ueTime - trEnd);
+      //   daxOptions.doDebug &&
+      //     console.debug(`--> startDiff: ${startDiff}, endDiff: ${endDiff}, allowance: ${_scrollTimingAllowance}`);
+      //   if (startDiff <= _scrollTimingAllowance && 
+      //       (trDur <= trInt || endDiff <= _scrollTimingAllowance)) {
+      //       daxOptions.doDebug && 
+      //         console.debug('--> Ignoring user scroll.');
+      //   }
+      // }
+      daxOptions.doDebug && console.debug("--> Ignoring user scroll.");
       return;
     }
     // if (Math.abs(tracker.distance) > _maxScrollJump) {

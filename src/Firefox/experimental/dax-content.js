@@ -6,12 +6,28 @@ let _options = { ...defaultConfig },
 
 // Start the extension.
 refreshOptions();
-_options.doDebug &&
+/* _options.doDebug && */
   console.debug(`content.js is running in iframe ${window.name}.`);
+
 // Listen for option updates and debug messages from config page.
 listenForMessages();
 // Set up the IntersectionObserver to watch for auto-expand links coming into view.
 createObserver();
+
+// Connect to the background script and ask to install the stopPageJump script in the parent window.
+/* _options.doDebug &&  */console.debug('Connecting to background script.');
+_bkgdPort = browser.runtime.connect();
+/* _options.doDebug &&  */console.debug('Creating onDisconnect listener.');
+_bkgdPort.onDisconnect.addListener(port => {
+  if (port.error) {
+    console.warn('Background page message port closed unexpectedly: "%s"', port.error);
+  } else {
+    _options.doDebug && console.debug('Background page message port closed normally.');
+  }
+});
+/* _options.doDebug &&  */console.debug('Asking background script to install jump stopper.');
+_bkgdPort.postMessage({'request': 'installJumpStopper', 'caller': window.location.href});
+
 // Start processing.
 processNewLinks();
 /* ===== End of main code. ===== */

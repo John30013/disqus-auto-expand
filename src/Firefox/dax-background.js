@@ -24,36 +24,3 @@ browser.runtime.onInstalled.addListener(async () => {
     console.error(`Storage operation failed: ${error}.`);
   }
 });
-
-// Listen for connections from the content script.
-function handleContentMessage(msg) {
-  _config.doDebug && console.debug("Got message:", msg);
-  if ((msg.request === "installJumpStopper")) {
-    (async () => {
-      await browser.tabs.executeScript(_callers[msg.caller].tabId,
-        {"code": `window.daxOptions = ${JSON.stringify(_config)};`});
-      browser.tabs.executeScript(_callers[msg.caller].tabId, 
-          {"file": "/dax-stopPageJumps.js"})
-        .then(result => {
-          _config.doDebug &&
-            console.debug(
-              'installJumpStopper request from "%s":',
-              msg.caller, result
-            );
-        });
-    })();
-  }
-
-  // Handle disconnect request. It can come as part of another message, or as its own message.
-  if (msg.disconnect || msg.request === 'disconnect') {
-    _callers[msg.caller].port.disconnect();
-    delete _callers[msg.caller];
-    _config.doDebug && console.debug('Closed port for "%s"', msg.caller);
-  }
-}
-
-browser.runtime.onConnect.addListener(port => {
-  _callers[port.sender.url] = {"port": port, "tabId": port.sender.tab.id};
-  _config.doDebug && console.debug('Got connection from port', port);
-  port.onMessage.addListener(handleContentMessage);
-});

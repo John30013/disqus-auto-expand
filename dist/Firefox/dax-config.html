@@ -14,49 +14,58 @@
   </header>
   <main>
     <section>
-      <h2>Items to auto-expand</h2>
+      <h2>Content options</h2>
       <p>
-        <span class="label">More replies</span>
-        <small>“See more replies” links.</small>
+        <span class="label">Expand hidden replies</span>
+        <small>Automatically expand “See more replies” links.</small>
         <span class="input input-toggle"><input type="checkbox" id="moreReplies"
             checked>
-          <label for="moreReplies">More replies</label>
+          <label for="moreReplies">Expand more replies</label>
         </span>
       </p>
       <p>
-        <span class="label">New replies</span>
-        <small>“See # new replies” links that appear when others reply to a post that is already visible.</small>
+        <span class="label">Expand new replies</span>
+        <small>Automatically expand “See # new replies” links that appear when others reply to a post that is already visible.</small>
         <span class="input input-toggle"><input type="checkbox" id="newReplies"
             checked>
-          <label for="newReplies">New replies</label>
+          <label for="newReplies">Expand new replies</label>
         </span>
       </p>
       <p>
-        <span class="label">Long items</span>
-        <small>"See more" links that cut off long posts and media items.</small>
+        <span class="label">Expand long items</span>
+        <small>Automatically expand "see more" links that cut off long posts and media items.</small>
         <span class="input input-toggle"><input type="checkbox" id="longItems"
             checked>
-          <label for="longItems">Long items</label>
+          <label for="longItems">Expand long items</label>
+        </span>
+      </p>
+      <p>
+        <span class="label">Stop autoplay media</span>
+        <small>&hellip; regardless of browser settings.
+          <em class="nowrap semibold"><a
+              href="https://github.com/John30013/disqus-auto-expand#long-items-and-hidden-media"
+              target="dax-info">Learn more.</a></em></small>
+        <span class="input input-toggle"><input type="checkbox" id="stopAutoplay"
+            checked>
+          <label for="stopAutoplay">Stop autoplay media</label>
+        </span>
+      </p>
+      <p>
+        <span class="label wrap">Open links in a new tab/window</span>
+        <span class="input input-toggle"><input type="checkbox" id="openInNewWindow"
+            checked>
+          <label for="openInNewWindow">Open links in a new tab/window</label>
         </span>
       </p>
     </section>
     <section>
-      <h2>Additional options</h2>
-        <p>
-          <label for="checkInterval">Check for changes</label>
-          <small>Choose 1&ndash;30 seconds; enter 0&#160;to disable.</small>
-          <span class="input">every <input inputmode="numeric" id="checkInterval"
-              pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
-              required> seconds</span>
-        </p>
+      <h2>Extension options</h2>
       <p>
-        <span class="label">Stop autoplay media</span>
-        <small>&hellip; regardless of browser settings.
-          <em class="nowrap semibold"><a href="https://github.com/John30013/disqus-auto-expand#long-items-and-hidden-media" target="dax-info">Learn more.</a></em></small>
-        <span class="input input-toggle"><input type="checkbox"
-            id="stopAutoplay" checked>
-          <label for="stopAutoplay">Stop autoplay media</label>
-        </span>
+        <label for="checkInterval">Check for new content</label>
+        <small>Choose 1&ndash;30 seconds, or 0&#160;to disable.</small>
+        <span class="input">every <input inputmode="numeric" id="checkInterval"
+            pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
+            required> seconds</span>
       </p>
       <p>
         <span class="label">Use dark theme</span>
