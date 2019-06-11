@@ -10,43 +10,43 @@ const gulp = require("gulp"),
   terser = require('gulp-terser');
 
 // Options specified at the command line.
-const allowDebug = false || argv.allowDebug,
-  minify = false || argv.minify;
+const optDebug = false || argv.debug,
+  optMinify = false || argv.minify;
 let src, dest;
 
 // Tasks
 const scripts = function() {
     return gulp.src(`${src}*.js`)
-      .pipe(gulpIf(!allowDebug, removeLogging(
+      .pipe(gulpIf(!optDebug, removeLogging(
           {'replaceWith': '0;', 
             'methods': ['assert', 'clear', 'count', 'count​Reset', 'debug', 
                 'dir', 'dirxml', 'group', 'group​Collapsed', 'groupEnd', 
                 'info', 'log', 'profile', 'profileEnd', 'table', 
                 'time', 'timeEnd', 'timeLog', 'time​Stamp', 'trace']})))
-      .pipe(gulpIf(!allowDebug, removeCode({'allowDebug': false})))
-      .pipe(gulpIf(minify, terser()))
+      .pipe(gulpIf(!optDebug, removeCode({'allowDebug': false})))
+      .pipe(gulpIf(optMinify, terser()))
       .pipe(gulp.dest(dest));
 };
 scripts.description = `Process and deploy Javascript files (${src}*.js).`;
 scripts.flags = {
-  '--allowDebug': 'Keep debug related logic in the JavaScript (default: false)',
-  '--minify': 'Minify the Javascript source code (default: false)',
+  '--debug': 'Keep debug related logic in the JavaScript (default: false)',
+  '--minify': 'minify the Javascript source code (default: false)',
 };
 
 const styles = function() {
   return gulp.src(`${src}*.css`)
-    .pipe(gulpIf(minify, csso()))
+    .pipe(gulpIf(optMinify, csso()))
     .pipe(gulp.dest(dest));
 };
 styles.description = `Process and deploy CSS files (${src}*.css).`;
 styles.flags = {
-  '--minify': 'Minify the CSS source code (default: false)',
+  '--minify': 'optMinify the CSS source code (default: false)',
 };
 
 const html = function() {
   return gulp.src(`${src}*.html`)
-    .pipe(gulpIf(!allowDebug, removeCode({ allowDebug: false })))
-    .pipe(gulpIf(minify, htmlmin({
+    .pipe(gulpIf(!optDebug, removeCode({allowDebug: false })))
+    .pipe(gulpIf(optMinify, htmlmin({
           collapseWhitespace: true,
           removeComments: true,
         })))
@@ -55,8 +55,8 @@ const html = function() {
 };
 html.description = `Process and deploy HTML files (${src}*.html).`;
 html.flags = {
-  '--allowDebug': 'Keep debug related logic in the HTML (default: false)',
-  '--minify': 'Minify the HTML source code (default: false)',
+  '--debug': 'Keep debug related logic in the HTML (default: false)',
+  '--minify': 'minify the HTML source code (default: false)',
 };
 
 const copyFiles = function() {
@@ -101,8 +101,8 @@ const buildChrome = function(done) {
 };
 buildChrome.description = 'Cleans and builds the Chrome version of the extension.';
 buildChrome.flags = {
-  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
-  '--minify': 'Minify the extension\'s source code (default: false)',
+  '--optDebug': 'Keep debug related logic in the extension (default: false)',
+  '--minify': 'minify the extension\'s source code (default: false)',
 };
 
 const cleanFirefox = function(done) {
@@ -116,8 +116,8 @@ const buildFirefox = function(done) {
 };
 buildFirefox.description = 'Cleans and builds the Firefox version of the extension.';
 buildFirefox.flags = {
-  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
-  '--minify': 'Minify the extension\'s source code (default: false)',
+'--optDebug': 'Keep debug related logic in the extension (default: false)',
+'--minify': 'minify the extension\'s source code (default: false)',
 };
 
 const defaultTasks = function(done) {
@@ -125,8 +125,8 @@ const defaultTasks = function(done) {
 };
 defaultTasks.description = 'Cleans and builds the Chrome and Firefox versions of the extension.';
 defaultTasks.flags = {
-  '--allowDebug': 'Keep debug related logic in the extension (default: false)',
-  '--minify': 'Minify the extension\'s source code (default: false)',
+  "--optDebug": "Keep debug related logic in the extension (default: false)",
+  "--minify": "minify the extension's source code (default: false)",
 };
 
 module.exports = {
