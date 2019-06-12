@@ -12,4 +12,15 @@
   background-color: darkred;
   content: "opened";
 }
+
+a[href*='disq.us/url?'][target='_blank']:focus::after, a[href*='disq.us/url?'][target='_blank']:hover::after {
+  background-color: darkslateblue;
+  border-radius: 5px;
+  color: white;
+  content: "new window";
+  font-size: .857em;
+  margin-left: 5px;
+  padding: 2px 5px;
+  position: absolute;
+}
 /*# sourceMappingURL=dax-content.css.map */
