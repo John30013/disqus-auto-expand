@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Disqus Auto Expander config</title>
   <link rel="stylesheet" href="dax-config.css">
 </head>
+
 <body>
-  <header class="clickable" data-href="https://www.github.com/John30013/disqus-auto-expand/" data-target="dax-info">
-    <h1>Disqus Auto Expander
+  <header class="clickable"
+    data-href="https://www.github.com/John30013/disqus-auto-expand/"
+    data-target="dax-info">
+    <h1>
+      Disqus Auto Expander
       <small>Configuration options</small>
     </h1>
   </header>
@@ -25,7 +30,8 @@
       </p>
       <p>
         <span class="label">Expand new replies</span>
-        <small>Automatically expand “See # new replies” links that appear when others reply to a post that is already visible.</small>
+        <small>Automatically expand “See # new replies” links that appear when
+          others reply to a post that is already visible.</small>
         <span class="input input-toggle"><input type="checkbox" id="newReplies"
             checked>
           <label for="newReplies">Expand new replies</label>
@@ -33,7 +39,8 @@
       </p>
       <p>
         <span class="label">Expand long items</span>
-        <small>Automatically expand "see more" links that cut off long posts and media items.</small>
+        <small>Automatically expand "see more" links that cut off long posts and
+          media items.</small>
         <span class="input input-toggle"><input type="checkbox" id="longItems"
             checked>
           <label for="longItems">Expand long items</label>
@@ -45,15 +52,15 @@
           <em class="nowrap semibold"><a
               href="https://github.com/John30013/disqus-auto-expand#long-items-and-hidden-media"
               target="dax-info">Learn more.</a></em></small>
-        <span class="input input-toggle"><input type="checkbox" id="stopAutoplay"
-            checked>
+        <span class="input input-toggle"><input type="checkbox"
+            id="stopAutoplay" checked>
           <label for="stopAutoplay">Stop autoplay media</label>
         </span>
       </p>
       <p>
         <span class="label wrap">Open links in a new tab/window</span>
-        <span class="input input-toggle"><input type="checkbox" id="openInNewWindow"
-            checked>
+        <span class="input input-toggle"><input type="checkbox"
+            id="openInNewWindow" checked>
           <label for="openInNewWindow">Open links in a new tab/window</label>
         </span>
       </p>
@@ -63,15 +70,17 @@
       <p>
         <label for="checkInterval">Check for new content</label>
         <small>Choose 1&ndash;30 seconds, or 0&#160;to disable.</small>
-        <span class="input">every <input inputmode="numeric" id="checkInterval"
+        <span class="input">every
+          <input inputmode="numeric" id="checkInterval"
             pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
-            required> seconds</span>
+            required>
+          seconds</span>
       </p>
       <p>
         <span class="label">Use dark theme</span>
         <small>&hellip; for this configuration page.</small>
         <span class="input input-toggle"><input type="checkbox"
-          id="useDarkTheme">
+            id="useDarkTheme">
           <label for="useDarkTheme">Use dark theme</label>
         </span>
       </p>
@@ -88,14 +97,21 @@
   </main>
   <footer>
     <h2>Extension information</h2>
-    <p><b>Version:</b>
+    <p>
+      <b>Version:</b>
       <span id="version">0.0.0</span>
     </p>
-    <p><b>Help, feedback, and bug reporting:</b> 
-      visit our <a href="https://github.com/John30013/disqus-auto-expand/" target="dax-info">Github repository</a> or the <a class="extensionStore" href="" target="dax-ext-store">${extension store}</a>.
+    <p>
+      <b>Help, feedback, and bug reporting:</b> visit our
+      <a href="https://github.com/John30013/disqus-auto-expand/"
+        target="dax-info">Github repository</a>
+      or the
+      <a class="extensionStore" href="" target="dax-ext-store">${extension
+        store}</a>.
     </p>
   </footer>
   <script src="dax-defaultConfig.js"></script>
   <script src="dax-config.js"></script>
 </body>
+
 </html>
