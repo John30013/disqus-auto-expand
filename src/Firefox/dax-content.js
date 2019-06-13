@@ -31,7 +31,7 @@ function listenForMessages() {
 
 function createObserver() {
   _observer = new IntersectionObserver(processObservedEntries, {
-    threshold: 1.0,
+    threshold: 1.0
   });
 
   function processObservedEntries(entries) {
@@ -144,7 +144,8 @@ function processNewLinks() {
 
   // Observe "Load more comments" "button" at the bottom of the comments.
   if (_options.moreComments) {
-    const moreCommentsSelector = 'div.load-more:not([style*="none"]) > a.load-more__button';
+    const moreCommentsSelector =
+      'div.load-more:not([style*="none"]) > a.load-more__button';
     document.querySelectorAll(moreCommentsSelector).forEach(observeLink);
   }
 
