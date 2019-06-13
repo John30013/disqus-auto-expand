@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
-  "version": "0.2",
-  "description": "Automatically shows all replies in Disqus discussions.",
+  "version": "0.3",
+  "description": "Automatically shows all replies in Disqus discussions. Optionally shows new comments, prevents auto-play media, and forces URLs to open in a new tab/window.",
   "permissions": ["activeTab", "declarativeContent", "storage"],
   "background": {
     "scripts": ["dax-defaultConfig.js", "dax-background.js"],
@@ -10,10 +10,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://disqus.com/embed/comments/*"],
+      "matches": [
+        "*://disqus.com/embed/comments/*",
+        "*://disqus.com/home/discussion/*"
+      ],
       "all_frames": true,
-      "js": ["dax-defaultConfig.js", "dax-content.js"],
-      "css": ["dax-content.css"]
+      "js": ["dax-defaultConfig.js", "dax-content.js"]
     },
     {
       "matches": ["*://cdn.embedly.com/widgets/media.html*"],

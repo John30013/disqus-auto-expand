@@ -2,35 +2,24 @@
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
   "version": "0.3",
-  "description": "Automatically shows all replies in Disqus discussions. Optionally show new comments, prevent auto-play media, and force URLs to open in a new tab/window.",
+  "description": "Automatically shows all replies in Disqus discussions. Optionally shows new comments, prevents auto-play media, and forces URLs to open in a new tab/window.",
   "applications": {
     "gecko": {
       "id": "disqus-auto-expander@john30013.com"
     }
   },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["activeTab", "storage"],
   "background": {
-    "scripts": [
-      "dax-defaultConfig.js",
-      "dax-background.js"
-    ]
+    "scripts": ["dax-defaultConfig.js", "dax-background.js"]
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://disqus.com/embed/comments/*"
-      ],
+      "matches": ["*://disqus.com/embed/comments/*"],
       "all_frames": true,
-      "js": ["dax-defaultConfig.js", "dax-content.js"],
-      "css": ["dax-content.css"]
+      "js": ["dax-defaultConfig.js", "dax-content.js"]
     },
     {
-      "matches": [
-        "*://cdn.embedly.com/widgets/media.html*"
-      ],
+      "matches": ["*://cdn.embedly.com/widgets/media.html*"],
       "all_frames": true,
       "js": ["dax-defaultConfig.js", "dax-stopAutoPlay.js"]
     }
@@ -51,8 +40,6 @@
     },
     "default_popup": "dax-config.html",
     "default_title": "Disqus Auto Expander",
-    "show_matches": [
-      "*://*/*"
-    ]
+    "show_matches": ["*://*/*"]
   }
 }
