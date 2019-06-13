@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
   "version": "0.3",
-  "description": "Automatically shows all replies in Disqus discussions. Optionally shows new comments, prevents auto-play media, and forces URLs to open in a new tab/window.",
+  "description": "Automatically show replies and new comments in Disqus discussions. Stops autoplay media and forces URLs to open in a new tab/window.",
   "permissions": ["activeTab", "declarativeContent", "storage"],
   "background": {
     "scripts": ["dax-defaultConfig.js", "dax-background.js"],
