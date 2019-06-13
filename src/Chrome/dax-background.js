@@ -34,7 +34,10 @@ chrome.runtime.onInstalled.addListener(() => {
             );
           } else {
             config.doDebug &&
-              console.debug("--> removed obsolete config value %s", key);
+              console.debug(
+                "--> removed obsolete config values,",
+                obsoleteKeys
+              );
           }
         });
       }
