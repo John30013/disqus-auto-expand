@@ -4,15 +4,15 @@ let _options = { ...defaultConfig },
   _observedLinks = {},
   _linkCounter = 0;
 
-// Listen for option updates and debug messages from config page.
-listenForMessages();
-// Set up the IntersectionObserver to watch for auto-expand links coming into view.
-createObserver();
-
 // Start the extension.
 refreshOptions();
 _options.doDebug &&
   console.debug(`content.js is running in iframe ${window.name}.`);
+// Listen for option updates and debug messages from config page.
+listenForMessages();
+// Set up the IntersectionObserver to watch for auto-expand links coming into view.
+createObserver();
+// Start processing.
 processNewLinks();
 /* ===== End of main code. ===== */
 
@@ -41,8 +41,9 @@ function createObserver() {
           luid = link.dataset.luid;
         _options.doDebug &&
           console.debug(
-            'Checking intersection of "%s" link %s', 
-            link.className, luid
+            'Checking intersection of "%s" link %s',
+            link.className,
+            luid
           );
         hideMediaLink = false;
         if (entry.isIntersecting) {
@@ -50,14 +51,17 @@ function createObserver() {
           _options.doDebug &&
             console.debug(
               '--> link.classList: %o; link.innerText: "%s"',
-              link.classList, link.innerText
+              link.classList,
+              link.innerText
             );
           link.click();
-          link.classList.add('dax-clicked');
+          link.classList.add("dax-clicked");
           unobserveLink(link);
           _options.doDebug &&
-            console.debug("--> Clicked %s (now %d observed)",
-              luid, Object.keys(_observedLinks).length, 
+            console.debug(
+              "--> Clicked %s (now %d observed)",
+              luid,
+              Object.keys(_observedLinks).length,
               _observedLinks
             );
         }
@@ -68,15 +72,12 @@ function createObserver() {
       // five minutes. If some non-zombie links get unobserved, they will be
       // observed again the next time the processNewLinks timer fires.
       if (foundIntersects) {
-        _options.doDebug && 
-          console.debug("--> Checking for old links");
+        _options.doDebug && console.debug("--> Checking for old links");
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
         Object.keys(_observedLinks)
-          .filter(luid => 
-            now - luid.substr(0, luid.indexOf('-')) >= maxAge)
-          .forEach(oldLuid => 
-            unobserveLink(_observedLinks[oldLuid], true));
+          .filter(luid => now - luid.substr(0, luid.indexOf("-")) >= maxAge)
+          .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
       }
     }
 
@@ -93,8 +94,13 @@ function createObserver() {
         link.classList.remove("dax-tagged", "dax-clicked");
       }
       _options.doDebug &&
-        console.debug('--> unobserved "%s" link %s; removeDaxTags: %s',
-          link.className, luid, removeDaxTags, link);
+        console.debug(
+          '--> unobserved "%s" link %s; removeDaxTags: %s',
+          link.className,
+          luid,
+          removeDaxTags,
+          link
+        );
     } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
@@ -104,7 +110,7 @@ function processNewLinks() {
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
   if (_timer) {
-    window.clearTimeout(_timer);
+    clearTimeout(_timer);
   }
   if (!_options.checkInterval) {
     _options.doDebug && console.debug("Stopping the timeout loop.");
@@ -134,6 +140,17 @@ function processNewLinks() {
       'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
+
+  // Make external links open in a new browser tab/window.
+  if (_options.openinNewWindow) {
+    const extLinkSelector = `a[href*='disq.us/url?'][rel*='noopener']:not([target])`;
+    document.querySelectorAll(extLinkSelector).forEach(link => {
+      link.target = "_blank";
+      _options.doDebug &&
+        console.debug('Added target="_blank" to external link:', link);
+    });
+  }
+
   // Reprocess after the checkInterval.
   _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
 
@@ -143,13 +160,16 @@ function processNewLinks() {
     let luid = link.dataset.luid;
     if (!luid) {
       luid = `${Date.now()}-${_linkCounter++}`;
-      link.setAttribute('data-luid', luid);
-      link.classList.add('dax-tagged');
+      link.setAttribute("data-luid", luid);
+      link.classList.add("dax-tagged");
       _observer.observe(link);
       _observedLinks[luid] = link;
       _options.doDebug &&
-        console.debug('--> Observing "%s" link %s (now %d observed)',
-          link.className, luid, Object.keys(_observedLinks).length,
+        console.debug(
+          '--> Observing "%s" link %s (now %d observed)',
+          link.className,
+          luid,
+          Object.keys(_observedLinks).length,
           _observedLinks
         );
     }
@@ -157,18 +177,21 @@ function processNewLinks() {
 }
 
 function refreshOptions() {
-  chrome.storage.sync.get(defaultConfig, 
-    options => {
-      if (chrome.runtime.lastError) {
-        console.error(`Couldn't get configuration form sync'd storage: ${chrome.runtime.lastError}`);
-        return;
-      }
-      const oldCheckInterval = +_options.checkInterval;
-      _options = options;
-      _options.doDebug && console.debug("Got sync'd options: %o", _options);
-      // Check if we need to resume processing links.
-      if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
-        processNewLinks();
-      }
-    });
+  chrome.storage.sync.get(defaultConfig, options => {
+    if (chrome.runtime.lastError) {
+      console.error(
+        `Couldn't get configuration form sync'd storage: ${
+          chrome.runtime.lastError
+        }`
+      );
+      return;
+    }
+    const oldCheckInterval = +_options.checkInterval;
+    _options = options;
+    _options.doDebug && console.debug("Got sync'd options: %o", _options);
+    // Check if we need to resume processing links.
+    if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
+      processNewLinks();
+    }
+  });
 }

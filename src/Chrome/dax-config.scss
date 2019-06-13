@@ -21,7 +21,7 @@ $theme-dark-color-text: #dddddd;
 $theme-dark-color-text-sec: #999999;
 
 // Font stack
-$font-family: 'Segoe UI', Tahoma, Arial, Geneva, Verdana, sans-serif;
+$font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
 
 // Mobile breakpoint
 $oneRem: 14px;
@@ -74,7 +74,7 @@ body {
   color: var(--color-text);
   font-size: 100%;
   margin: 0;
-  padding: .5rem;
+  padding: 0.5rem;
   max-width: $desktopWidth;
   min-width: $desktopWidth;
 
@@ -85,11 +85,14 @@ body {
   }
 }
 
-a:link, a:visited {
+a:link,
+a:visited {
   color: var(--color-link);
   text-decoration: none;
 }
-a:focus, a:hover, a:active {
+a:focus,
+a:hover,
+a:active {
   outline: none;
   text-decoration: underline;
 }
@@ -98,8 +101,8 @@ h2 {
   color: var(--color-text);
   font-size: 1.25rem;
   font-weight: normal;
-  margin: 0 0 .5rem;
-  padding: 0 0 .5rem;
+  margin: 0 0 0.5rem;
+  padding: 0 0 0.5rem;
   border-bottom: 1px dotted;
 }
 
@@ -116,16 +119,20 @@ p {
 .semibold {
   font-weight: 500;
 }
+.wrap {
+  white-space: normal !important;
+}
 
-header, footer {
+header,
+footer {
   line-height: 1.5;
-  margin: 0 0 .5rem;
-  padding: 0 0 .5rem;
+  margin: 0 0 0.5rem;
+  padding: 0 0 0.5rem;
 }
 
 header {
   background-image: url(images/disqus_eye_48.png);
-  background-position: 0 .5rem;
+  background-position: 0 0.5rem;
   background-repeat: no-repeat;
   background-size: fit;
   border-bottom: 1px solid var(--color-text);
@@ -143,9 +150,9 @@ header {
       display: block;
       font-size: 1.25rem;
       font-weight: normal;
-      margin: 0 0 .5rem;
+      margin: 0 0 0.5rem;
       padding: 0;
-      
+
       &:last-child {
         margin: 0;
       }
@@ -155,7 +162,7 @@ header {
 
 footer {
   border-top: 1px solid var(--color-text);
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   padding-top: 1rem;
 
   b {
@@ -176,31 +183,30 @@ main {
 }
 
 section {
-  margin: .5rem 0 0;
+  margin: 0.5rem 0 0;
   width: 100%;
 
   > h2 {
-    margin-bottom: .5rem;
-    padding-bottom: .5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
   }
   > p {
     display: grid;
-    grid-template: 
-      "label input" 1.5rem
-      "help  help"  auto
-      / auto 9rem;
+    column-gap: 1rem;
+    grid-template:
+      "label input" auto
+      "help  help" auto
+      / auto 8rem;
     margin-bottom: 1rem;
 
-    & > span, & > label {
-      // outline: 1px dotted red;
-
+    & > span,
+    & > label {
       &:first-child {
         font-weight: 500;
         grid-area: label;
-        padding-right: 1rem;
+        // padding-right: 1rem;
         min-width: 10rem;
-        white-space: nowrap;
-
+        // white-space: nowrap;
       }
       &:last-child {
         grid-area: input;
@@ -210,9 +216,9 @@ section {
       color: var(--color-text-sec);
       display: block;
       font-weight: normal;
-      font-size: .857rem;
+      font-size: 0.857rem;
       grid-area: help;
-      margin-top: .125rem;
+      margin-top: 0.125rem;
       white-space: normal;
     }
 
@@ -220,7 +226,7 @@ section {
       text-align: start;
       @include white-space();
     }
-    
+
     input#checkInterval {
       width: 1.25rem;
       text-align: center;
@@ -229,7 +235,9 @@ section {
 }
 
 /* Text-like inputs */
-input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea {
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
   background-color: var(--color-ctrl);
   border: 0;
   border-bottom: 1px solid var(--color-brdr);
@@ -237,7 +245,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   font-family: $font-family;
   font-size: 1rem;
   font-weight: normal;
-  padding: 0 .25rem;
+  padding: 0 0.25rem;
   position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
 
   &:focus {
@@ -278,7 +286,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
     overflow: hidden;
     position: relative;
     text-indent: 100%;
-    top: .25rem;
+    top: 0.25rem;
     // left: calc(100% - 2.25rem);
     width: 2rem;
     height: 1rem;
@@ -289,7 +297,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
       border: 1px solid var(--color-brdr);
       border-radius: var(--radius);
       box-sizing: content-box;
-      content: '';
+      content: "";
       transition: 0.3s;
       position: absolute;
       top: -1px;
@@ -316,7 +324,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
   input:disabled + label {
     cursor: not-allowed;
     opacity: 50%;
-    opacity: .5;
+    opacity: 0.5;
 
     &::after {
       background-color: var(--color-ctrl);

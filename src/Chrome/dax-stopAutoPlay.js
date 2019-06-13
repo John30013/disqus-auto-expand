@@ -11,18 +11,25 @@
 //   &type=text%2Fhtml
 //   &schema=youtube
 //   &auto_play=true&autoplay=1
-//
 const origLocation = window.location.href;
 chrome.storage.sync.get(defaultConfig, config => {
   if (chrome.runtime.lastError) {
-    console.error(`Couldn't get configuration from storage: ${chrome.runtime.lastError}.`);
+    console.error(
+      `Couldn't get configuration from storage: ${chrome.runtime.lastError}.`
+    );
   } else {
-    config.doDebug && 
-        console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`);
+    config.doDebug &&
+      console.debug(
+        `dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`
+      );
     if (config.stopAutoplay) {
-      const newLocation = origLocation.replace(/[?&]auto[_-]?(?:play|start)=[^&]+/ig, '');
+      const newLocation = origLocation.replace(
+        /[?&]auto[_-]?(?:play|start)=[^&]+/gi,
+        ""
+      );
       if (newLocation !== origLocation) {
-        console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
+        config.doDebug &&
+          console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
         window.location.href = newLocation;
       }
     }

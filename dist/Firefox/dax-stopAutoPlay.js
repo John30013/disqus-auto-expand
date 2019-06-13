@@ -11,12 +11,14 @@
 //   &type=text%2Fhtml
 //   &schema=youtube
 //   &auto_play=true&autoplay=1
-(async function () {
+(async function() {
   try {
     const origLocation = window.location.href;
     const config = await browser.storage.sync.get(defaultConfig);
-    config.doDebug && 
-      console.debug(`dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`);
+    config.doDebug &&
+      console.debug(
+        `dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`
+      );
     if (config.stopAutoplay) {
       const newLocation = origLocation.replace(
         /[?&]auto[_-]?(?:play|start)=[^&]+/gi,

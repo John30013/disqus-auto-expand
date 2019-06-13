@@ -8,27 +8,21 @@
       "id": "disqus-auto-expander@john30013.com"
     }
   },
-  "permissions": [
-    "activeTab", 
-    "storage"
-  ],
+  "permissions": ["activeTab", "storage"],
   "background": {
-    "scripts": ["dax-defaultConfig.js", 
-      "dax-background.js"]
+    "scripts": ["dax-defaultConfig.js", "dax-background.js"]
   },
   "content_scripts": [
     {
       "matches": ["*://disqus.com/embed/comments/*"],
       "all_frames": true,
-      "js": ["dax-defaultConfig.js",
-        "dax-content.js"],
+      "js": ["dax-defaultConfig.js", "dax-content.js"],
       "css": ["dax-content.css"]
     },
     {
       "matches": ["*://cdn.embedly.com/widgets/media.html*"],
       "all_frames": true,
-      "js": ["dax-defaultConfig.js",
-        "dax-stopAutoPlay.js"]
+      "js": ["dax-defaultConfig.js", "dax-stopAutoPlay.js"]
     }
   ],
   "icons": {
@@ -36,8 +30,8 @@
     "32": "images/disqus_eye_32.png",
     "48": "images/disqus_eye_48.png"
   },
-  "options_ui": { 
-    "page": "dax-config.html" 
+  "options_ui": {
+    "page": "dax-config.html"
   },
   "page_action": {
     "browser_style": true,
