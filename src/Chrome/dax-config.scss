@@ -27,7 +27,7 @@ $lineHeight: 1.7;
 
 // Mobile breakpoint
 $mobileBreakpoint: $oneRem * 40;
-$mobileMinWidth: $oneRem * 20;
+$mobileMinWidth: $oneRem * 21;
 $desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
@@ -93,6 +93,7 @@ body {
 
   @media screen and (max-width: $mobileBreakpoint) {
     display: block;
+    line-height: 1.25;
     min-width: $mobileMinWidth;
     width: auto;
   }
@@ -213,8 +214,10 @@ section {
     padding-bottom: 0.5rem;
   }
   p {
-    &:last-child {
-      margin-bottom: 0;
+    @media screen and (min-width: $mobileBreakpoint + 1px) {
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
 
     display: grid;

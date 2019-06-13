@@ -52,7 +52,8 @@ body.theme-dark {
 @media screen and (max-width: 560px) {
   body {
     display: block;
-    min-width: 280px;
+    line-height: 1.25;
+    min-width: 294px;
     width: auto;
   }
 }
@@ -187,8 +188,10 @@ section p {
   grid-template: "label input" auto "help  help" auto / auto 8rem;
 }
 
-section p:last-child {
-  margin-bottom: 0;
+@media screen and (min-width: 561px) {
+  section p:last-child {
+    margin-bottom: 0;
+  }
 }
 
 section p span:first-child, section p label:first-child {
