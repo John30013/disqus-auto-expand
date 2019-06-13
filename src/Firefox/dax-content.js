@@ -96,9 +96,10 @@ function createObserver() {
       }
       _options.doDebug &&
         console.debug(
-          '--> unobserved "%s" link %s',
+          '--> unobserved "%s" link %s; removeDaxTags: %s',
           link.className,
           luid,
+          removeDaxTags,
           link
         );
     } // end of unobserveLink().
@@ -110,7 +111,7 @@ function processNewLinks() {
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
   if (_timer) {
-    window.clearTimeout(_timer);
+    clearTimeout(_timer);
   }
   if (!_options.checkInterval) {
     _options.doDebug && console.debug("Stopping the timeout loop.");
