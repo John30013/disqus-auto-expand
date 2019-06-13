@@ -20,11 +20,12 @@ $theme-dark-color-error: #ff9999;
 $theme-dark-color-text: #dddddd;
 $theme-dark-color-text-sec: #999999;
 
-// Font stack
-$font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
+// Font stack & text sizing & spacing.
+$font-family: 'Segoe UI', Tahoma, Arial, Geneva, Verdana, sans-serif;
+$oneRem: 14px;
+$lineHeight: 1.7;
 
 // Mobile breakpoint
-$oneRem: 14px;
 $mobileBreakpoint: $oneRem * 40;
 $mobileMinWidth: $oneRem * 20;
 $desktopWidth: $mobileBreakpoint + $oneRem;
@@ -43,8 +44,9 @@ html {
   border: 0;
   font-family: $font-family;
   font-size: $oneRem;
-  line-height: 1.25rem;
+  // line-height: $lineHeight;
   margin: 0;
+  padding: 0;
 }
 body {
   --color-bkgd: #{$theme-lite-color-bkgd};
@@ -73,10 +75,21 @@ body {
   background-color: var(--color-bkgd);
   color: var(--color-text);
   font-size: 100%;
-  margin: 0;
-  padding: 0.5rem;
-  max-width: $desktopWidth;
+  line-height: $lineHeight;
+  margin: 0; // 18px = scrollbar width.
+  overflow-x: hidden;
+  padding: 0 .5rem .5rem;
+  max-width: $desktopMaxWidth;
   min-width: $desktopWidth;
+
+  display: grid;
+  grid-template: 
+    "header   header"   auto
+    "contopts contopts" auto
+    "extopts  footer"  auto
+    / 1fr 1fr;
+  column-gap: 1rem;
+  align-items: start;
 
   @media screen and (max-width: $mobileBreakpoint) {
     display: block;
@@ -109,7 +122,7 @@ h2 {
 p {
   color: inherit;
   font-size: 1rem;
-  margin: 0;
+  margin: 0 0 1.25rem;
   padding: 0;
 }
 
@@ -123,20 +136,14 @@ p {
   white-space: normal !important;
 }
 
-header,
-footer {
-  line-height: 1.5;
-  margin: 0 0 0.5rem;
-  padding: 0 0 0.5rem;
-}
 
 header {
   background-image: url(images/disqus_eye_48.png);
   background-position: 0 0.5rem;
   background-repeat: no-repeat;
   background-size: fit;
-  border-bottom: 1px solid var(--color-text);
-  margin-bottom: 1rem;
+  grid-area: header;
+  line-height: 1.5;
   padding-left: 4rem;
   @include white-space();
 
@@ -162,8 +169,9 @@ header {
 
 footer {
   border-top: 1px solid var(--color-text);
-  margin-top: 0.5rem;
-  padding-top: 1rem;
+  grid-area: footer;
+  margin-top: .5rem;
+  padding-top: .5rem;
 
   b {
     font-weight: 600;
@@ -171,38 +179,55 @@ footer {
   }
 }
 
-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 1rem;
-  align-items: start;
-
-  @media screen and (max-width: $mobileBreakpoint) {
-    display: block;
-  }
-}
-
 section {
-  margin: 0.5rem 0 0;
+  border-top: 1px solid var(--color-text);
+  margin: .5rem 0 0;
+  padding-top: .5rem;
   width: 100%;
+
+  &:first-of-type {
+    display: grid;
+    grid-area: contopts;
+    grid-template: 
+      "heading heading" auto
+      "col-1 col-2" auto
+      / 1fr 1fr;
+    grid-auto-flow: column;
+    column-gap: 1rem;
+    align-items: start;
+
+    & > h2 {
+      grid-area: heading;
+    }
+
+    @media screen and (max-width: $mobileBreakpoint) {
+      display: block;
+    }
+  }
+  &:last-of-type {
+    grid-area: extopts;
+  }
 
   > h2 {
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
   }
-  > p {
+  p {
+    &:last-child {
+      margin-bottom: 0;
+    }
+
     display: grid;
     column-gap: 1rem;
     grid-template:
       "label input" auto
       "help  help" auto
       / auto 8rem;
-    margin-bottom: 1rem;
 
-    & > span,
-    & > label {
+    span, label {
       &:first-child {
-        font-weight: 500;
+        color: var(--color-text-sec);
+        font-weight: 600;
         grid-area: label;
         // padding-right: 1rem;
         min-width: 10rem;

@@ -9,105 +9,105 @@
 </head>
 
 <body>
-  <header class="clickable"
-    data-href="https://www.github.com/John30013/disqus-auto-expand/"
-    data-target="dax-info">
+  <header class="clickable" data-href="https://www.github.com/John30013/disqus-auto-expand/" data-target="dax-info">
     <h1>
       Disqus Auto Expander
       <small>Configuration options</small>
     </h1>
   </header>
-  <main>
-    <section>
-      <h2>Content options</h2>
+  <section>
+    <h2>Content options</h2>
+    <div class="col-1">
       <p>
         <span class="label">Expand hidden replies</span>
         <small>Automatically expand “See more replies” links.</small>
-        <span class="input input-toggle"><input type="checkbox" id="moreReplies"
-            checked>
+        <span class="input input-toggle"><input type="checkbox" id="moreReplies" checked>
           <label for="moreReplies">Expand more replies</label>
         </span>
       </p>
       <p>
         <span class="label">Expand new replies</span>
-        <small>Automatically expand “See # new replies” links that appear when
-          others reply to a post that is already visible.</small>
-        <span class="input input-toggle"><input type="checkbox" id="newReplies"
-            checked>
+        <small>Automatically expand “See # new replies” links that appear when others reply to a post that is already
+          visible.</small>
+        <span class="input input-toggle"><input type="checkbox" id="newReplies" checked>
           <label for="newReplies">Expand new replies</label>
         </span>
       </p>
       <p>
         <span class="label">Expand long items</span>
-        <small>Automatically expand "see more" links that cut off long posts and
-          media items.</small>
-        <span class="input input-toggle"><input type="checkbox" id="longItems"
-            checked>
+        <small>Automatically expand "see more" links that cut off long posts and media items.</small>
+        <span class="input input-toggle"><input type="checkbox" id="longItems" checked>
           <label for="longItems">Expand long items</label>
+        </span>
+      </p>
+    </div>
+    <div class="col-2">
+      <p>
+        <span class="label">Load more comments</span>
+        <small>&hellip; automatically when at the end of the comments.</small>
+        <span class="input input-toggle"><input type="checkbox" id="moreComments" checked>
+          <label for="moreComments">Load more comments</label>
+        </span>
+      </p>
+      <p>
+        <span class="label">Show new comments</span>
+        <small>&hellip; automatically when at the top of the comments.</small>
+        <span class="input input-toggle"><input type="checkbox" id="newComments" checked>
+          <label for="newComments">Show new comments</label>
         </span>
       </p>
       <p>
         <span class="label">Stop autoplay media</span>
         <small>&hellip; regardless of browser settings.
           <em class="nowrap semibold"><a
-              href="https://github.com/John30013/disqus-auto-expand#long-items-and-hidden-media"
-              target="dax-info">Learn more.</a></em></small>
-        <span class="input input-toggle"><input type="checkbox"
-            id="stopAutoplay" checked>
+              href="https://github.com/John30013/disqus-auto-expand#long-items-and-hidden-media" target="dax-info">Learn
+              more.</a></em></small>
+        <span class="input input-toggle"><input type="checkbox" id="stopAutoplay" checked>
           <label for="stopAutoplay">Stop autoplay media</label>
         </span>
       </p>
       <p>
         <span class="label wrap">Open links in a new tab/window</span>
-        <span class="input input-toggle"><input type="checkbox"
-            id="openInNewWindow" checked>
+        <span class="input input-toggle"><input type="checkbox" id="openInNewWindow" checked>
           <label for="openInNewWindow">Open links in a new tab/window</label>
         </span>
       </p>
-    </section>
-    <section>
-      <h2>Extension options</h2>
-      <p>
-        <label for="checkInterval">Check for new content</label>
-        <small>Choose 1&ndash;30 seconds, or 0&#160;to disable.</small>
-        <span class="input">every
-          <input inputmode="numeric" id="checkInterval"
-            pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
-            required>
-          seconds</span>
-      </p>
-      <p>
-        <span class="label">Use dark theme</span>
-        <small>&hellip; for this configuration page.</small>
-        <span class="input input-toggle"><input type="checkbox"
-            id="useDarkTheme">
-          <label for="useDarkTheme">Use dark theme</label>
-        </span>
-      </p>
-      <!-- removeIf(!allowDebug) -->
-      <p>
-        <span class="label">Log debug output</span>
-        <small>&hellip; to the JavaScript console.</small>
-        <span class="input input-toggle"><input type="checkbox" id="doDebug">
-          <label for="doDebug">Log debug info</label>
-        </span>
-      </p>
-      <!-- endRemoveIf(!allowDebug) -->
-    </section>
-  </main>
+    </div>
+  </section>
+  <section>
+    <h2>Extension options</h2>
+    <p>
+      <label for="checkInterval">Check for new content</label>
+      <small>Choose 1&ndash;30 seconds, or 0&#160;to disable.</small>
+      <span class="input">every <input inputmode="numeric" id="checkInterval" pattern="[0-9]|[12][0-9]|30" minlength="1"
+          maxlength="2" value="0" required> seconds</span>
+    </p>
+    <p>
+      <span class="label">Use dark theme</span>
+      <small>&hellip; for this configuration page.</small>
+      <span class="input input-toggle"><input type="checkbox" id="useDarkTheme">
+        <label for="useDarkTheme">Use dark theme</label>
+      </span>
+    </p>
+    <!-- removeIf(!allowDebug) -->
+    <p>
+      <span class="label">Log debug output</span>
+      <small>&hellip; to the JavaScript console.</small>
+      <span class="input input-toggle"><input type="checkbox" id="doDebug">
+        <label for="doDebug">Log debug info</label>
+      </span>
+    </p>
+    <!-- endRemoveIf(!allowDebug) -->
+  </section>
   <footer>
     <h2>Extension information</h2>
     <p>
       <b>Version:</b>
       <span id="version">0.0.0</span>
     </p>
-    <p>
-      <b>Help, feedback, and bug reporting:</b> visit our
-      <a href="https://github.com/John30013/disqus-auto-expand/"
-        target="dax-info">Github repository</a>
-      or the
-      <a class="extensionStore" href="" target="dax-ext-store">${extension
-        store}</a>.
+    <p><b>Help, feedback, and bug reporting:</b><br>
+      visit our <a href="https://github.com/John30013/disqus-auto-expand/" target="dax-info">Github repository</a> or
+      the <a class="extensionStore" href="" target="dax-ext-store">${extension store}</a>.
     </p>
   </footer>
   <script src="dax-defaultConfig.js"></script>

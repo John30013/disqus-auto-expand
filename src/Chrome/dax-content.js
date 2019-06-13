@@ -56,6 +56,7 @@ function createObserver() {
             );
           link.click();
           link.classList.add("dax-clicked");
+          link.title = link.title.replace("[tagged] ", "[clicked] ");
           unobserveLink(link);
           _options.doDebug &&
             console.debug(
@@ -92,6 +93,7 @@ function createObserver() {
       link.removeAttribute("data-luid");
       if (removeDaxTags) {
         link.classList.remove("dax-tagged", "dax-clicked");
+        link.title = link.title.replace(/^\[\w+\]\s/, "");
       }
       _options.doDebug &&
         console.debug(
@@ -141,11 +143,26 @@ function processNewLinks() {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
 
+  // Observe "Load more comments" "button" at the bottom of the comments.
+  if (_options.moreComments) {
+    const moreCommentsSelector =
+      'div.load-more:not([style*="none"]) > a.load-more__button';
+    document.querySelectorAll(moreCommentsSelector).forEach(observeLink);
+  }
+
+  // Observe "Show # New Comments" button at the top of the comments.
+  if (_options.newComments) {
+    const newCommentsSelector = 'button.alert--realtime:not([style*="none"])';
+    document.querySelectorAll(newCommentsSelector).forEach(observeLink);
+  }
+
   // Make external links open in a new browser tab/window.
-  if (_options.openinNewWindow) {
-    const extLinkSelector = `a[href*='disq.us/url?'][rel*='noopener']:not([target])`;
+  if (_options.openInNewWindow) {
+    const extLinkSelector =
+      "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
     document.querySelectorAll(extLinkSelector).forEach(link => {
       link.target = "_blank";
+      link.title = "[new window] " + link.title;
       _options.doDebug &&
         console.debug('Added target="_blank" to external link:', link);
     });
@@ -162,6 +179,7 @@ function processNewLinks() {
       luid = `${Date.now()}-${_linkCounter++}`;
       link.setAttribute("data-luid", luid);
       link.classList.add("dax-tagged");
+      link.title = `[tagged] ${link.title}`;
       _observer.observe(link);
       _observedLinks[luid] = link;
       _options.doDebug &&
