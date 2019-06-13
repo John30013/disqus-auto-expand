@@ -19,7 +19,7 @@ browser.runtime.onInstalled.addListener(async () => {
       if (obsoleteKeys.length) {
         await browser.storage.sync.remove(obsoleteKeys);
         _config.doDebug &&
-          console.debug("--> removed obsolete config value %s", key);
+          console.debug("--> removed obsolete config value(s)", obsoleteKeys);
       }
     }
   } catch (error) {
