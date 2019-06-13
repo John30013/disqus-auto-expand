@@ -24,7 +24,9 @@ function logDebug(message, ...params) {
 
 // Initialize some text in the config UI.
 const manifest = chrome.runtime.getManifest();
-document.querySelector("span#version").innerHTML = manifest.version;
+document.querySelectorAll(".version").forEach(elt => {
+  elt.innerHTML = manifest.version;
+});
 document.querySelectorAll("a.extensionStore").forEach(link => {
   link.href =
     "https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US";
