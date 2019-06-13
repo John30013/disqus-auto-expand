@@ -14,6 +14,7 @@ listenForMessages();
 createObserver();
 // Start processing.
 processNewLinks();
+
 /* ===== End of main code. ===== */
 
 /* ===== Helper functions. ===== */
@@ -30,7 +31,7 @@ function listenForMessages() {
 
 function createObserver() {
   _observer = new IntersectionObserver(processObservedEntries, {
-    threshold: 1.0,
+    threshold: 1.0
   });
 
   function processObservedEntries(entries) {
@@ -106,7 +107,7 @@ function createObserver() {
 } // end of createObserver().
 
 function processNewLinks() {
-  // Since processNewLinks() can be called by refreshOptions() when checkInterval is
+  // Since processNewLinks can be called by refreshOptions when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
   if (_timer) {
@@ -141,8 +142,21 @@ function processNewLinks() {
     document.querySelectorAll(longItemsSelector).forEach(observeLink);
   }
 
+  // Observe "Load more comments" "button" at the bottom of the comments.
+  if (_options.moreComments) {
+    const moreCommentsSelector =
+      'div.load-more:not([style*="none"]) > a.load-more__button';
+    document.querySelectorAll(moreCommentsSelector).forEach(observeLink);
+  }
+
+  // Observe "Show # New Comments" button at the top of the comments.
+  if (_options.newComments) {
+    const newCommentsSelector = 'button.alert--realtime:not([style*="none"])';
+    document.querySelectorAll(newCommentsSelector).forEach(observeLink);
+  }
+
   // Make external links open in a new browser tab/window.
-  if (_options.openinNewWindow) {
+  if (_options.openInNewWindow) {
     const extLinkSelector = `a[href*='disq.us/url?'][rel*='noopener']:not([target])`;
     document.querySelectorAll(extLinkSelector).forEach(link => {
       link.target = "_blank";

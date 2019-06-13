@@ -23,7 +23,9 @@ function logDebug(message, ...params) {
 
 // Initialize some text in the config UI.
 const manifest = browser.runtime.getManifest();
-document.querySelector("span#version").innerHTML = manifest.version;
+document.querySelectorAll(".version").forEach(elt => {
+  elt.innerHTML = manifest.version;
+});
 document.querySelectorAll("a.extensionStore").forEach(link => {
   link.href = "https://addons.mozilla.org/firefox/addon/disqus-auto-expander/";
   link.innerText = "Firefox Add-ons site";
