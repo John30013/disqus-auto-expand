@@ -1,27 +1,5 @@
 let _options = { ...defaultConfig };
 
-// removeIf(!allowDebug)
-function logDebug(message, ...params) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-    if (chrome.runtime.lastError) {
-      console.error(
-        `logDebug(): couldn't get active tab to send a message to: ${
-          chrome.runtime.lastError
-        }.`
-      );
-      return;
-    }
-    const messageData = {
-      action: "logDebug",
-      caller: "config",
-      message: message,
-      params: params,
-    };
-    chrome.tabs.sendMessage(tabs[0].id, messageData);
-  });
-}
-// endRemoveIf(!allowDebug)
-
 // Initialize some text in the config UI.
 const manifest = chrome.runtime.getManifest();
 document.querySelectorAll(".version").forEach(elt => {
@@ -74,9 +52,95 @@ chrome.storage.sync.get(defaultConfig, options => {
       // removeIf(!allowDebug)
       logDebug("--> %s set to %s.", key, input.value);
       // endRemoveIf(!allowDebug)
+    } else if (key === "loadAllContent") {
+      // true =  operation is in progress, so the button should be diabled.
+      // false = operation is not in progress, so the button should be enanbled.
+      input.toggleAttribute("disabled", !!value);
+      input.disabled = !!value;
     }
   }
 });
+
+// Initialize the Load all content confirmation dialog.
+const dialog = document.getElementById("confirmLoadAllContent");
+closeDialog(dialog);
+
+// Initialize the Load all content button.
+document.getElementById("loadAllContent").addEventListener("click", event => {
+  logDebug("Load all content button clicked!");
+  showDialog(dialog, event.target);
+});
+function showDialog(dialog, opener) {
+  // Disable focus on focusable elements outside the dialog.
+  logDebug(`showDialog: ${dialog}`);
+  const outerFocusables = [];
+  document
+    .querySelectorAll("a:link, button, input, .clickable")
+    .forEach(elt => {
+      let generation = 0,
+        inDialog = false,
+        ancestor = elt.parentElement;
+      while (ancestor && generation < 3) {
+        if (ancestor === dialog) {
+          inDialog = true;
+          break;
+        }
+        ancestor = ancestor.parentElement;
+        generation += 1;
+      }
+      if (!inDialog) {
+        outerFocusables.push(elt);
+        if (elt.tabIndex) {
+          elt.dataset.tabindex = elt.tabindex;
+        }
+        elt.tabindex = -1;
+        elt.setAttribute("tabindex", "-1");
+      }
+    });
+    document.body.style.pointerEvents = "none";
+  // Show the dialog.
+  dialog.querySelectorAll("button").forEach(elt => {
+    elt.tabIndex = 0;
+  });
+  dialog.style.pointerEvents = "all";
+  dialog.tabIndex = -1;
+  dialog.focus();
+  dialog.classList.add("dialog-open");
+  dialog.setAttribute("aria-hidden", false);
+  dialog.addEventListener("click", event => {
+    const source = event.target;
+    if (source.tagName === "BUTTON") {
+      event.preventDefault();
+      if (source.value === "yes") {
+        loadAllContent();
+        window.close();
+      } else {
+        closeDialog(dialog/* , outerFocusables */);
+        opener.focus();
+      }
+    }
+  });
+}
+
+function closeDialog(dialog, outerFocusables) {
+  outerFocusables &&
+    outerFocusables.forEach(elt => {
+      if (elt.dataset.tabIndex) {
+        elt.tabIndex = elt.dataset.tabIndex;
+        elt.setAttribute("tabindex", elt.dataset.tabIndex);
+      } else {
+        elt.tabIndex = 0;
+        elt.removeAttribute("tabindex");
+      }
+    });
+  document.body.style.pointerEvents = "all";
+  dialog.classList.remove("dialog-open");
+  dialog.setAttribute("aria-hidden", "true");
+  dialog.querySelectorAll('button').forEach(elt => {
+    elt.tabIndex = -1;
+  });
+  dialog.style.pointerEvents = "none";
+}
 
 // Handle changes in the configuration controls.
 document.body.addEventListener("input", event => {
@@ -156,4 +220,36 @@ function updateConfigValue(key, value) {
       chrome.tabs.sendMessage(tabs[0].id, { action: "refreshOptions" });
     });
   }
+}
+
+function sendContentCommand(commandData) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (chrome.runtime.lastError) {
+      console.error(
+        `sendContentCommand(): couldn't get active tab for sendMessage: ${
+          chrome.runtime.lastError
+        }.`
+      );
+      return;
+    }
+    chrome.tabs.sendMessage(tabs[0].id, commandData);
+  });
+}
+
+// removeIf(!allowDebug)
+function logDebug(message, ...params) {
+  sendContentCommand({
+    action: "logDebug",
+    caller: "config",
+    message: message,
+    params: params,
+  });
+}
+// endRemoveIf(!allowDebug)
+
+function loadAllContent() {
+  sendContentCommand({
+    action: "loadAllContent",
+    caller: "config",
+  });
 }
