@@ -151,3 +151,8 @@ Click the extension’s icon in the browser's toolbar to control each option. Yo
 - **Check for new content**: how often (in seconds) the extension checks for new links to expand.
 - **Use dark theme**: display the configuration page in a dark color theme.
 - **Log debug output**: logs messages about the extension’s operation to the browser’s developer console. You should not need to enable this option unless you are experiencing problems with the extension. (This option will be removed in a future release.)
+
+---
+## Credits
+
+Warning icon made by [Amit Jakhu](https://www.flaticon.com/authors/amit-jakhu) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/).

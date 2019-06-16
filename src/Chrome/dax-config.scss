@@ -10,7 +10,7 @@ $theme-lite-color-text: #222222;
 $theme-lite-color-text-sec: #666666;
 
 // Dark theme
-$theme-dark-color-bkgd: #222222;
+$theme-dark-color-bkgd: #282828;
 $theme-dark-color-brand: #459cf9;
 $theme-dark-color-brdr: #999999;
 $theme-dark-color-ctrl: #00000033;
@@ -18,16 +18,17 @@ $theme-dark-color-ctrl-focus: #00000080;
 $theme-dark-color-ctrl-invalid: #ff000033;
 $theme-dark-color-error: #ff9999;
 $theme-dark-color-text: #dddddd;
-$theme-dark-color-text-sec: #999999;
+$theme-dark-color-text-sec: #aaaaaa;
 
 // Font stack & text sizing & spacing.
-$font-family: 'Segoe UI', Tahoma, Arial, Geneva, Verdana, sans-serif;
+$font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
 $oneRem: 14px;
 $lineHeight: 1.7;
+$semiboldWeight: 600;
 
 // Mobile breakpoint
 $mobileBreakpoint: $oneRem * 40;
-$mobileMinWidth: $oneRem * 21;
+$mobileMinWidth: 320px;
 $desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
@@ -44,12 +45,14 @@ html {
   border: 0;
   font-family: $font-family;
   font-size: $oneRem;
-  // line-height: $lineHeight;
   margin: 0;
   padding: 0;
 }
 body {
+  --ctrl-radius: 5px;
+  // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
+  --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
   --color-brdr: #{$theme-lite-color-brdr};
   --color-ctrl: #{$theme-lite-color-ctrl};
   --color-ctrl-focus: #{$theme-lite-color-ctrl-focus};
@@ -76,26 +79,58 @@ body {
   color: var(--color-text);
   font-size: 100%;
   line-height: $lineHeight;
-  margin: 0; // 18px = scrollbar width.
+  margin: 0;
   overflow-x: hidden;
-  padding: 0 .5rem .5rem;
+  padding: 0 0.5rem 0.5rem;
   max-width: $desktopMaxWidth;
   min-width: $desktopWidth;
 
+  @media screen and (max-device-width: $mobileBreakpoint) {
+    line-height: 1.25;
+    min-width: $mobileMinWidth;
+    width: auto;
+
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      height: 0.5rem;
+      position: fixed;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    &::before {
+      background: linear-gradient(
+        to bottom,
+        var(--color-bkgd) 0%,
+        var(--color-bkgd-clear) 100%
+      );
+      top: 0;
+    }
+    &::after {
+      background: linear-gradient(
+        to top,
+        var(--color-bkgd) 0%,
+        var(--color-bkgd-clear) 100%
+      );
+      bottom: 0;
+    }
+  }
+}
+
+main {
   display: grid;
-  grid-template: 
-    "header   header"   auto
+  grid-template:
+    "header   header" auto
     "contopts contopts" auto
-    "extopts  footer"  auto
+    "extopts  footer" auto
     / 1fr 1fr;
   column-gap: 1rem;
   align-items: start;
 
-  @media screen and (max-width: $mobileBreakpoint) {
+  @media screen and (max-device-width: $mobileBreakpoint) {
     display: block;
-    line-height: 1.25;
-    min-width: $mobileMinWidth;
-    width: auto;
   }
 }
 
@@ -125,18 +160,34 @@ p {
   font-size: 1rem;
   margin: 0 0 1.25rem;
   padding: 0;
+
+  &:last-child {
+    // border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
 }
 
-.nowrap {
-  white-space: nowrap;
+.clickable {
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    box-shadow: 0 0 0 1px var(--color-ctrl-on);
+  }
+}
+.italic {
+  font-style: italic !important;
 }
 .semibold {
-  font-weight: 500;
+  font-weight: $semiboldWeight !important;
+}
+.nowrap {
+  white-space: nowrap !important;
 }
 .wrap {
   white-space: normal !important;
 }
-
 
 header {
   background-image: url(images/disqus_eye_48.png);
@@ -155,14 +206,13 @@ header {
     padding: 0;
 
     small {
-      display: block;
-      font-size: 1.25rem;
+      // display: block;
+      font-size: 1rem;
       font-weight: normal;
-      margin: 0 0 0.5rem;
-      padding: 0;
 
       &:last-child {
-        margin: 0;
+        display: block;
+        font-size: 1.25rem;
       }
     }
   }
@@ -170,26 +220,35 @@ header {
 
 footer {
   border-top: 1px solid var(--color-text);
+  color: var(--color-text-sec);
   grid-area: footer;
-  margin-top: .5rem;
-  padding-top: .5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+
+  // On small screens we need a larger top margin to simulate the bottom margin
+  // that has been suppressed on the last paragraph inside the SECTIONs.
+  @media screen and (max-device-width: $mobileBreakpoint) {
+    margin-top: 0.625rem;
+  }
 
   b {
-    font-weight: 600;
-    color: var(--color-text-sec);
+    // Same font styling as a control's label.
+    color: var(--color-text);
+    font-weight: $semiboldWeight;
   }
 }
 
 section {
   border-top: 1px solid var(--color-text);
-  margin: .5rem 0 0;
-  padding-top: .5rem;
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
   width: 100%;
 
+  // On large screens we use a dual-column layout for the content options.
   &:first-of-type {
-    display: grid;
     grid-area: contopts;
-    grid-template: 
+    display: grid;
+    grid-template:
       "heading heading" auto
       "col-1 col-2" auto
       / 1fr 1fr;
@@ -201,40 +260,64 @@ section {
       grid-area: heading;
     }
 
-    @media screen and (max-width: $mobileBreakpoint) {
+    // On small screens we fall back to a single-column layout.
+    @media screen and (max-device-width: $mobileBreakpoint) {
       display: block;
     }
   }
+
+  // The second section goes in the left column below the content options.
   &:last-of-type {
     grid-area: extopts;
   }
 
+  // In the dual-column layout (large screens), the bottom paragraph in each
+  // column loses its bottom border, margin and padding (since the next section
+  // and footer sit below them and have top margins and borders).
+  // In the single-column layout (small screens), the two "columns" are stacked
+  // and we need to restore the bottom margin on both "columns", and the bottom
+  // border and padding on the first one (since it's visually in the middle of
+  // the single column). We do this on the DIVs ("columns") to avoid complex
+  // style rules on the paragraphs.
+  @media screen and (max-device-width: $mobileBreakpoint) {
+    > div {
+      margin-bottom: 0.625rem;
+
+      &:first-of-type {
+        // border-bottom: 1px dotted var(--color-text-sec);
+        // padding-bottom: calc(0.625rem - 1px);
+        padding-bottom: 0.625rem;
+      }
+    }
+  }
+
   > h2 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between; // Align heading to the left, button to the right.
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
   }
-  p {
-    @media screen and (min-width: $mobileBreakpoint + 1px) {
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
 
+  p {
     display: grid;
     column-gap: 1rem;
     grid-template:
       "label input" auto
       "help  help" auto
-      / auto 8rem;
+      / auto 8.25rem;
+    // border-bottom: 1px dotted var(--color-text-sec);
+    margin-bottom: 0.625rem;
+    // padding-bottom: calc(0.625rem - 1px);
+    padding-bottom: 0.625rem;
 
-    span, label {
+    span,
+    label {
       &:first-child {
-        color: var(--color-text-sec);
-        font-weight: 600;
+        color: var(--color-text);
+        font-weight: $semiboldWeight;
         grid-area: label;
-        // padding-right: 1rem;
         min-width: 10rem;
-        // white-space: nowrap;
       }
       &:last-child {
         grid-area: input;
@@ -256,7 +339,7 @@ section {
     }
 
     input#checkInterval {
-      width: 1.25rem;
+      width: 1.75rem;
       text-align: center;
     }
   }
@@ -272,7 +355,7 @@ textarea {
   color: var(--color-text);
   font-family: $font-family;
   font-size: 1rem;
-  font-weight: normal;
+  font-weight: $semiboldWeight;
   padding: 0 0.25rem;
   position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
 
@@ -294,7 +377,6 @@ textarea {
 
 /* Toggle switch (styled checkbox) input */
 .input-toggle {
-  --radius: 5px;
   line-height: 1.5;
 
   > input[type="checkbox"] {
@@ -306,16 +388,16 @@ textarea {
   > label {
     background: var(--color-ctrl);
     border: 1px solid var(--color-brdr);
-    border-radius: var(--radius);
+    border-radius: var(--ctrl-radius);
     box-sizing: content-box;
     cursor: pointer;
     display: block;
+    left: calc(100% - 2.5rem);
     margin-bottom: 5px;
     overflow: hidden;
     position: relative;
     text-indent: 100%;
     top: 0.25rem;
-    // left: calc(100% - 2.25rem);
     width: 2rem;
     height: 1rem;
 
@@ -323,7 +405,7 @@ textarea {
     &::after {
       background: var(--color-ctrl);
       border: 1px solid var(--color-brdr);
-      border-radius: var(--radius);
+      border-radius: var(--ctrl-radius);
       box-sizing: content-box;
       content: "";
       transition: 0.3s;
@@ -342,7 +424,7 @@ textarea {
     transform: translateX(calc(-100% + 2px));
   }
 
-  // Focussed state.
+  // Focus state.
   > input:focus + label {
     background-color: var(--color-ctrl-focus);
     box-shadow: 0 0 0 1px var(--color-ctrl-on);
@@ -357,5 +439,45 @@ textarea {
     &::after {
       background-color: var(--color-ctrl);
     }
+  }
+}
+
+button {
+  background-color: var(--color-ctrl);
+  border: 1px solid var(--color-brdr);
+  border-radius: var(--ctrl-radius);
+  box-sizing: content-box;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: $semiboldWeight;
+  height: 1.5rem;
+  margin-right: 0.25rem;
+  outline: none;
+  padding: 0 0.5rem;
+  width: auto;
+
+  svg {
+    height: 1rem;
+    margin-right: 0.5rem;
+    width: 1rem;
+  }
+
+  &:active {
+    background-color: var(--color-ctrl-on);
+    color: var(--color-ctrl-focus);
+  }
+  &:disabled {
+    border-style: dotted;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  &:focus:not(:active) {
+    background-color: var(--color-ctrl-focus);
+    box-shadow: 0 0 0 1px var(--color-ctrl-on);
   }
 }
