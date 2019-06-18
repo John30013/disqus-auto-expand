@@ -278,7 +278,15 @@ main {
         }
 
         > .dialog-wrapper {
-          > .dialog {
+          pointer-events: none;
+          position: absolute;
+            right: .25rem;
+            top: 2.5rem;
+          opacity: 0;
+          transition: opacity .3s ease-in .1s;
+          z-index: 20;
+
+            > .dialog {
             background-color: var(--color-bkgd);
             border: 1px solid var(--color-brdr);
             border-radius: 5px;
@@ -304,16 +312,10 @@ main {
             }
           }
 
-          position: absolute;
-          right: .25rem;
-          top: 2.5rem;
-          opacity: 0;
-          transition: opacity .3s ease-in .1s;
-          z-index: 20;
-
-          &::before {
+          &::after {
             background-color: #000;
             content: "";
+            cursor: none;
             opacity: 0;
             position: fixed;
             top: 0;
@@ -326,8 +328,10 @@ main {
 
           &.dialog-open {
             opacity: 1;
+            pointer-events: all;
 
-            &::before {
+            &::after {
+              cursor: not-allowed;
               opacity: .5;
             }
           }
