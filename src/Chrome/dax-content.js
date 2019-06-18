@@ -218,5 +218,5 @@ function refreshOptions() {
 }
 
 function loadAllContent() {
-  _options.debug && console.debug("loadAllContent(): entering.");
+  _options.doDebug && console.debug("loadAllContent(): entering.");
 }
