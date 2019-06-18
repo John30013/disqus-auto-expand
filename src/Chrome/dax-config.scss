@@ -89,7 +89,8 @@ body {
   padding: 0 0.5rem 0.5rem;
   max-width: $desktopMaxWidth;
   min-width: $desktopWidth;
-  -webkit-transition: -webkit-filter 0.4s ease-in 0.1s, background-color 0.5s ease-in;
+  -webkit-transition: -webkit-filter 0.4s ease-in 0.1s,
+    background-color 0.5s ease-in;
 
   @media screen and (max-device-width: $mobileBreakpoint) {
     line-height: 1.25;
@@ -159,14 +160,6 @@ p {
   }
 }
 
-.clickable {
-  cursor: pointer;
-  outline: none;
-
-  &:focus {
-    box-shadow: 0 0 0 1px var(--color-ctrl-on);
-  }
-}
 .italic {
   font-style: italic !important;
 }
@@ -195,20 +188,31 @@ main {
   }
 
   > header {
-    background-image: url(images/disqus_eye_48.png);
-    background-position: 0 0.5rem;
-    background-repeat: no-repeat;
-    background-size: fit;
     grid-area: header;
-    line-height: 1.5;
-    padding-left: 4rem;
-    @include white-space();
 
     h1 {
+      background-image: url(images/disqus_eye_48.png);
+      background-position: 0 0.5rem;
+      background-repeat: no-repeat;
+      background-size: fit;
+      color: var(--color-text);
       font-size: 1.5rem;
       font-weight: normal;
+      line-height: 1.5;
       margin: 0;
-      padding: 0;
+      @include white-space();
+      
+      a:link,
+      a:visited,
+      a:active {
+        color: inherit;
+        display: block;
+        text-indent: 4rem;
+        text-decoration: none;
+      }
+      a:focus {
+        box-shadow: 0 0 0 1px var(--color-ctrl-on);
+      }
 
       small {
         // display: block;
@@ -280,17 +284,17 @@ main {
         > .dialog-wrapper {
           pointer-events: none;
           position: absolute;
-            right: .25rem;
-            top: 2.5rem;
+          right: 0.25rem;
+          top: 2.5rem;
           opacity: 0;
-          transition: opacity .3s ease-in .1s;
+          transition: opacity 0.3s ease-in 0.1s;
           z-index: 20;
 
-            > .dialog {
+          > .dialog {
             background-color: var(--color-bkgd);
             border: 1px solid var(--color-brdr);
             border-radius: 5px;
-            box-shadow: 0 0 .25rem .25rem var(--color-ctrl-on);
+            box-shadow: 0 0 0.25rem 0.25rem var(--color-ctrl-on);
             color: var(--color-text);
             padding: 1rem;
 
@@ -298,8 +302,8 @@ main {
               color: var(--color-text-sec);
               font-size: 1.125rem;
               font-weight: normal;
-              margin: 0 0 .5rem;
-              padding: 0 0 calc(.5rem - 1px);
+              margin: 0 0 0.5rem;
+              padding: 0 0 calc(0.5rem - 1px);
               border-bottom: 1px dotted;
             }
             p {
@@ -322,7 +326,7 @@ main {
             right: 0;
             bottom: 0;
             left: 0;
-            transition: opacity .3s ease-in;
+            transition: opacity 0.3s ease-in;
             z-index: -10;
           }
 
@@ -332,7 +336,7 @@ main {
 
             &::after {
               cursor: not-allowed;
-              opacity: .5;
+              opacity: 0.5;
             }
           }
         }
@@ -369,7 +373,7 @@ main {
       }
     }
 
-    > header, 
+    > header,
     > h2 {
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
@@ -421,7 +425,6 @@ main {
     }
   }
 }
-
 
 /* Text-like inputs */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),

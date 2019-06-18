@@ -24,6 +24,9 @@ function listenForMessages() {
     } else if (msg.action === "logDebug" && msg.message) {
       _options.doDebug &&
         console.debug(`[${msg.caller}] ${msg.message}`, ...msg.params);
+    } else if (msg.action === "loadAllContent") {
+      _options.doDebug && console.debug("Got 'loadAllContent' message.");
+      loadAllContent();
     }
   });
 }
@@ -212,4 +215,8 @@ function refreshOptions() {
       processNewLinks();
     }
   });
+}
+
+function loadAllContent() {
+  _options.debug && console.debug("loadAllContent(): entering.");
 }

@@ -34,7 +34,7 @@ body {
   padding: 0 0.5rem 0.5rem;
   max-width: 574px;
   min-width: 574px;
-  -webkit-transition: -webkit-filter 0.4s ease-in 0.1s, background-color 0.5s ease-in;
+  -webkit-transition: -webkit-filter 0.4s ease-in 0.1s, background-color 0.5s ease-in;
 }
 
 body.theme-dark {
@@ -110,15 +110,6 @@ p:last-child {
   padding-bottom: 0;
 }
 
-.clickable {
-  cursor: pointer;
-  outline: none;
-}
-
-.clickable:focus {
-  box-shadow: 0 0 0 1px var(--color-ctrl-on);
-}
-
 .italic {
   font-style: italic !important;
 }
@@ -149,27 +140,39 @@ main {
 }
 
 main > header {
+  grid-area: header;
+}
+
+main > header h1 {
   background-image: url(images/disqus_eye_48.png);
   background-position: 0 0.5rem;
   background-repeat: no-repeat;
   background-size: fit;
-  grid-area: header;
+  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: normal;
   line-height: 1.5;
-  padding-left: 4rem;
+  margin: 0;
   white-space: nowrap;
 }
 
 @media screen and (max-width: 560px) {
-  main > header {
+  main > header h1 {
     white-space: normal;
   }
 }
 
-main > header h1 {
-  font-size: 1.5rem;
-  font-weight: normal;
-  margin: 0;
-  padding: 0;
+main > header h1 a:link,
+main > header h1 a:visited,
+main > header h1 a:active {
+  color: inherit;
+  display: block;
+  text-indent: 4rem;
+  text-decoration: none;
+}
+
+main > header h1 a:focus {
+  box-shadow: 0 0 0 1px var(--color-ctrl-on);
 }
 
 main > header h1 small {
@@ -237,10 +240,10 @@ main > section:first-of-type > header > h2 {
 main > section:first-of-type > header > .dialog-wrapper {
   pointer-events: none;
   position: absolute;
-  right: .25rem;
+  right: 0.25rem;
   top: 2.5rem;
   opacity: 0;
-  transition: opacity .3s ease-in .1s;
+  transition: opacity 0.3s ease-in 0.1s;
   z-index: 20;
 }
 
@@ -257,8 +260,8 @@ main > section:first-of-type > header > .dialog-wrapper > .dialog h3 {
   color: var(--color-text-sec);
   font-size: 1.125rem;
   font-weight: normal;
-  margin: 0 0 .5rem;
-  padding: 0 0 calc(.5rem - 1px);
+  margin: 0 0 0.5rem;
+  padding: 0 0 calc(0.5rem - 1px);
   border-bottom: 1px dotted;
 }
 
@@ -281,7 +284,7 @@ main > section:first-of-type > header > .dialog-wrapper::after {
   right: 0;
   bottom: 0;
   left: 0;
-  transition: opacity .3s ease-in;
+  transition: opacity 0.3s ease-in;
   z-index: -10;
 }
 
@@ -292,7 +295,7 @@ main > section:first-of-type > header > .dialog-wrapper.dialog-open {
 
 main > section:first-of-type > header > .dialog-wrapper.dialog-open::after {
   cursor: not-allowed;
-  opacity: .5;
+  opacity: 0.5;
 }
 
 @media screen and (max-device-width: 560px) {

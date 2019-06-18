@@ -1,13 +1,18 @@
 let _options = { ...defaultConfig };
 
-// Initialize some text in the config UI.
+// Initialize some text in the UI.
 initUiText();
 
-// Initialize configuration controls from storage and listen for config updates.
-initConfig();
+// Initialize configuration controls with values from storage
+// and listen for updates.
+getCurrentConfig();
+listenForUpdates();
 
-// Initialize the Load all content button and confirmation dialog.
+// Initialize the "Load all content" button and confirmation dialog.
 initLoadAllContent();
+
+/* ========== End of main code. ==========
+   ===== Helper functions follow. ===== */
 
 function initUiText() {
   const manifest = chrome.runtime.getManifest();
@@ -21,232 +26,221 @@ function initUiText() {
   });
 }
 
-function initConfig() {
-  getCurrentConfig();
-  listenForUpdates();
-
-  function getCurrentConfig() {
-    chrome.storage.sync.get(defaultConfig, options => {
-      if (chrome.runtime.lastError) {
-        console.error(
-          "Couldn't initialize options from storage: %s",
-          chrome.runtime.lastError
-        );
-        return;
+function getCurrentConfig() {
+  chrome.storage.sync.get(defaultConfig, options => {
+    if (chrome.runtime.lastError) {
+      console.error(
+        "Couldn't initialize options from storage: %s",
+        chrome.runtime.lastError
+      );
+      return;
+    }
+    // removeIf(!allowDebug)
+    logDebug("config.js loaded.");
+    logDebug("Setting options from storage: %o", options);
+    // endRemoveIf(!allowDebug)
+    for (let key in options) {
+      let input = document.getElementById(key);
+      if (!input) {
+        // removeIf(!allowDebug)
+        logDebug('--> Skipped option "%s" with no control.', key);
+        // endRemoveIf(!allowDebug)
+        continue;
       }
-      // removeIf(!allowDebug)
-      logDebug("config.js loaded.");
-      logDebug("Setting options from storage: %o", options);
-      // endRemoveIf(!allowDebug)
-      for (let key in options) {
-        let input = document.getElementById(key);
-        if (!input) {
+      if (input.type === "checkbox") {
+        input.checked = options[key];
+        if (key === "useDarkTheme") {
+          document.body.classList.toggle("theme-dark", input.checked);
           // removeIf(!allowDebug)
-          logDebug('--> Skipped option "%s" with no control.', key);
+          logDebug("--> document.body class: %s", document.body.className);
           // endRemoveIf(!allowDebug)
-          continue;
-        }
-        if (input.type === "checkbox") {
-          input.checked = options[key];
-          if (key === "useDarkTheme") {
-            document.body.classList.toggle("theme-dark", input.checked);
-            // removeIf(!allowDebug)
-            logDebug("--> document.body class: %s", document.body.className);
-            // endRemoveIf(!allowDebug)
-          }
-          // removeIf(!allowDebug)
-          logDebug(
-            "--> %s checkbox %s.",
-            input.checked ? "Checked" : "Unchecked",
-            key
-          );
-          // endRemoveIf(!allowDebug)
-        } else if (input.getAttribute("inputmode") === "numeric") {
-          input.value = "" + options[key];
-          // removeIf(!allowDebug)
-          logDebug("--> %s set to %s.", key, input.value);
-          // endRemoveIf(!allowDebug)
-        } else if (key === "loadAllContent") {
-          // true =  operation is in progress, so the button should be diabled.
-          // false = operation is not in progress, so the button should be enanbled.
-          input.toggleAttribute("disabled", !!value);
-          input.disabled = !!value;
-        }
-      }
-    });
-  }
-
-  // Handle changes in the configuration values.
-  function listenForUpdates() {
-    document.body.addEventListener("input", event => {
-      // removeIf(!allowDebug)
-      logDebug("Handling change event on %s", event.target.id, event);
-      // endRemoveIf(!allowDebug)
-      let target = event.target,
-        value = null,
-        typingDebounceTimer = null;
-      if (target.id === "checkInterval") {
-        if (typingDebounceTimer) {
-          clearTimeout(typingDebounceTimer);
-        }
-        typingDebounceTimer = setTimeout(
-          target => {
-            if (target.validity.valid) {
-              updateConfigValue(target.id, +target.value);
-            } else {
-              // Restore the previous value after 1 second.
-              chrome.storage.sync.get(target.id, value => {
-                if (chrome.runtime.lastError) {
-                  console.error(
-                    "Couldn't get config value %s from storage: %s",
-                    target.id,
-                    chrome.runtime.lastError
-                  );
-                  return;
-                }
-                target.value = value[target.id];
-              });
-              return;
-            }
-          },
-          1000,
-          target
-        );
-      } else {
-        value = target.checked;
-        if (target.id === "useDarkTheme") {
-          document.body.classList.toggle("theme-dark", target.checked);
-          // removeIf(!allowDebug)
-          logDebug("--> document.body className: %s", document.body.className);
-          // endRemoveIf(!allowDebug)
-        }
-        updateConfigValue(target.id, value);
-      }
-    });
-
-    function updateConfigValue(key, value) {
-      chrome.storage.sync.set({ [key]: value }, () => {
-        if (chrome.runtime.lastError) {
-          console.error(
-            `Couldn't store option ${key} with value ${value}: ${
-              chrome.runtime.lastError
-            }.`
-          );
         }
         // removeIf(!allowDebug)
         logDebug(
-          '--> Updated config option "%s" to (%s) "%s"',
-          key,
-          typeof value,
-          value
+          "--> %s checkbox %s.",
+          input.checked ? "Checked" : "Unchecked",
+          key
         );
         // endRemoveIf(!allowDebug)
-      });
-      if (key !== "useDarkTheme") {
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          if (chrome.runtime.lastError) {
-            console.error(
-              `updateConfigValue(): couldn't get active tab to send a message to: ${
-                chrome.runtime.lastError
-              }.`
-            );
+      } else if (input.getAttribute("inputmode") === "numeric") {
+        input.value = "" + options[key];
+        // removeIf(!allowDebug)
+        logDebug("--> %s set to %s.", key, input.value);
+        // endRemoveIf(!allowDebug)
+      } else if (key === "loadAllContent") {
+        // true =  operation is in progress, so the button should be diabled.
+        // false = operation is not in progress, so the button should be enanbled.
+        input.toggleAttribute("disabled", !!value);
+        input.disabled = !!value;
+      }
+    }
+  });
+} // end of getCurrentConfig().
+
+// Handle changes in the configuration values.
+function listenForUpdates() {
+  document.body.addEventListener("input", event => {
+    // removeIf(!allowDebug)
+    logDebug("Handling change event on %s", event.target.id, event);
+    // endRemoveIf(!allowDebug)
+    let target = event.target,
+      value = null,
+      typingDebounceTimer = null;
+    if (target.id === "checkInterval") {
+      if (typingDebounceTimer) {
+        clearTimeout(typingDebounceTimer);
+      }
+      typingDebounceTimer = setTimeout(
+        target => {
+          if (target.validity.valid) {
+            updateConfigValue(target.id, +target.value);
+          } else {
+            // Restore the previous value after 1 second.
+            chrome.storage.sync.get(target.id, value => {
+              if (chrome.runtime.lastError) {
+                console.error(
+                  "Couldn't get config value %s from storage: %s",
+                  target.id,
+                  chrome.runtime.lastError
+                );
+                return;
+              }
+              target.value = value[target.id];
+            });
             return;
           }
-          chrome.tabs.sendMessage(tabs[0].id, { action: "refreshOptions" });
-        });
+        },
+        1000,
+        target
+      );
+    } else {
+      value = target.checked;
+      if (target.id === "useDarkTheme") {
+        document.body.classList.toggle("theme-dark", target.checked);
+        // removeIf(!allowDebug)
+        logDebug("--> document.body className: %s", document.body.className);
+        // endRemoveIf(!allowDebug)
       }
-    } // end of updateConfigValue().
-  } // end of listenForUpdates().
-} // end of initConfig().
-
-function initLoadAllContent() {
-  const dialog = document.getElementById("confirmLoadAllContent");
-  closeDialog(dialog);
-
-  // Initialize the Load all content button.
-  document.getElementById("loadAllContent").addEventListener("click", event => {
-    logDebug("Load all content button clicked!");
-    showDialog(dialog, event.target);
+      updateConfigValue(target.id, value);
+    }
   });
 
-  function closeDialog(dialog, outerFocusables) {
-    outerFocusables &&
-      outerFocusables.forEach(elt => {
-        if (elt.dataset.tabIndex) {
-          elt.tabIndex = elt.dataset.tabIndex;
-          elt.setAttribute("tabindex", elt.dataset.tabIndex);
-        } else {
-          elt.tabIndex = 0;
-          elt.removeAttribute("tabindex");
+  function updateConfigValue(key, value) {
+    chrome.storage.sync.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        console.error(
+          `Couldn't store option ${key} with value ${value}: ${
+            chrome.runtime.lastError
+          }.`
+        );
+      }
+      // removeIf(!allowDebug)
+      logDebug(
+        '--> Updated config option "%s" to (%s) "%s"',
+        key,
+        typeof value,
+        value
+      );
+      // endRemoveIf(!allowDebug)
+    });
+    if (key !== "useDarkTheme") {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            `updateConfigValue(): couldn't get active tab to send a message to: ${
+              chrome.runtime.lastError
+            }.`
+          );
+          return;
         }
+        chrome.tabs.sendMessage(tabs[0].id, { action: "refreshOptions" });
       });
-    document.body.style.pointerEvents = "all";
-    dialog.classList.remove("dialog-open");
+    } // end of dark theme handling.
+  } // end of updateConfigValue().
+} // end of listenForUpdates().
+
+// Initailize the "Load all content" button and confirmation dialog.
+function initLoadAllContent() {
+  // Initialize the confirmation dialog.
+  const dialog = document.getElementById("confirmLoadAllContent"),
+    dialogClickablesSelector = "a:link, button";
+  dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
+    elt.classList.add(focusableClass);
+  });
+  closeDialog(dialog);
+
+  // Initialize the "Load all content" button.
+  document.getElementById("loadAllContent").addEventListener("click", event => {
+    // removeIf(!allowDebug)
+    logDebug("Load all content button clicked!");
+    // endRemoveIf(!allowDebug)
+    openDialog(dialog, event.target);
+  });
+
+  /* ========== Helpers ========== */
+  const openClass = "dialog-open",
+    focusableClass = "dialog-focusable";
+
+  function closeDialog(dialog) {
+    // removeIf(!allowDebug)
+    logDebug(`closeDialog: ${dialog}`);
+    // endRmoveIf(!allowDebug)
+    getNonDialogFocusables().forEach(elt => {
+      if (elt.dataset.tabindex) {
+        elt.tabIndex = elt.dataset.tabindex;
+      } else {
+        elt.tabIndex = 0;
+      }
+    });
+    dialog.classList.remove(openClass);
     dialog.setAttribute("aria-hidden", "true");
-    dialog.querySelectorAll("button").forEach(elt => {
+    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
       elt.tabIndex = -1;
     });
-    dialog.style.pointerEvents = "none";
   } // end of closeDialog().
 
-  function showDialog(dialog, opener) {
+  function openDialog(dialog, opener) {
+    // removeIf(!allowDebug)
+    logDebug(`openDialog: ${dialog}`);
+    // endRemoveIf(!allowDebug)
     // Disable focus on focusable elements outside the dialog.
-    logDebug(`showDialog: ${dialog}`);
-    const outerFocusables = [];
-    document
-      .querySelectorAll("a:link, button, input, .clickable")
-      .forEach(elt => {
-        let generation = 0,
-          inDialog = false,
-          ancestor = elt.parentElement;
-        while (ancestor && generation < 3) {
-          if (ancestor === dialog) {
-            inDialog = true;
-            break;
-          }
-          ancestor = ancestor.parentElement;
-          generation += 1;
-        }
-        if (!inDialog) {
-          outerFocusables.push(elt);
-          if (elt.tabIndex) {
-            elt.dataset.tabindex = elt.tabindex;
-          }
-          elt.tabindex = -1;
-          elt.setAttribute("tabindex", "-1");
-        }
-      });
-    document.body.style.pointerEvents = "none";
+    getNonDialogFocusables().forEach(elt => {
+      if (elt.tabIndex) {
+        elt.dataset.tabindex = elt.tabIndex;
+      }
+      elt.tabIndex = -1;
+    });
     // Show the dialog.
-    dialog.querySelectorAll("a:link, button").forEach(elt => {
+    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
       elt.tabIndex = 0;
     });
-    dialog.style.pointerEvents = "all";
     dialog.tabIndex = -1;
     dialog.focus();
-    dialog.classList.add("dialog-open");
-    dialog.setAttribute("aria-hidden", false);
+    dialog.classList.add(openClass);
+    dialog.setAttribute("aria-hidden", "false");
     dialog.addEventListener("click", event => {
       const source = event.target;
       if (source.tagName === "BUTTON") {
         event.preventDefault();
         if (source.value === "yes") {
-          loadAllContent();
+          sendContentCommand({
+            action: "loadAllContent",
+            caller: "config",
+          });
           window.close();
         } else {
-          closeDialog(dialog , outerFocusables);
+          closeDialog(dialog);
           opener.focus();
         }
       }
     });
+  } // end of openDialog().
 
-    function loadAllContent() {
-      sendContentCommand({
-        action: "loadAllContent",
-        caller: "config",
-      });
-    } // end of loadAllContent().
-  } // end of showDialog().
+  function getNonDialogFocusables() {
+    return Array.from(
+      document.querySelectorAll("a:link, button, input")
+    ).filter(elt => !elt.classList.contains(focusableClass));
+  } // end of getNonDialogClickables().
 } // end of initLoadAllContent().
 
 function sendContentCommand(commandData) {
@@ -265,6 +259,7 @@ function sendContentCommand(commandData) {
 
 // removeIf(!allowDebug)
 function logDebug(message, ...params) {
+  console.debug(message, ...params);
   sendContentCommand({
     action: "logDebug",
     caller: "config",
