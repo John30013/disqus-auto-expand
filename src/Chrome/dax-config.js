@@ -163,7 +163,10 @@ function listenForUpdates() {
 function initLoadAllContent() {
   // Initialize the confirmation dialog.
   const dialog = document.getElementById("confirmLoadAllContent"),
-    dialogClickablesSelector = "a:link, button";
+    dialogClickablesSelector = "a:link, button",
+    openClass = "dialog-open",
+    focusableClass = "dialog-focusable";
+
   dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
     elt.classList.add(focusableClass);
   });
@@ -178,9 +181,6 @@ function initLoadAllContent() {
   });
 
   /* ========== Helpers ========== */
-  const openClass = "dialog-open",
-    focusableClass = "dialog-focusable";
-
   function closeDialog(dialog) {
     // removeIf(!allowDebug)
     logDebug(`closeDialog: ${dialog}`);
