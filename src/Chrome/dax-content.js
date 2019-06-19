@@ -48,7 +48,6 @@ function createObserver() {
             link.className,
             luid
           );
-        hideMediaLink = false;
         if (entry.isIntersecting) {
           foundIntersects = true;
           _options.doDebug &&
@@ -57,9 +56,7 @@ function createObserver() {
               link.classList,
               link.innerText
             );
-          link.click();
-          link.classList.add("dax-clicked");
-          link.title = link.title.replace("[tagged] ", "[clicked] ");
+          activateLink(link);
           unobserveLink(link);
           _options.doDebug &&
             console.debug(
@@ -84,29 +81,6 @@ function createObserver() {
           .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
       }
     }
-
-    /**
-     * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
-     */
-    function unobserveLink(link, removeDaxTags) {
-      const luid = link.dataset.luid;
-      _observer.unobserve(link);
-      delete _observedLinks[luid];
-      delete link.dataset.luid;
-      link.removeAttribute("data-luid");
-      if (removeDaxTags) {
-        link.classList.remove("dax-tagged", "dax-clicked");
-        link.title = link.title.replace(/^\[\w+\]\s/, "");
-      }
-      _options.doDebug &&
-        console.debug(
-          '--> unobserved "%s" link %s; removeDaxTags: %s',
-          link.className,
-          luid,
-          removeDaxTags,
-          link
-        );
-    } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
 
@@ -114,50 +88,15 @@ function processNewLinks() {
   // Since processNewLinks() can be called by refreshOptions() when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
-  if (_timer) {
-    clearTimeout(_timer);
-  }
+  _timer && clearTimeout(_timer);
   if (!_options.checkInterval) {
     _options.doDebug && console.debug("Stopping the timeout loop.");
     return;
   }
 
-  // Find new links to observe.
+  // Observe new links.
   _options.doDebug && console.debug("Finding new links to observe.");
-  let repliesSelector = [];
-  if (_options.moreReplies) {
-    repliesSelector.push(
-      "div.show-children-wrapper:not(.hidden) > a.show-children:not(.busy):not([data-luid])"
-    );
-  }
-  if (_options.newReplies) {
-    repliesSelector.push(
-      'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
-    );
-  }
-  // Observe "replies" links that haven't already been observed.
-  if (repliesSelector.length) {
-    document.querySelectorAll(repliesSelector.join(",")).forEach(observeLink);
-  }
-  // Observe "see more" links that haven't already been observed.
-  if (_options.longItems) {
-    const longItemsSelector =
-      'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
-    document.querySelectorAll(longItemsSelector).forEach(observeLink);
-  }
-
-  // Observe "Load more comments" "button" at the bottom of the comments.
-  if (_options.moreComments) {
-    const moreCommentsSelector =
-      'div.load-more:not([style*="none"]) > a.load-more__button';
-    document.querySelectorAll(moreCommentsSelector).forEach(observeLink);
-  }
-
-  // Observe "Show # New Comments" button at the top of the comments.
-  if (_options.newComments) {
-    const newCommentsSelector = 'button.alert--realtime:not([style*="none"])';
-    document.querySelectorAll(newCommentsSelector).forEach(observeLink);
-  }
+  findNewLinks(_options).forEach(observeLink);
 
   // Make external links open in a new browser tab/window.
   if (_options.openInNewWindow) {
@@ -172,28 +111,27 @@ function processNewLinks() {
   }
 
   // Reprocess after the checkInterval.
-  _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
+  _timer = setTimeout(processNewLinks, _options.checkInterval * 1000);
 
   // Observe a link. Instructs the IntersectionOserver to start observing the
   // link and does some record keeping.
   function observeLink(link) {
     let luid = link.dataset.luid;
-    if (!luid) {
-      luid = `${Date.now()}-${_linkCounter++}`;
-      link.setAttribute("data-luid", luid);
-      link.classList.add("dax-tagged");
-      link.title = `[tagged] ${link.title}`;
-      _observer.observe(link);
-      _observedLinks[luid] = link;
-      _options.doDebug &&
-        console.debug(
-          '--> Observing "%s" link %s (now %d observed)',
-          link.className,
-          luid,
-          Object.keys(_observedLinks).length,
-          _observedLinks
-        );
+    if (luid) {
+      // Already being observed.
+      return;
     }
+    luid = tagLink(link);
+    _observer.observe(link);
+    _observedLinks[luid] = link;
+    _options.doDebug &&
+      console.debug(
+        '--> Observing "%s" link %s (now %d observed)',
+        link.className,
+        luid,
+        Object.keys(_observedLinks).length,
+        _observedLinks
+      );
   }
 }
 
@@ -217,6 +155,107 @@ function refreshOptions() {
   });
 }
 
+/**
+ * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
+ */
+function unobserveLink(link, removeDaxTags) {
+  const luid = link.dataset.luid;
+  if (!luid) {
+    // Link isn't being observed.
+    return;
+  }
+  _observer.unobserve(link);
+  delete _observedLinks[luid];
+  delete link.dataset.luid;
+  link.removeAttribute("data-luid");
+  if (removeDaxTags) {
+    link.classList.remove("dax-tagged", "dax-clicked");
+    link.title = link.title.replace(/^\[\w+\]\s/, "");
+  }
+  _options.doDebug &&
+    console.debug(
+      '--> unobserved "%s" link %s; removeDaxTags: %s',
+      link.className,
+      luid,
+      removeDaxTags,
+      link
+    );
+} // end of unobserveLink().
+
+function findNewLinks(config) {
+  const newLinks = [];
+  // Find new "See more replies" links.
+  if (!config || config.moreReplies) {
+    document
+      .querySelectorAll(
+        "div.show-children-wrapper:not(.hidden) > a.show-children:not(.busy):not([data-luid])"
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find new "See ### new replies" links.
+  if (!config || config.newReplies) {
+    document
+      .querySelectorAll(
+        'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find new "see more" links.
+  if (!config || config.longItems) {
+    document
+      .querySelectorAll(
+        'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find the active "Load more comments" "button" at the bottom of the comments.
+  if (!config || config.moreComments) {
+    document
+      .querySelectorAll(
+        'div.load-more:not([style*="none"]) > a.load-more__button'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find the active "Show # New Comments" button at the top of the comments.
+  if (!config || config.newComments) {
+    document
+      .querySelectorAll('button.alert--realtime:not([style*="none"])')
+      .forEach(elt => newLinks.push(elt));
+  }
+  return newLinks;
+}
+
+function tagLink(link) {
+  luid = `${Date.now()}-${_linkCounter++}`;
+  link.setAttribute("data-luid", luid);
+  link.classList.add("dax-tagged");
+  link.title = `[tagged] ${link.title}`;
+  return luid;
+}
+
+function activateLink(link) {
+  link.click();
+  link.classList.add("dax-clicked");
+  link.title = link.title.replace("[tagged] ", "[clicked] ");
+}
+
 function loadAllContent() {
   _options.doDebug && console.debug("loadAllContent(): entering.");
+  // Stop the processNewLinks() timeout loop.
+  _timer && clearTimeout(_timer);
+
+  const newLinks = findNewLinks();
+  _options.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
+  if (newLinks.length) {
+    newLinks.forEach(link => {
+      unobserveLink(link);
+      tagLink(link);
+      activateLink(link);
+    });
+    // Map checkInterval range (0-30 sec.) to delay range (5-10 sec.).
+    const delay = Math.floor(1000 * (5 + (_options.checkInterval * 5) / 30));
+    _timer = setTimeout(loadAllContent, delay);
+  } else {
+    processNewLinks();
+  }
 }
