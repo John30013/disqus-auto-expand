@@ -40,6 +40,12 @@ $desktopMaxWidth: $desktopWidth;
     white-space: normal;
   }
 }
+
+@mixin disabled {
+  color: var(--color-text-sec);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 * {
   box-sizing: border-box;
 }
@@ -201,7 +207,7 @@ main {
       line-height: 1.5;
       margin: 0;
       @include white-space();
-      
+
       a:link,
       a:visited,
       a:active {
@@ -513,10 +519,7 @@ textarea {
 
   // Disabled state.
   input:disabled + label {
-    cursor: not-allowed;
-    opacity: 50%;
-    opacity: 0.5;
-
+    @include disabled();
     &::after {
       background-color: var(--color-ctrl);
     }
@@ -555,8 +558,7 @@ button {
   }
   &:disabled {
     border-style: dotted;
-    cursor: not-allowed;
-    opacity: 0.5;
+    @include disabled();
   }
   &:focus:not(:active) {
     background-color: var(--color-ctrl-focus);

@@ -462,8 +462,8 @@ textarea::selection {
 }
 
 .input-toggle input:disabled + label {
+  color: var(--color-text-sec);
   cursor: not-allowed;
-  opacity: 50%;
   opacity: 0.5;
 }
 
@@ -505,6 +505,7 @@ button:active {
 
 button:disabled {
   border-style: dotted;
+  color: var(--color-text-sec);
   cursor: not-allowed;
   opacity: 0.5;
 }
