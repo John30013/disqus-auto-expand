@@ -1,4 +1,5 @@
 chrome.runtime.onInstalled.addListener(() => {
+  _config = defaultConfig;
   // Make sure the extension's options are stored when the extension starts up.
   // Pass `null` so we get everything in storage. This allows us to clean up
   // obsolete config values (see else block below).
@@ -15,7 +16,7 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.sync.set(defaultConfig, () => {
         // console.debug("Stored default config: %o", defaultConfig);
       });
-      config = defaultConfig();
+      // config = defaultConfig();
     } else {
       // Check for and remove obsolete config items.
       config.doDebug && console.debug("Found existing config: %o", config);
@@ -42,8 +43,9 @@ chrome.runtime.onInstalled.addListener(() => {
           }
         });
       }
-    }
-    setIcon(!!config.checkInterval);
+      _config = config;
+    } // end of else block (got config items from storage).
+    setIcon(!!_config.checkInterval);
   }); // end of chrome.storage.sync.get() callback.
 
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
@@ -77,6 +79,8 @@ chrome.runtime.onInstalled.addListener(() => {
         );
         return;
       }
+      _config.doDebug &&
+        console.debug(`--> Setting icon; isRunning is ${isRunning}.`);
       chrome.pageAction.setIcon({
         tabId: tabs[0].id,
         path: isRunning

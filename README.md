@@ -1,6 +1,6 @@
 # Disqus Auto Expander
 
-Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 0.3 (see the [changelog](#changelog)).
+Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 0.4 (see the [changelog](#changelog)).
 
 ---
 
@@ -65,6 +65,16 @@ When the icon is gray, the browser’s Extension management menu appears instead
 
 Note that your changes on the Configuration options page are saved automatically. And if you use your browser’s synchronization feature, your settings will be synchronized to your other browsers.
 
+#### Load all content
+
+_**Note**: as of June 20, 2019, this feature is currently only available for Chrome, and has not yet been published to the Chrome web store._
+
+Click this button to repeatedly expand all content and reply links until all of the discussion’s content is loaded. This is most useful for discussions that are not receiving any new comments or replies. The goal is to allow searching the full content of the discussion using your browser’s “Find...” (Ctrl+F) command.
+
+Note that this button is only available from the popup version of the options page, since it applies to the currently active window/tab that contains a Disqus discussion.
+
+Since this option could load a lot of data (and media, if you have [Display Media mode enabled](#a-note-about-hidden-media-items)), this is not a persistent option. Instead, you can use this button to load all of the content on demand. When you click this button you will be prompted to confirm that you want to proceed.
+
 #### Expand hidden/new replies
 
 These are the links Disqus displays when a comment has more than 6 replies (“More replies”), or when another user submits a reply while you are viewing the comment (“New replies”). Enabling these options will expand these links as they come into view.
@@ -77,9 +87,9 @@ Disqus displays a “See more” link at the bottom of when a comment or media i
 
 #### A note about hidden media items
 
-By default, on mobile devices Disqus hides embedded media items (such as images, Tweets and videos), and shows them by default on “desktop” devices. When the Disqus menu shows “Display Media”that means it is _currently_ in “Hide Media” mode:  
-![Screen shot of expanded Disqus menu with the "Display Media" option selected](docs/disqus_menu_display_media.png)  
-Choosing that option in the Disqus menu will cause Disqus to display all media items as the discussion content loads, and the option will change to “Hide Media”. Since Disqus allows you to control this option itself, the extension does not have an option to automatically expand these items.
+By default, Disqus hides embedded media items (such as images, Tweets and videos) on “mobile” devices, and shows them on “desktop” devices. When the Disqus menu shows “Display Media”, that means it is _currently_ hiding embedded media:  
+![Screen shot of expanded Disqus menu with the "Display Media" option visible](docs/disqus_menu_display_media.png)  
+Choosing that option in the menu will cause Disqus to display all media items as the discussion content loads, and the option’s title will change to “Hide Media”. Since Disqus allows you to control this option itself, the extension does not have an option to automatically expand hidden media items.
 
 #### Show more/new comments
 
@@ -102,21 +112,24 @@ When you click on an embedded media item (image, Tweet, video), the item display
 
 These options control other aspects of the extension.
 
-- “Check for changes” controls how often (in seconds) the extension checks for new links.
-- “Use dark theme” changes the options page to a dark color theme.
-- “Log debug output” causes the extension to log debug messages to the brower’s Developer Console. You should not need to enable this option during normal usage.
+- **Check for changes**: controls how often (in seconds) the extension checks for new links.
+- **Use dark theme**: changes the options page to a dark color scheme.
+- **Log debug output**: causes the extension to log debug messages to the brower’s Developer Console. You should not need to enable this option during normal usage.
 
 ---
 
 ## Future changes
 
-I welcome your suggestions for new features. I am currently considering the following:
-
-- Add a push button that would completely load a discussion and expand all of its replies and embedded media. The purpose is to allow searching the full text of the discussion (especially an older one that is no longer receiving new comments). Since this feature could potentially load a lot of data, it wouldn’t be a “persistent” option like the link expansion options are; it would be “on demand”.
+I welcome your suggestions for new features.
 
 ---
 
 ## Changelog
+
+### Version 0.4
+
+- New **Load all content** option: repeatedly expands all replies and content links and buttons until all content has been loaded.
+- The extension’s icon in the browser’s toolbar changes to a “pause” icon when the “Check for new content” option is set to zero.
 
 ### Version 0.3
 
@@ -153,6 +166,7 @@ Click the extension’s icon in the browser's toolbar to control each option. Yo
 - **Log debug output**: logs messages about the extension’s operation to the browser’s developer console. You should not need to enable this option unless you are experiencing problems with the extension. (This option will be removed in a future release.)
 
 ---
+
 ## Credits
 
 Warning icon made by [Amit Jakhu](https://www.flaticon.com/authors/amit-jakhu) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/).

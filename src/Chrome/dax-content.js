@@ -258,7 +258,7 @@ function loadAllContent() {
   const newLinks = findNewLinks();
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   if (newLinks.length) {
-    showToast("Please wait while content loads&hellip;");
+    showToast("Please wait while content loads...");
     newLinks.forEach(link => {
       unobserveLink(link);
       tagLink(link);
@@ -273,27 +273,35 @@ function loadAllContent() {
   }
 
   function showToast(message) {
+    _config.doDebug && console.debug("showToast(): entering");
+
+    // Make sure the discussion forum (and therefore the toast) is visible.
+    document.body.scrollIntoView();
+
     let toast = document.getElementById("dax-toast");
     if (!toast) {
+      _config.doDebug && console.debug("--> creating toast");
       toast = document.createElement("div");
       toast.id = "dax-toast";
-      toast.innerText = message;
       toast.setAttribute("role", "alert");
+      toast.innerText = message || "";
+      toast.className = "toast";
       document.body.prepend(toast);
-      toast.classList.add("toast toast-open");
+      toast.classList.add("toast-open");
+    } else {
+      toast.innerText = message || "";
     }
+    return toast;
   }
 
   function hideToast(message, delay) {
-    const toast = document.getElementById("dax-toast");
-    if (toast) {
-      toast.innerText = message;
-      toast.style.setProperty("--delay", delay);
-      toast.classList.add("toast-closed");
+    const toast = document.getElementById("dax-toast") || showToast();
+    toast.innerText = message;
+    setTimeout(() => {
       toast.classList.remove("toast-open");
-      setTimeout(() => {
-        document.body.removeChild(toast);
-      }, delay + 500);
-    }
+    }, delay);
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, delay + 500);
   }
 }

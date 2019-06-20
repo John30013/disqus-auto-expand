@@ -1,0 +1,24 @@
+.toast {
+  --toast-width: 18rem;
+  background-color: #282828;
+  border: 2px solid #459cf9;
+  border-radius: 5px;
+  box-shadow: 0.125rem 0.125rem 0.5rem #666;
+  box-sizing: border-box;
+  color: #ddd;
+  display: block;
+  margin: 0.5rem 0;
+  opacity: 0;
+  padding: 0.5rem;
+  position: fixed;
+  left: calc(50% - var(--toast-width) / 2);
+  top: 2rem;
+  text-align: center;
+  transition: opacity 0.5s ease-in-out;
+  width: var(--toast-width);
+  z-index: 20000;
+
+  &.toast-open {
+    opacity: 1;
+  }
+}
