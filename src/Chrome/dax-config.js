@@ -1,4 +1,4 @@
-let _options = { ...defaultConfig };
+let _config = { ...defaultConfig };
 
 // Initialize some text in the UI.
 initUiText();
@@ -27,28 +27,28 @@ function initUiText() {
 }
 
 function getCurrentConfig() {
-  chrome.storage.sync.get(defaultConfig, options => {
+  chrome.storage.sync.get(defaultConfig, config => {
     if (chrome.runtime.lastError) {
-      console.error(
-        "Couldn't initialize options from storage: %s",
-        chrome.runtime.lastError
+      console.warn(
+        "Couldn't initialize config from storage: %s",
+        chrome.runtime.lastError.message
       );
       return;
     }
     // removeIf(!allowDebug)
     logDebug("config.js loaded.");
-    logDebug("Setting options from storage: %o", options);
+    logDebug("Setting config from storage: %o", config);
     // endRemoveIf(!allowDebug)
-    for (let key in options) {
+    for (let key in config) {
       let input = document.getElementById(key);
       if (!input) {
         // removeIf(!allowDebug)
-        logDebug('--> Skipped option "%s" with no control.', key);
+        logDebug('--> Skipped config option "%s" with no control.', key);
         // endRemoveIf(!allowDebug)
         continue;
       }
       if (input.type === "checkbox") {
-        input.checked = options[key];
+        input.checked = config[key];
         if (key === "useDarkTheme") {
           document.body.classList.toggle("theme-dark", input.checked);
           // removeIf(!allowDebug)
@@ -62,8 +62,9 @@ function getCurrentConfig() {
           key
         );
         // endRemoveIf(!allowDebug)
-      } else if (input.getAttribute("inputmode") === "numeric") {
-        input.value = "" + options[key];
+      } else if (key === "checkInterval") {
+        input.value = "" + config[key];
+        setIcon(!!config[key]);
         // removeIf(!allowDebug)
         logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
@@ -98,10 +99,10 @@ function listenForUpdates() {
             // Restore the previous value after 1 second.
             chrome.storage.sync.get(target.id, value => {
               if (chrome.runtime.lastError) {
-                console.error(
+                console.warn(
                   "Couldn't get config value %s from storage: %s",
                   target.id,
-                  chrome.runtime.lastError
+                  chrome.runtime.lastError.message
                 );
                 return;
               }
@@ -128,9 +129,9 @@ function listenForUpdates() {
   function updateConfigValue(key, value) {
     chrome.storage.sync.set({ [key]: value }, () => {
       if (chrome.runtime.lastError) {
-        console.error(
-          `Couldn't store option ${key} with value ${value}: ${
-            chrome.runtime.lastError
+        console.warn(
+          `Couldn't store config option ${key} with value ${value}: ${
+            chrome.runtime.lastError.message
           }.`
         );
       }
@@ -146,18 +147,25 @@ function listenForUpdates() {
     if (key !== "useDarkTheme") {
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         if (chrome.runtime.lastError) {
-          console.error(
+          console.warn(
             `updateConfigValue(): couldn't get active tab to send a message to: ${
-              chrome.runtime.lastError
+              chrome.runtime.lastError.message
             }.`
           );
           return;
         }
-        chrome.tabs.sendMessage(tabs[0].id, { action: "refreshOptions" });
+        chrome.tabs.sendMessage(tabs[0].id, { action: "refreshConfig" });
+        if (key === "checkInterval") {
+          setIcon(!!value);
+        }
       });
     } // end of dark theme handling.
   } // end of updateConfigValue().
 } // end of listenForUpdates().
+
+function setIcon(isRunning) {
+  chrome.runtime.sendMessage({ action: "setIcon", data: isRunning });
+} // end of setIcon().
 
 // Initailize the "Load all content" button and confirmation dialog.
 function initLoadAllContent() {
@@ -172,18 +180,27 @@ function initLoadAllContent() {
   });
   closeDialog(dialog);
 
-  // Initialize the "Load all content" button.
-  document.getElementById("loadAllContent").addEventListener("click", event => {
-    // removeIf(!allowDebug)
-    logDebug("Load all content button clicked!");
-    // endRemoveIf(!allowDebug)
+  // Initialize the "Load all content" button. The button is disabled
+  // by default, and only an affirmative ping from the content script
+  // will enable it.
+  const button = document.getElementById("loadAllContent");
+  button.addEventListener("click", event => {
     openDialog(dialog, event.target);
+  });
+  sendContentCommand({ action: "ping", caller: "config" }, reply => {
+    if (reply && reply.value === "pong") {
+      logDebug(
+        "Got reply from 'ping' request: %o; enabling Load all content button.",
+        reply
+      );
+      button.disabled = false;
+    }
   });
 
   /* ========== Helpers ========== */
   function closeDialog(dialog) {
     // removeIf(!allowDebug)
-    logDebug(`closeDialog: ${dialog}`);
+    logDebug("closeDialog: %o", dialog);
     // endRmoveIf(!allowDebug)
     getNonDialogFocusables().forEach(elt => {
       if (elt.dataset.tabindex) {
@@ -201,7 +218,7 @@ function initLoadAllContent() {
 
   function openDialog(dialog, opener) {
     // removeIf(!allowDebug)
-    logDebug(`openDialog: ${dialog}`);
+    logDebug("openDialog: %o", dialog);
     // endRemoveIf(!allowDebug)
     // Disable focus on focusable elements outside the dialog.
     getNonDialogFocusables().forEach(elt => {
@@ -243,17 +260,28 @@ function initLoadAllContent() {
   } // end of getNonDialogClickables().
 } // end of initLoadAllContent().
 
-function sendContentCommand(commandData) {
+function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (chrome.runtime.lastError) {
-      console.error(
+      console.warn(
         `sendContentCommand(): couldn't get active tab for sendMessage: ${
-          chrome.runtime.lastError
+          chrome.runtime.lastError.message
         }.`
       );
       return;
     }
-    chrome.tabs.sendMessage(tabs[0].id, commandData);
+    chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
+      if (chrome.runtime.lastError) {
+        console.warn(
+          `sendContentCommand(): couldn't send command: ${
+            chrome.runtime.lastError.message
+          }.`
+        );
+      }
+      if (responseCallback) {
+        responseCallback(response);
+      }
+    });
   });
 }
 
@@ -264,7 +292,7 @@ function logDebug(message, ...params) {
     action: "logDebug",
     caller: "config",
     message: message,
-    params: params,
+    data: params,
   });
 }
 // endRemoveIf(!allowDebug)
