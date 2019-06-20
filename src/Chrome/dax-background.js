@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
   // obsolete config values (see else block below).
   chrome.storage.sync.get(null, config => {
     if (chrome.runtime.lastError) {
-      console.warn(
+      console.info(
         `Couldn't get configuration options from storage: ${
           chrome.runtime.lastError.message
         }`
@@ -29,7 +29,7 @@ chrome.runtime.onInstalled.addListener(() => {
       if (obsoleteKeys.length) {
         chrome.storage.sync.remove(obsoleteKeys, () => {
           if (chrome.runtime.lastError) {
-            console.warn(
+            console.info(
               `Couldn't remove obsolete keys from storage: ${
                 chrome.runtime.lastError.message
               }.`
@@ -72,7 +72,7 @@ chrome.runtime.onInstalled.addListener(() => {
   function setIcon(isRunning) {
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       if (chrome.runtime.lastError) {
-        console.warn(
+        console.info(
           `updateConfigValue(): couldn't get active tab to set icon: ${
             chrome.runtime.lastError.message
           }.`
