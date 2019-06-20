@@ -1,12 +1,12 @@
-let _options = { ...defaultConfig },
+let _config = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
   _linkCounter = 0;
 
 // Start the extension.
-refreshOptions();
-_options.doDebug &&
+refreshConfig(true);
+_config.doDebug &&
   console.debug(`content.js is running in iframe ${window.name}.`);
 // Listen for option updates and debug messages from config page.
 listenForMessages();
@@ -18,14 +18,17 @@ processNewLinks();
 
 /* ===== Helper functions. ===== */
 function listenForMessages() {
-  chrome.runtime.onMessage.addListener(msg => {
-    if (msg.action === "refreshOptions") {
-      refreshOptions();
+  chrome.runtime.onMessage.addListener((msg, sender, sendReply) => {
+    if (msg.action === "refreshConfig") {
+      refreshConfig(false);
     } else if (msg.action === "logDebug" && msg.message) {
-      _options.doDebug &&
-        console.debug(`[${msg.caller}] ${msg.message}`, ...msg.params);
+      _config.doDebug &&
+        console.debug(`[${msg.caller}] ${msg.message}`, ...msg.data);
+    } else if (msg.action === "ping") {
+      _config.doDebug &&
+        console.debug("Got 'ping' message; replying with 'pong'.");
+      sendReply({ value: "pong" });
     } else if (msg.action === "loadAllContent") {
-      _options.doDebug && console.debug("Got 'loadAllContent' message.");
       loadAllContent();
     }
   });
@@ -37,12 +40,12 @@ function createObserver() {
   });
 
   function processObservedEntries(entries) {
-    if (_options.checkInterval) {
+    if (_config.checkInterval) {
       let foundIntersects = false;
       entries.forEach(entry => {
         const link = entry.target,
           luid = link.dataset.luid;
-        _options.doDebug &&
+        _config.doDebug &&
           console.debug(
             'Checking intersection of "%s" link %s',
             link.className,
@@ -50,7 +53,7 @@ function createObserver() {
           );
         if (entry.isIntersecting) {
           foundIntersects = true;
-          _options.doDebug &&
+          _config.doDebug &&
             console.debug(
               '--> link.classList: %o; link.innerText: "%s"',
               link.classList,
@@ -58,7 +61,7 @@ function createObserver() {
             );
           activateLink(link);
           unobserveLink(link);
-          _options.doDebug &&
+          _config.doDebug &&
             console.debug(
               "--> Clicked %s (now %d observed)",
               luid,
@@ -73,7 +76,7 @@ function createObserver() {
       // five minutes. If some non-zombie links get unobserved, they will be
       // observed again the next time the processNewLinks timer fires.
       if (foundIntersects) {
-        _options.doDebug && console.debug("--> Checking for old links");
+        _config.doDebug && console.debug("--> Checking for old links");
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
         Object.keys(_observedLinks)
@@ -85,33 +88,33 @@ function createObserver() {
 } // end of createObserver().
 
 function processNewLinks() {
-  // Since processNewLinks() can be called by refreshOptions() when checkInterval is
+  // Since processNewLinks() can be called by refreshConfig() when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
   _timer && clearTimeout(_timer);
-  if (!_options.checkInterval) {
-    _options.doDebug && console.debug("Stopping the timeout loop.");
+  if (!_config.checkInterval) {
+    _config.doDebug && console.debug("Stopping the timeout loop.");
     return;
   }
 
   // Observe new links.
-  _options.doDebug && console.debug("Finding new links to observe.");
-  findNewLinks(_options).forEach(observeLink);
+  _config.doDebug && console.debug("Finding new links to observe.");
+  findNewLinks(_config).forEach(observeLink);
 
   // Make external links open in a new browser tab/window.
-  if (_options.openInNewWindow) {
+  if (_config.openInNewWindow) {
     const extLinkSelector =
       "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
     document.querySelectorAll(extLinkSelector).forEach(link => {
       link.target = "_blank";
       link.title = "[new window] " + link.title;
-      _options.doDebug &&
+      _config.doDebug &&
         console.debug('Added target="_blank" to external link:', link);
     });
   }
 
   // Reprocess after the checkInterval.
-  _timer = setTimeout(processNewLinks, _options.checkInterval * 1000);
+  _timer = setTimeout(processNewLinks, _config.checkInterval * 1000);
 
   // Observe a link. Instructs the IntersectionOserver to start observing the
   // link and does some record keeping.
@@ -124,7 +127,7 @@ function processNewLinks() {
     luid = tagLink(link);
     _observer.observe(link);
     _observedLinks[luid] = link;
-    _options.doDebug &&
+    _config.doDebug &&
       console.debug(
         '--> Observing "%s" link %s (now %d observed)',
         link.className,
@@ -135,21 +138,27 @@ function processNewLinks() {
   }
 }
 
-function refreshOptions() {
-  chrome.storage.sync.get(defaultConfig, options => {
+function refreshConfig(setIcon) {
+  chrome.storage.sync.get(defaultConfig, config => {
     if (chrome.runtime.lastError) {
-      console.error(
+      console.warn(
         `Couldn't get configuration form sync'd storage: ${
-          chrome.runtime.lastError
+          chrome.runtime.lastError.message
         }`
       );
       return;
     }
-    const oldCheckInterval = +_options.checkInterval;
-    _options = options;
-    _options.doDebug && console.debug("Got sync'd options: %o", _options);
+    const oldCheckInterval = +_config.checkInterval;
+    _config = config;
+    _config.doDebug && console.debug("Got sync'd config: %o", _config);
+    if (setIcon) {
+      chrome.runtime.sendMessage({
+        action: "setIcon",
+        data: !!_config.checkInterval,
+      });
+    }
     // Check if we need to resume processing links.
-    if (oldCheckInterval === 0 && _options.checkInterval !== oldCheckInterval) {
+    if (oldCheckInterval === 0 && _config.checkInterval !== oldCheckInterval) {
       processNewLinks();
     }
   });
@@ -172,7 +181,7 @@ function unobserveLink(link, removeDaxTags) {
     link.classList.remove("dax-tagged", "dax-clicked");
     link.title = link.title.replace(/^\[\w+\]\s/, "");
   }
-  _options.doDebug &&
+  _config.doDebug &&
     console.debug(
       '--> unobserved "%s" link %s; removeDaxTags: %s',
       link.className,
@@ -229,7 +238,9 @@ function tagLink(link) {
   luid = `${Date.now()}-${_linkCounter++}`;
   link.setAttribute("data-luid", luid);
   link.classList.add("dax-tagged");
-  link.title = `[tagged] ${link.title}`;
+  if (!/^\[(tagged|clicked)\] /.test(link.title)) {
+    link.title = `[tagged] ${link.title}`;
+  }
   return luid;
 }
 
@@ -240,22 +251,49 @@ function activateLink(link) {
 }
 
 function loadAllContent() {
-  _options.doDebug && console.debug("loadAllContent(): entering.");
+  _config.doDebug && console.debug("loadAllContent(): entering.");
   // Stop the processNewLinks() timeout loop.
   _timer && clearTimeout(_timer);
 
   const newLinks = findNewLinks();
-  _options.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
+  _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   if (newLinks.length) {
+    showToast("Please wait while content loads&hellip;");
     newLinks.forEach(link => {
       unobserveLink(link);
       tagLink(link);
       activateLink(link);
     });
     // Map checkInterval range (0-30 sec.) to delay range (5-10 sec.).
-    const delay = Math.floor(1000 * (5 + (_options.checkInterval * 5) / 30));
+    const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
     _timer = setTimeout(loadAllContent, delay);
   } else {
+    hideToast("All content has been loaded.", 5000);
     processNewLinks();
+  }
+
+  function showToast(message) {
+    let toast = document.getElementById("dax-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "dax-toast";
+      toast.innerText = message;
+      toast.setAttribute("role", "alert");
+      document.body.prepend(toast);
+      toast.classList.add("toast toast-open");
+    }
+  }
+
+  function hideToast(message, delay) {
+    const toast = document.getElementById("dax-toast");
+    if (toast) {
+      toast.innerText = message;
+      toast.style.setProperty("--delay", delay);
+      toast.classList.add("toast-closed");
+      toast.classList.remove("toast-open");
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, delay + 500);
+    }
   }
 }
