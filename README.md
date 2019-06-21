@@ -27,17 +27,17 @@ After you install one of those browsers, [install the extension from the Google 
 
 ### Other browsers
 
-I have not tried to install the extension on any other browsers (e.g., MS Edge, Opera, Safari, etc.). I don't have access to an iOS device, so I can't do the development work necessary to make it work on Safari [see note below]. I can try MS Edge and Opera—especially since MS Edge is going to adopt the WebKit browser engine (the same engine that powers Chrome and Safari), albeit with some Microsoft-specific customizations.
+I have not tried to install the extension on any other browsers (e.g., MS Edge, Opera, Safari, etc.). I don’t have access to an iOS device, so I can’t do the development work necessary to make it work on Safari (see note below). I can try MS Edge and Opera—especially since MS Edge is going to adopt the WebKit browser engine (the same engine that powers Chrome and Safari), albeit with some Microsoft-specific customizations.
 
 I will update this section when I have more to share.
 
-_**Note:** if you are a web developer with an iOS machine and would like to help adapt this extension for Safar, please contact me. The code is open source, but I would like to collaborate, especially as I'm planning to add more features in the future._
+_**Note:** if you are a web developer with an iOS machine, and you are willing to help adapt this extension for Safari, please contact me. The code is open source, but I would like to collaborate with you._
 
 ---
 
 ## Configuration and operation
 
-The extension is designed to work automatically, and it is configured with the most useful options (i.e., expand all replies and long media items; and check for new links every 5 seconds).
+The extension is designed to work automatically, and it is configured with the most useful options (i.e., expand all replies and long media items; load new comments and more comments, and check for new links every 5 seconds).
 
 You can change the configuration to choose (a) which links to automatically expand, and (b) how often to check for new links. There are three ways to access the configuration screen:
 
@@ -57,21 +57,27 @@ Either of the last two options will display a new browser tab or window containi
 
 On the configuration popup or page you can change any of the options shown. Changes take effect immediately (there is no “Save” button) and—if you are signed in to your browser’s synchronization service—will be synchronized to your other browsers.
 
-### Configuration help
+### Configuration options
 
-Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page. When the icon is blue, the Options page appears as a popup window. Note that you might have to scroll down to see all of the options.
+Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page. When the icon is blue, the active tab or window contains a Disqus discussion. The Options page appears as a popup when the icon is clicked. Note that you might have to scroll down to see all of the options in the popup.
 
-When the icon is gray, the browser’s Extension management menu appears instead. Choose the “Options” item to display the Configuration options page in a new browser tab or window. The sections below provide more information about these configuration options.
+When the icon is gray, the active tab or window does not contain a Disqus discussion. The browser’s Extension management menu appears when the icon is clicked. Choose the “Options” menu item to display the Configuration options page in a new browser tab or window. 
 
-Note that your changes on the Configuration options page are saved automatically. And if you use your browser’s synchronization feature, your settings will be synchronized to your other browsers.
+The sections below provide more information about these configuration options.
+
+_**Note:** your changes on the Configuration options page are saved automatically. And if you use your browser’s synchronization feature, your settings will be synchronized to your other browsers._
 
 #### Load all content
 
 _**Note**: as of June 20, 2019, this feature is currently only available for Chrome, and has not yet been published to the Chrome web store._
 
-Click this button to repeatedly expand all content and reply links until all of the discussion’s content is loaded. This is most useful for discussions that are not receiving any new comments or replies. The goal is to allow searching the full content of the discussion using your browser’s “Find...” (Ctrl+F) command.
+Click this button to automatically expand all content and reply links until all of the discussion content is loaded. This feature is most useful for discussions that are not receiving new comments or replies. The goal is to allow searching the full content of the discussion using your browser’s “Find...” (Ctrl+F) command.
 
-Note that this button is only available from the popup version of the options page, since it applies to the currently active window/tab that contains a Disqus discussion.
+_**Notes**:_ 
+
+_1. This button is only available from the popup version of the options page, since it applies to the currently active tab or window that contains a Disqus discussion._
+
+_2. The button is disabled when the active tab or window does not contain a Disqus discussion (including on the Extensions page)._
 
 Since this option could load a lot of data (and media, if you have [Display Media mode enabled](#a-note-about-hidden-media-items)), this is not a persistent option. Instead, you can use this button to load all of the content on demand. When you click this button you will be prompted to confirm that you want to proceed.
 
@@ -104,23 +110,32 @@ When an embedded audio or video player is revealed, it might play automatically.
 
 However, even after following these instructions, the browser may still allow some media to autoplay (this seems to depend on whether you have previously interacted with the source of that media). This feature tries to prevent autoplay media embedded by Disqus, regardless of the autoplay settings in your browser.
 
-#### Open links in a new tab/window
+#### Open URLs in a new tab/window
 
-When you click on an embedded media item (image, Tweet, video), the item displays in a new browser tab or window (depending on your browser’s settings). However, URLs entered in comments and replies are also clickable, but they load in the _current_ window, replacing the page you are viewing. This feature forces those URLs to open in a new browser tab or window.
+When you click on an embedded media item (image, Tweet, video), the item opens in a new browser tab or window (depending on your browser’s settings). URLs entered in comments and replies are also clickable, but they load in the _current_ window, replacing the page you are viewing. This feature forces those URLs to open in a new browser tab or window.
 
 #### Extension options
 
 These options control other aspects of the extension.
 
-- **Check for changes**: controls how often (in seconds) the extension checks for new links.
-- **Use dark theme**: changes the options page to a dark color scheme.
+- **Check for changes**: controls how often (in seconds) the extension checks for new links. If you set this value to 0 (zero), the extension pauses its search for new links to expand. In that case, the extension’s icon changes to a “paused” image: ![Extension icon when paused](docs/dax_icon_paused.png).
+
+- **Use dark theme**: displays the options page in a dark color scheme:
+![Configuration options popup in dark theme](docs/dax_config_page_dark.png)
+
 - **Log debug output**: causes the extension to log debug messages to the brower’s Developer Console. You should not need to enable this option during normal usage.
 
 ---
 
-## Future changes
+## Reporting bugs
 
-I welcome your suggestions for new features.
+If you encounter a bug, please create an Issue in this repository. Be sure include the following information:
+- The URL of the page where the error happened.
+- The issue you experienced (describe in as much detail as possible).
+- If you can reproduce the problem, provide the steps to do so.
+- Which browser (including version) you are using.
+- Which version of the extension you are using (the version is shown on the Configuration options page).
+- Any other information you think would be helpful.
 
 ---
 
@@ -128,8 +143,8 @@ I welcome your suggestions for new features.
 
 ### Version 1.0
 
-- New **Load all content** option: repeatedly expands all replies and content links and buttons until all content has been loaded.
-- The extension’s icon in the browser’s toolbar changes to a “pause” icon when the “Check for new content” option is set to zero.
+- New **Load all content** option: automatically expands all replies and content links and buttons until all content has been loaded.
+- The extension’s icon in the browser’s toolbar changes to a “pause” icon when the “Check for new content” option is set to 0 (zero).
 
 ### Version 0.3
 
@@ -140,14 +155,14 @@ New auto-expand options:
 
 Bug fixes:
 
-- Fixed the **Open links in a new tab/window** option.
+- Fixed the **Open URLs in a new tab/window** option.
 
 ### Version 0.2
 
 New content management options:
 
 - **Stop autoplay media**: attemtps to stop autoplay embedded audio and video items (because the browser settings to do this do not always work). Does not affect GIFs.
-- **Open links in a new tab/window**: forces URLs included in a comment to open in a new browser window or tab (depending on your browser’s settings).
+- **Open links in a new tab or window**: forces URLs included in a comment to open in a new browser window or tab (depending on your browser’s settings).
 
 ### Version 0.1
 
