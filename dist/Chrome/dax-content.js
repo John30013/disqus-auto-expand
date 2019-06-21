@@ -258,7 +258,7 @@ function loadAllContent() {
   const newLinks = findNewLinks();
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   if (newLinks.length) {
-    showToast("Please wait while content loads...");
+    showToast("Please wait while the content loads…");
     newLinks.forEach(link => {
       unobserveLink(link);
       tagLink(link);
@@ -268,7 +268,7 @@ function loadAllContent() {
     const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
     _timer = setTimeout(loadAllContent, delay);
   } else {
-    hideToast("All content has been loaded.", 5000);
+    hideToast("All content has been loaded.", 3000);
     processNewLinks();
   }
 
@@ -278,30 +278,35 @@ function loadAllContent() {
     // Make sure the discussion forum (and therefore the toast) is visible.
     document.body.scrollIntoView();
 
-    let toast = document.getElementById("dax-toast");
+    let toast = document.getElementById("dax-toast"),
+      toastText = message || '';
     if (!toast) {
       _config.doDebug && console.debug("--> creating toast");
       toast = document.createElement("div");
       toast.id = "dax-toast";
       toast.setAttribute("role", "alert");
-      toast.innerText = message || "";
+      toast.innerText = toastText;
       toast.className = "toast";
       document.body.prepend(toast);
       toast.classList.add("toast-open");
     } else {
-      toast.innerText = message || "";
+      if (toast.innerText !== toastText) {
+        toast.innerText = toastText;
+      }
     }
     return toast;
   }
 
   function hideToast(message, delay) {
-    const toast = document.getElementById("dax-toast") || showToast();
-    toast.innerText = message;
+    const toast = document.getElementById("dax-toast") || showToast(),
+      hideDelay = delay || 3000;
+    toast.innerText = message || '';
+    toast.classList.add("toast-done");
     setTimeout(() => {
       toast.classList.remove("toast-open");
-    }, delay);
+    }, hideDelay);
     setTimeout(() => {
       document.body.removeChild(toast);
-    }, delay + 500);
+    }, hideDelay + 500);
   }
 }

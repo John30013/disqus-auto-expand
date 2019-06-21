@@ -1,5 +1,4 @@
 .toast {
-  --toast-width: 18rem;
   background-color: #282828;
   border: 2px solid #459cf9;
   border-radius: 5px;
@@ -9,17 +8,53 @@
   display: block;
   margin: 0.5rem 0;
   opacity: 0;
-  padding: 0.5rem;
+  padding: 0.5rem 0.5rem 1rem;
   position: fixed;
-  left: calc(50% - var(--toast-width) / 2);
+  left: calc(50% - 18rem / 2);
   top: 2rem;
   text-align: center;
   transition: opacity 0.5s ease-in-out;
-  width: var(--toast-width);
+  width: 18rem;
   z-index: 20000;
+}
+
+.toast::before {
+  animation: 3s ease-in-out infinite alternate paused toast-throbber;
+  background-color: transparent;
+  border-top: 1px solid #459cf9;
+  box-sizing: border-box;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0.5rem;
+  height: 0.65rem;
+  z-index: 20001;
+  opacity: 0;
+  transition: opacity 1s ease-out 1s;
 }
 
 .toast.toast-open {
   opacity: 1;
+}
+
+.toast.toast-open::before {
+  animation-play-state: running;
+  opacity: 1;
+}
+
+.toast.toast-open.toast-done::before {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+@keyframes toast-throbber {
+  0% {
+    left: 2;
+    width: calc(18rem - 1rem - 4px);
+  }
+  100% {
+    left: calc(50% - 1rem);
+    width: 2rem;
+  }
 }
 /*# sourceMappingURL=dax-content.css.map */

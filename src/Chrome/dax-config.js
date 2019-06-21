@@ -86,7 +86,8 @@ function listenForUpdates() {
     // endRemoveIf(!allowDebug)
     let target = event.target,
       value = null,
-      typingDebounceTimer = null;
+      typingDebounceTimer = null,
+      debounceDelay = 3000;
     if (target.id === "checkInterval") {
       if (typingDebounceTimer) {
         clearTimeout(typingDebounceTimer);
@@ -96,7 +97,7 @@ function listenForUpdates() {
           if (target.validity.valid) {
             updateConfigValue(target.id, +target.value);
           } else {
-            // Restore the previous value after 1 second.
+            // Restore the previous value after debounceDelay (msecs).
             chrome.storage.sync.get(target.id, value => {
               if (chrome.runtime.lastError) {
                 console.warn(
@@ -111,7 +112,7 @@ function listenForUpdates() {
             return;
           }
         },
-        1000,
+        debounceDelay,
         target
       );
     } else {
