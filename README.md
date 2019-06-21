@@ -10,24 +10,24 @@ _**NOTE:** The Chrome and Firefox extensions are now available in their respecti
 
 ### Chrome desktop browser
 
-[Install from the Google Play Store](https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US).
+[Install from the Google Play Store.](https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US)
 
 ### Chrome-based mobile browsers for Android
 
 Chrome for Android does not currently support installing extensions. However, other mobile browsers based on the Chromium browser engine, such as Kiwi and Yandex, do support extensions.
 
-- [Read instructions for the Kiwi browser](https://www.howtogeek.com/415876/how-to-install-desktop-chrome-extensions-on-android/)
-- [Read instructions for the Yandex browser](https://www.gizbot.com/how-to/tips-tricks/how-you-can-install-chrome-extensions-on-android-050121.html).
+- [Read instructions for the Kiwi browser.](https://www.howtogeek.com/415876/how-to-install-desktop-chrome-extensions-on-android/)
+- [Read instructions for the Yandex browser.](https://www.gizbot.com/how-to/tips-tricks/how-you-can-install-chrome-extensions-on-android-050121.html)
 
 After you install one of those browsers, [install the extension from the Google Play Store](https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US).
 
 ### Firefox desktop and mobile browsers
 
-[Install from the Firefox Add-ons site](https://addons.mozilla.org/en-US/firefox/addon/disqus-auto-expander/?src=search).
+[Install from the Firefox Add-ons site.](https://addons.mozilla.org/en-US/firefox/addon/disqus-auto-expander/?src=search)
 
 ### Other browsers
 
-I have not tried to install the extension on any other browsers (e.g., MS Edge, Opera, Safari, etc.). I don’t have access to an iOS device, so I can’t do the development work necessary to make it work on Safari (see note below). I can try MS Edge and Opera—especially since MS Edge is going to adopt the WebKit browser engine (the same engine that powers Chrome and Safari), albeit with some Microsoft-specific customizations.
+I have not tried to install the extension on any other browsers (MS Edge, Opera, Safari, etc.). I don’t have access to an iOS device, so I can’t do the development work necessary to make it work on Safari (see note below). I can try MS Edge and Opera—especially since MS Edge is going to adopt the WebKit browser engine (the same engine that powers Chrome and Safari), albeit with some Microsoft-specific customizations.
 
 I will update this section when I have more to share.
 
@@ -39,16 +39,16 @@ _**Note:** if you are a web developer with an iOS machine, and you are willing t
 
 The extension is designed to work automatically, and it is configured with the most useful options (i.e., expand all replies and long media items; load new comments and more comments, and check for new links every 5 seconds).
 
-You can change the configuration to choose (a) which links to automatically expand, and (b) how often to check for new links. There are three ways to access the configuration screen:
+You can change the configuration to choose which items to automatically expand, and how often to check for new links. There are three ways to access the configuration screen:
 
-1. On a desktop browser, when you are on a web page that contains a Disqus discussion area, the extension’s icon turns blue: ![Disqus Auto Expand extension icon in the active state](docs/dax_icon_blue.png). You can click the icon to display the configuration page in a popup view:  
-   ![Screen shot of configuration popup when the extension is active](docs/dax_config_page.png)  
+1. On a desktop browser, when you are on a web page that contains a Disqus discussion, the extension’s icon turns blue: ![Disqus Auto Expand extension icon in the active state](docs/dax_icon_blue.png). You can click the icon to display the configuration page as a popup:  
+   ![Screen shot of configuration popup when the extension is active.](docs/dax_config_page.png)  
    _**Note:** you may need to scroll down to see all of the options in the popup view._
 
-1. On a Desktop browser, when you are on a web page that _does not_ contain a Disqus discussion area, the extension’s icon turns gray: ![Disqus Auto Expand extension icon in the inactive state](docs/dax_icon_gray.png). You can click the icon to display the extension management popup and choose “Options”:  
+1. On a desktop browser, when you are on a web page that _does not_ contain a Disqus discussion area, the extension’s icon turns gray: ![Disqus Auto Expand extension icon in the inactive state](docs/dax_icon_gray.png). You can click the icon to display the extension management popup and choose “Options”:  
    ![Screen shot of Chrome's standard extension management popup](docs/chrome_extension_management_popup.png)
 
-1. On a Desktop or Mobile browser you can access the “Extension options” page by choosing the “Details” button on the extension’s tile in the browser’s “Extensions” page:  
+1. On a desktop or mobile browser you can access the “Extension options” page by choosing the “Details” button on the extension’s tile in the browser’s “Extensions” page:  
    ![Screen shot of the Disqus Auto Expand extension, installed in the Chrome browser's Extensions page](docs/chrome_extension_tile.png)  
    Then on the details page scroll down and select the section titled “Extension options”:  
    ![Screen shot of the "Extension options" section](docs/chrome_extension_options.png)
@@ -59,7 +59,9 @@ On the configuration popup or page you can change any of the options shown. Chan
 
 ### Configuration options
 
-Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page. When the icon is blue, the active tab or window contains a Disqus discussion. The Options page appears as a popup when the icon is clicked. Note that you might have to scroll down to see all of the options in the popup.
+Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page. 
+
+When the icon is blue, the active tab or window contains a Disqus discussion. The Options page appears as a popup when the icon is clicked. Note that you might have to scroll down to see all of the options in the popup.
 
 When the icon is gray, the active tab or window does not contain a Disqus discussion. The browser’s Extension management menu appears when the icon is clicked. Choose the “Options” menu item to display the Configuration options page in a new browser tab or window. 
 
