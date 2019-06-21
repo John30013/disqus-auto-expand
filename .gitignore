@@ -1,6 +1,5 @@
 .private
 .vscode
-package-lock.json
 node_modules
 **/*.map
 **/*.pem
