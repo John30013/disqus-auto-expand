@@ -96,7 +96,7 @@ html.flags = {
 
 const copyFiles = function() {
   return gulp
-    .src([`${src}manifest.json`, `${src}images/*.png`], { base: src })
+    .src([`${src}manifest.json`, `${src}images/*`], { base: src })
     .pipe(gulp.dest(dest));
 };
 copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dest}.`;
