@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Disqus Auto Expander",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Automatically shows replies and new comments in Disqus discussions. Stops autoplay media and opens URLs in a new tab/window.",
   "permissions": ["activeTab", "declarativeContent", "storage"],
   "background": {

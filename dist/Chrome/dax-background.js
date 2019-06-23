@@ -1,5 +1,5 @@
 chrome.runtime.onInstalled.addListener(() => {
-  _config = defaultConfig;
+  let _config = defaultConfig;
   // Make sure the extension's options are stored when the extension starts up.
   // Pass `null` so we get everything in storage. This allows us to clean up
   // obsolete config values (see else block below).
@@ -13,13 +13,9 @@ chrome.runtime.onInstalled.addListener(() => {
       return;
     }
     if (!Object.keys(config).length) {
-      chrome.storage.sync.set(defaultConfig, () => {
-        // console.debug("Stored default config: %o", defaultConfig);
-      });
-      // config = defaultConfig();
+      chrome.storage.sync.set(defaultConfig);
     } else {
       // Check for and remove obsolete config items.
-      config.doDebug && console.debug("Found existing config: %o", config);
       let obsoleteKeys = [];
       for (let key in config) {
         if (!defaultConfig.hasOwnProperty(key)) {
@@ -34,12 +30,14 @@ chrome.runtime.onInstalled.addListener(() => {
                 chrome.runtime.lastError.message
               }.`
             );
+            // removeIf(!allowDebug)
           } else {
             config.doDebug &&
               console.debug(
                 "--> removed obsolete config values,",
                 obsoleteKeys
               );
+            // endRemoveIf(!allowDebug)
           }
         });
       }
@@ -63,6 +61,9 @@ chrome.runtime.onInstalled.addListener(() => {
 
   // Listen for messages from content and config scripts.
   chrome.runtime.onMessage.addListener(msg => {
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("Got message: %o", msg);
+    // endRemoveIf(!allowDebug)
     if (msg.action === "setIcon" && typeof msg.data !== "undefined") {
       setIcon(!!msg.data);
     }
@@ -70,23 +71,33 @@ chrome.runtime.onInstalled.addListener(() => {
 
   // Set the extension's icon.
   function setIcon(isRunning) {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (chrome.runtime.lastError) {
-        console.info(
-          `updateConfigValue(): couldn't get active tab to set icon: ${
-            chrome.runtime.lastError.message
-          }.`
-        );
-        return;
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug(`setIcon(${isRunning}): entering.`);
+    // endRemoveIf(!allowDebug)
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      tabs => {
+        if (chrome.runtime.lastError) {
+          console.info(
+            `setIcon(): couldn't get active tab to send message: ${
+              chrome.runtime.lastError.message
+            }.`
+          );
+          return;
+        }
+        // removeIf(!allowDebug)
+        _config.doDebug && console.debug(`--> Setting icon.`);
+        // endRemoveIf(!allowDebug)
+        chrome.pageAction.setIcon({
+          tabId: tabs[0].id,
+          path: isRunning
+            ? "images/disqus_eye_16.png"
+            : "images/disqus_eye_16_paused.png",
+        });
       }
-      _config.doDebug &&
-        console.debug(`--> Setting icon; isRunning is ${isRunning}.`);
-      chrome.pageAction.setIcon({
-        tabId: tabs[0].id,
-        path: isRunning
-          ? "images/disqus_eye_16.png"
-          : "images/disqus_eye_16_paused.png",
-      });
-    });
+    );
   } // end of setIcon().
 }); // end of onInstalled listener.
