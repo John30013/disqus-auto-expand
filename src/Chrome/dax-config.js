@@ -29,7 +29,7 @@ function initUiText() {
 function getCurrentConfig() {
   chrome.storage.sync.get(defaultConfig, config => {
     if (chrome.runtime.lastError) {
-      console.warn(
+      console.info(
         "Couldn't initialize config from storage: %s",
         chrome.runtime.lastError.message
       );
@@ -100,7 +100,7 @@ function listenForUpdates() {
             // Restore the previous value after debounceDelay (msecs).
             chrome.storage.sync.get(target.id, value => {
               if (chrome.runtime.lastError) {
-                console.warn(
+                console.info(
                   "Couldn't get config value %s from storage: %s",
                   target.id,
                   chrome.runtime.lastError.message
@@ -130,7 +130,7 @@ function listenForUpdates() {
   function updateConfigValue(key, value) {
     chrome.storage.sync.set({ [key]: value }, () => {
       if (chrome.runtime.lastError) {
-        console.warn(
+        console.info(
           `Couldn't store config option ${key} with value ${value}: ${
             chrome.runtime.lastError.message
           }.`
@@ -148,7 +148,7 @@ function listenForUpdates() {
     if (key !== "useDarkTheme") {
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         if (chrome.runtime.lastError) {
-          console.warn(
+          console.info(
             `updateConfigValue(): couldn't get active tab to send a message to: ${
               chrome.runtime.lastError.message
             }.`
@@ -264,7 +264,7 @@ function initLoadAllContent() {
 function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (chrome.runtime.lastError) {
-      console.warn(
+      console.info(
         `sendContentCommand(): couldn't get active tab for sendMessage: ${
           chrome.runtime.lastError.message
         }.`
@@ -273,7 +273,7 @@ function sendContentCommand(commandData, responseCallback) {
     }
     chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
       if (chrome.runtime.lastError) {
-        console.warn(
+        console.info(
           `sendContentCommand(): couldn't send command: ${
             chrome.runtime.lastError.message
           }.`
@@ -284,7 +284,7 @@ function sendContentCommand(commandData, responseCallback) {
       }
     });
   });
-}
+} // end of sendContentCommand().
 
 // removeIf(!allowDebug)
 function logDebug(message, ...params) {
