@@ -5,29 +5,32 @@ $theme-lite-color-brdr: #666666;
 $theme-lite-color-ctrl: #0000000f;
 $theme-lite-color-ctrl-focus: #ffffffc0;
 $theme-lite-color-ctrl-invalid: #ff00000f;
+$theme-lite-color-dlg-bkdrp: #00000080;
 $theme-lite-color-error: #660000;
 $theme-lite-color-text: #222222;
 $theme-lite-color-text-sec: #666666;
 
 // Dark theme
-$theme-dark-color-bkgd: #222222;
+$theme-dark-color-bkgd: #282828;
 $theme-dark-color-brand: #459cf9;
 $theme-dark-color-brdr: #999999;
 $theme-dark-color-ctrl: #00000033;
 $theme-dark-color-ctrl-focus: #00000080;
 $theme-dark-color-ctrl-invalid: #ff000033;
+$theme-dark-color-dlg-bkdrp: #00000099;
 $theme-dark-color-error: #ff9999;
 $theme-dark-color-text: #dddddd;
-$theme-dark-color-text-sec: #999999;
+$theme-dark-color-text-sec: #aaaaaa;
 
 // Font stack & text sizing & spacing.
-$font-family: 'Segoe UI', Tahoma, Arial, Geneva, Verdana, sans-serif;
+$font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
 $oneRem: 14px;
 $lineHeight: 1.7;
+$semiboldWeight: 600;
 
 // Mobile breakpoint
 $mobileBreakpoint: $oneRem * 40;
-$mobileMinWidth: $oneRem * 21;
+$mobileMinWidth: 320px;
 $desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
@@ -37,6 +40,12 @@ $desktopMaxWidth: $desktopWidth;
     white-space: normal;
   }
 }
+
+@mixin disabled {
+  color: var(--color-text-sec);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 * {
   box-sizing: border-box;
 }
@@ -44,21 +53,25 @@ html {
   border: 0;
   font-family: $font-family;
   font-size: $oneRem;
-  // line-height: $lineHeight;
   margin: 0;
   padding: 0;
 }
 body {
+  --ctrl-radius: 5px;
+  // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
+  --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
   --color-brdr: #{$theme-lite-color-brdr};
   --color-ctrl: #{$theme-lite-color-ctrl};
   --color-ctrl-focus: #{$theme-lite-color-ctrl-focus};
   --color-ctrl-invalid: #{$theme-lite-color-ctrl-invalid};
   --color-ctrl-on: #{$theme-lite-color-brand};
+  --color-dlg-bkdrp: #{$theme-lite-color-dlg-bkdrp};
   --color-error: #{$theme-lite-color-error};
   --color-text: #{$theme-lite-color-text};
   --color-text-sec: #{$theme-lite-color-text-sec};
   --color-link: #{darken($theme-lite-color-brand, 20%)};
+  --prompt-brightness: 0.5;
   &.theme-dark {
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
@@ -66,6 +79,7 @@ body {
     --color-ctrl-focus: #{$theme-dark-color-ctrl-focus};
     --color-ctrl-invalid: #{$theme-dark-color-ctrl-invalid};
     --color-ctrl-on: #{$theme-dark-color-brand};
+    --color-dlg-bkdrp: #{$theme-dark-color-dlg-bkdrp};
     --color-error: #{$theme-dark-color-error};
     --color-text: #{$theme-dark-color-text};
     --color-text-sec: #{$theme-dark-color-text-sec};
@@ -76,26 +90,45 @@ body {
   color: var(--color-text);
   font-size: 100%;
   line-height: $lineHeight;
-  margin: 0; // 18px = scrollbar width.
+  margin: 0;
   overflow-x: hidden;
-  padding: 0 .5rem .5rem;
+  padding: 0 0.5rem 0.5rem;
   max-width: $desktopMaxWidth;
   min-width: $desktopWidth;
+  -webkit-transition: -webkit-filter 0.4s ease-in 0.1s,
+    background-color 0.5s ease-in;
 
-  display: grid;
-  grid-template: 
-    "header   header"   auto
-    "contopts contopts" auto
-    "extopts  footer"  auto
-    / 1fr 1fr;
-  column-gap: 1rem;
-  align-items: start;
-
-  @media screen and (max-width: $mobileBreakpoint) {
-    display: block;
+  @media screen and (max-device-width: $mobileBreakpoint) {
     line-height: 1.25;
     min-width: $mobileMinWidth;
     width: auto;
+
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      height: 0.5rem;
+      position: fixed;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    &::before {
+      background: linear-gradient(
+        to bottom,
+        var(--color-bkgd) 0%,
+        var(--color-bkgd-clear) 100%
+      );
+      top: 0;
+    }
+    &::after {
+      background: linear-gradient(
+        to top,
+        var(--color-bkgd) 0%,
+        var(--color-bkgd-clear) 100%
+      );
+      bottom: 0;
+    }
   }
 }
 
@@ -116,7 +149,7 @@ h2 {
   font-size: 1.25rem;
   font-weight: normal;
   margin: 0 0 0.5rem;
-  padding: 0 0 0.5rem;
+  padding: 0 0 calc(0.5rem - 1px);
   border-bottom: 1px dotted;
 }
 
@@ -125,139 +158,276 @@ p {
   font-size: 1rem;
   margin: 0 0 1.25rem;
   padding: 0;
+
+  &:last-child {
+    // border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
 }
 
-.nowrap {
-  white-space: nowrap;
+.italic {
+  font-style: italic !important;
 }
 .semibold {
-  font-weight: 500;
+  font-weight: $semiboldWeight !important;
+}
+.nowrap {
+  white-space: nowrap !important;
 }
 .wrap {
   white-space: normal !important;
 }
 
+main {
+  display: grid;
+  grid-template:
+    "header   header" auto
+    "contopts contopts" auto
+    "extopts  footer" auto
+    / 1fr 1fr;
+  column-gap: 1rem;
+  align-items: start;
 
-header {
-  background-image: url(images/disqus_eye_48.png);
-  background-position: 0 0.5rem;
-  background-repeat: no-repeat;
-  background-size: fit;
-  grid-area: header;
-  line-height: 1.5;
-  padding-left: 4rem;
-  @include white-space();
+  @media screen and (max-device-width: $mobileBreakpoint) {
+    display: block;
+  }
 
-  h1 {
-    font-size: 1.5rem;
-    font-weight: normal;
-    margin: 0;
-    padding: 0;
+  > header {
+    grid-area: header;
 
-    small {
-      display: block;
-      font-size: 1.25rem;
+    h1 {
+      background-image: url(images/disqus_eye_48.png);
+      background-position: 0 0.5rem;
+      background-repeat: no-repeat;
+      background-size: fit;
+      color: var(--color-text);
+      font-size: 1.5rem;
       font-weight: normal;
-      margin: 0 0 0.5rem;
-      padding: 0;
-
-      &:last-child {
-        margin: 0;
-      }
-    }
-  }
-}
-
-footer {
-  border-top: 1px solid var(--color-text);
-  grid-area: footer;
-  margin-top: .5rem;
-  padding-top: .5rem;
-
-  b {
-    font-weight: 600;
-    color: var(--color-text-sec);
-  }
-}
-
-section {
-  border-top: 1px solid var(--color-text);
-  margin: .5rem 0 0;
-  padding-top: .5rem;
-  width: 100%;
-
-  &:first-of-type {
-    display: grid;
-    grid-area: contopts;
-    grid-template: 
-      "heading heading" auto
-      "col-1 col-2" auto
-      / 1fr 1fr;
-    grid-auto-flow: column;
-    column-gap: 1rem;
-    align-items: start;
-
-    & > h2 {
-      grid-area: heading;
-    }
-
-    @media screen and (max-width: $mobileBreakpoint) {
-      display: block;
-    }
-  }
-  &:last-of-type {
-    grid-area: extopts;
-  }
-
-  > h2 {
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  p {
-    @media screen and (min-width: $mobileBreakpoint + 1px) {
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    display: grid;
-    column-gap: 1rem;
-    grid-template:
-      "label input" auto
-      "help  help" auto
-      / auto 8rem;
-
-    span, label {
-      &:first-child {
-        color: var(--color-text-sec);
-        font-weight: 600;
-        grid-area: label;
-        // padding-right: 1rem;
-        min-width: 10rem;
-        // white-space: nowrap;
-      }
-      &:last-child {
-        grid-area: input;
-      }
-    }
-    & > small {
-      color: var(--color-text-sec);
-      display: block;
-      font-weight: normal;
-      font-size: 0.857rem;
-      grid-area: help;
-      margin-top: 0.125rem;
-      white-space: normal;
-    }
-
-    & > span.input {
-      text-align: start;
+      line-height: 1.5;
+      margin: 0;
       @include white-space();
+
+      a:link,
+      a:visited,
+      a:active {
+        color: inherit;
+        display: block;
+        text-indent: 4rem;
+        text-decoration: none;
+      }
+      a:focus {
+        box-shadow: 0 0 0 1px var(--color-ctrl-on);
+      }
+
+      small {
+        // display: block;
+        font-size: 1rem;
+        font-weight: normal;
+
+        &:last-child {
+          display: block;
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
+
+  > footer {
+    border-top: 1px solid var(--color-text);
+    color: var(--color-text-sec);
+    grid-area: footer;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+
+    // On small screens we need a larger top margin to simulate the bottom margin
+    // that has been suppressed on the last paragraph inside the SECTIONs.
+    @media screen and (max-device-width: $mobileBreakpoint) {
+      margin-top: 0.625rem;
     }
 
-    input#checkInterval {
-      width: 1.25rem;
-      text-align: center;
+    b {
+      // Same font styling as a control's label.
+      color: var(--color-text);
+      font-weight: $semiboldWeight;
+    }
+  }
+
+  > section {
+    border-top: 1px solid var(--color-text);
+    margin: 0.5rem 0 0;
+    padding-top: 0.5rem;
+    width: 100%;
+
+    // On large screens we use a dual-column layout for the content options.
+    &:first-of-type {
+      grid-area: contopts;
+      display: grid;
+      grid-template:
+        "heading heading" auto
+        "col-1 col-2" auto
+        / 1fr 1fr;
+      grid-auto-flow: column;
+      column-gap: 1rem;
+      align-items: start;
+
+      & > header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between; // Align heading to the left, button to the right.
+        border-bottom: 1px dotted;
+        grid-area: heading;
+        margin: 0 0 0.5rem;
+        padding: 0 0 calc(0.5rem - 1px);
+        position: relative;
+
+        > h2 {
+          border-bottom: 0;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        > .dialog-wrapper {
+          pointer-events: none;
+          position: absolute;
+          right: 0.25rem;
+          top: 2.5rem;
+          opacity: 0;
+          transition: opacity 0.3s ease-in 0.1s;
+          z-index: 20;
+
+          > .dialog {
+            background-color: var(--color-bkgd);
+            border: 1px solid var(--color-brdr);
+            border-radius: 5px;
+            box-shadow: 0 0 0.25rem 0.25rem var(--color-ctrl-on);
+            color: var(--color-text);
+            padding: 1rem;
+
+            h3 {
+              color: var(--color-text-sec);
+              font-size: 1.125rem;
+              font-weight: normal;
+              margin: 0 0 0.5rem;
+              padding: 0 0 calc(0.5rem - 1px);
+              border-bottom: 1px dotted;
+            }
+            p {
+              display: block;
+
+              &:last-of-type {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+              }
+            }
+          }
+
+          &::after {
+            background-color: #000;
+            content: "";
+            cursor: none;
+            opacity: 0;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transition: opacity 0.3s ease-in;
+            z-index: -10;
+          }
+
+          &.dialog-open {
+            opacity: 1;
+            pointer-events: all;
+
+            &::after {
+              cursor: not-allowed;
+              opacity: 0.5;
+            }
+          }
+        }
+      }
+
+      // On small screens we fall back to a single-column layout.
+      @media screen and (max-device-width: $mobileBreakpoint) {
+        display: block;
+      }
+    }
+
+    // The second section goes in the left column below the content options.
+    &:last-of-type {
+      grid-area: extopts;
+    }
+
+    // In the dual-column layout (large screens), the bottom paragraph in each
+    // column loses its bottom border, margin and padding (since the next section
+    // and footer sit below them and have top margins and borders).
+    // In the single-column layout (small screens), the two "columns" are stacked
+    // and we need to restore the bottom margin on both "columns", and the bottom
+    // border and padding on the first one (since it's visually in the middle of
+    // the single column). We do this on the DIVs ("columns") to avoid complex
+    // style rules on the paragraphs.
+    @media screen and (max-device-width: $mobileBreakpoint) {
+      > div {
+        margin-bottom: 0.625rem;
+
+        &:first-of-type {
+          // border-bottom: 1px dotted var(--color-text-sec);
+          // padding-bottom: calc(0.625rem - 1px);
+          padding-bottom: 0.625rem;
+        }
+      }
+    }
+
+    > header,
+    > h2 {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    p {
+      display: grid;
+      column-gap: 1rem;
+      grid-template:
+        "label input" auto
+        "help  help" auto
+        / auto 8.25rem;
+      // border-bottom: 1px dotted var(--color-text-sec);
+      margin-bottom: 0.625rem;
+      // padding-bottom: calc(0.625rem - 1px);
+      padding-bottom: 0.625rem;
+
+      span,
+      label {
+        &:first-child {
+          color: var(--color-text);
+          font-weight: $semiboldWeight;
+          grid-area: label;
+          min-width: 10rem;
+        }
+        &:last-child {
+          grid-area: input;
+        }
+      }
+      & > small {
+        color: var(--color-text-sec);
+        display: block;
+        font-weight: normal;
+        font-size: 0.857rem;
+        grid-area: help;
+        margin-top: 0.125rem;
+        white-space: normal;
+      }
+
+      & > span.input {
+        text-align: start;
+        @include white-space();
+      }
+
+      input#checkInterval {
+        width: 1.75rem;
+        text-align: center;
+      }
     }
   }
 }
@@ -272,7 +442,7 @@ textarea {
   color: var(--color-text);
   font-family: $font-family;
   font-size: 1rem;
-  font-weight: normal;
+  font-weight: $semiboldWeight;
   padding: 0 0.25rem;
   position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
 
@@ -294,7 +464,6 @@ textarea {
 
 /* Toggle switch (styled checkbox) input */
 .input-toggle {
-  --radius: 5px;
   line-height: 1.5;
 
   > input[type="checkbox"] {
@@ -306,16 +475,16 @@ textarea {
   > label {
     background: var(--color-ctrl);
     border: 1px solid var(--color-brdr);
-    border-radius: var(--radius);
+    border-radius: var(--ctrl-radius);
     box-sizing: content-box;
     cursor: pointer;
     display: block;
+    left: calc(100% - 2.5rem);
     margin-bottom: 5px;
     overflow: hidden;
     position: relative;
     text-indent: 100%;
     top: 0.25rem;
-    // left: calc(100% - 2.25rem);
     width: 2rem;
     height: 1rem;
 
@@ -323,7 +492,7 @@ textarea {
     &::after {
       background: var(--color-ctrl);
       border: 1px solid var(--color-brdr);
-      border-radius: var(--radius);
+      border-radius: var(--ctrl-radius);
       box-sizing: content-box;
       content: "";
       transition: 0.3s;
@@ -342,7 +511,7 @@ textarea {
     transform: translateX(calc(-100% + 2px));
   }
 
-  // Focussed state.
+  // Focus state.
   > input:focus + label {
     background-color: var(--color-ctrl-focus);
     box-shadow: 0 0 0 1px var(--color-ctrl-on);
@@ -350,12 +519,49 @@ textarea {
 
   // Disabled state.
   input:disabled + label {
-    cursor: not-allowed;
-    opacity: 50%;
-    opacity: 0.5;
-
+    @include disabled();
     &::after {
       background-color: var(--color-ctrl);
     }
+  }
+}
+
+button {
+  background-color: var(--color-ctrl);
+  border: 1px solid var(--color-brdr);
+  border-radius: var(--ctrl-radius);
+  box-sizing: content-box;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: $semiboldWeight;
+  height: 1.5rem;
+  margin-right: 0.25rem;
+  min-width: 5rem;
+  outline: none;
+  padding: 0 0.5rem;
+  width: auto;
+
+  svg {
+    height: 1rem;
+    margin-right: 0.5rem;
+    width: 1rem;
+  }
+
+  &:active {
+    background-color: var(--color-ctrl-on);
+    color: var(--color-ctrl-focus);
+  }
+  &:disabled {
+    border-style: dotted;
+    @include disabled();
+  }
+  &:focus:not(:active) {
+    background-color: var(--color-ctrl-focus);
+    box-shadow: 0 0 0 1px var(--color-ctrl-on);
   }
 }
