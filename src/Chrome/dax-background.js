@@ -61,6 +61,9 @@ chrome.runtime.onInstalled.addListener(() => {
 
   // Listen for messages from content and config scripts.
   chrome.runtime.onMessage.addListener(msg => {
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("Got message: %o", msg);
+    // endRemoveIf(!allowDebug)
     if (msg.action === "setIcon" && typeof msg.data !== "undefined") {
       setIcon(!!msg.data);
     }
@@ -68,25 +71,33 @@ chrome.runtime.onInstalled.addListener(() => {
 
   // Set the extension's icon.
   function setIcon(isRunning) {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (chrome.runtime.lastError) {
-        console.info(
-          `updateConfigValue(): couldn't get active tab to set icon: ${
-            chrome.runtime.lastError.message
-          }.`
-        );
-        return;
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug(`setIcon(${isRunning}): entering.`);
+    // endRemoveIf(!allowDebug)
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      tabs => {
+        if (chrome.runtime.lastError) {
+          console.info(
+            `setIcon(): couldn't get active tab to send message: ${
+              chrome.runtime.lastError.message
+            }.`
+          );
+          return;
+        }
+        // removeIf(!allowDebug)
+        _config.doDebug && console.debug(`--> Setting icon.`);
+        // endRemoveIf(!allowDebug)
+        chrome.pageAction.setIcon({
+          tabId: tabs[0].id,
+          path: isRunning
+            ? "images/disqus_eye_16.png"
+            : "images/disqus_eye_16_paused.png",
+        });
       }
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug(`--> Setting icon; isRunning is ${isRunning}.`);
-      // endRemoveIf(!allowDebug)
-      chrome.pageAction.setIcon({
-        tabId: tabs[0].id,
-        path: isRunning
-          ? "images/disqus_eye_16.png"
-          : "images/disqus_eye_16_paused.png",
-      });
-    });
+    );
   } // end of setIcon().
 }); // end of onInstalled listener.
