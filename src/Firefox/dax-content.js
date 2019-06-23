@@ -171,6 +171,7 @@ async function refreshConfig(setIcon) {
     if (setIcon) {
       chrome.runtime.sendMessage({
         action: "setIcon",
+        caller: "content",
         data: !!_config.checkInterval,
       });
     }

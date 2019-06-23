@@ -83,7 +83,8 @@ function listenForUpdates() {
     // endRemoveIf(!allowDebug)
     let target = event.target,
       value = null,
-      typingDebounceTimer = null;
+      typingDebounceTimer = null,
+      debounceDelay = 3000;
     if (target.id === "checkInterval") {
       if (typingDebounceTimer) {
         clearTimeout(typingDebounceTimer);
@@ -93,7 +94,7 @@ function listenForUpdates() {
           if (target.validity.valid) {
             updateConfigValue(target.id, +target.value);
           } else {
-            // Restore the previous value after 1 second.
+            // Restore the previous value after debounceDelay (msecs).
             browser.storage.sync
               .get(target.id)
               .then(value => {
@@ -109,7 +110,7 @@ function listenForUpdates() {
             return;
           }
         },
-        1000,
+        debounceDelay,
         target
       );
     } else {
@@ -158,6 +159,17 @@ function listenForUpdates() {
     } // end of dark theme handling.
   } // end of updateConfigValue().
 } // end of listenForUpdates().
+
+function setIcon(isRunning) {
+  // removeIf(!allowDebug)
+  logDebug(`[proxy] setIcon(${isRunning}): entering.`);
+  // endRemoveIf(!allowDebug)
+  browser.runtime.sendMessage({
+    action: "setIcon",
+    caller: "config",
+    data: isRunning,
+  });
+} // end of setIcon().
 
 // Initailize the "Load all content" button and confirmation dialog.
 function initLoadAllContent() {

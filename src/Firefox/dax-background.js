@@ -30,6 +30,9 @@ browser.runtime.onInstalled.addListener(async () => {
 
   // Listen for messages from content and config scripts.
   browser.runtime.onMessage.addListener(msg => {
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("Got message: %o", msg);
+    // endRemoveIf(!allowDebug)
     if (msg.action === "setIcon" && typeof msg.data !== "undefined") {
       setIcon(!!msg.data);
     }
@@ -44,7 +47,7 @@ browser.runtime.onInstalled.addListener(async () => {
       });
       // removeIf(!allowDebug)
       _config.doDebug &&
-        console.debug(`--> Setting icon; isRunning is ${isRunning}.`);
+        console.debug(`--> Setting icon.`);
       // endRemoveIf(!allowDebug)
       browser.pageAction.setIcon({
         tabId: tabs[0].id,
