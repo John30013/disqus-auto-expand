@@ -1,70 +1,85 @@
-let _options = { ...defaultConfig },
+let _config = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
   _linkCounter = 0;
 
 // Start the extension.
-refreshOptions();
-_options.doDebug &&
+refreshConfig(true);
+// removeIf(!allowDebug)
+_config.doDebug &&
   console.debug(`content.js is running in iframe ${window.name}.`);
+// endRemoveIf(!allowDebug)
 // Listen for option updates and debug messages from config page.
 listenForMessages();
 // Set up the IntersectionObserver to watch for auto-expand links coming into view.
 createObserver();
 // Start processing.
 processNewLinks();
-
 /* ===== End of main code. ===== */
 
 /* ===== Helper functions. ===== */
 function listenForMessages() {
-  browser.runtime.onMessage.addListener(msg => {
-    if (msg.action === "refreshOptions") {
-      refreshOptions();
+  browser.runtime.onMessage.addListener((msg, sender, sendReply) => {
+    if (msg.action === "refreshConfig") {
+      refreshConfig(false);
     } else if (msg.action === "logDebug" && msg.message) {
-      _options.doDebug &&
+      // removeIf(!allowDebug)
+      _config.doDebug &&
         console.debug(`[${msg.caller}] ${msg.message}`, ...msg.params);
+      // endRemoveIf(!allowDebug)
+    } else if (msg.action === "ping") {
+      // removeIf(!allowDebug)
+      _config.doDebug &&
+        console.debug("Got 'ping' message; replying with 'pong'.");
+      // endRemoveIf(!allowDebug)
+      sendReply({ value: "pong" });
+    } else if (msg.action === "loadAllContent") {
+      loadAllContent();
     }
   });
 }
 
 function createObserver() {
   _observer = new IntersectionObserver(processObservedEntries, {
-    threshold: 1.0
+    threshold: 1.0,
   });
 
   function processObservedEntries(entries) {
-    if (_options.checkInterval) {
+    if (_config.checkInterval) {
       let foundIntersects = false;
       entries.forEach(entry => {
         const link = entry.target,
           luid = link.dataset.luid;
-        _options.doDebug &&
+        // removeIf(!allowDebug)
+        _config.doDebug &&
           console.debug(
             'Checking intersection of "%s" link %s',
             link.className,
             luid
           );
-        hideMediaLink = false;
+        // endRemoveIf(!allowDebug)
         if (entry.isIntersecting) {
           foundIntersects = true;
-          _options.doDebug &&
+          // removeIf(!allowDebug)
+          _config.doDebug &&
             console.debug(
               '--> link.classList: %o; link.innerText: "%s"',
               link.classList,
               link.innerText
             );
-          link.click();
-          link.classList.add("dax-clicked");
+          // endRemoveIf(!allowDebug)
+          activateLink(link);
           unobserveLink(link);
-          _options.doDebug &&
+          // removeIf(!allowDebug)
+          _config.doDebug &&
             console.debug(
               "--> Clicked %s (now %d observed)",
               luid,
               Object.keys(_observedLinks).length,
               _observedLinks
             );
+          // endRemoveIf(!allowDebug)
         }
       });
       // Clean up old observed links. Disqus seems to output some (mostly "see more")
@@ -73,7 +88,9 @@ function createObserver() {
       // five minutes. If some non-zombie links get unobserved, they will be
       // observed again the next time the processNewLinks timer fires.
       if (foundIntersects) {
-        _options.doDebug && console.debug("--> Checking for old links");
+        // removeIf(!allowDebug)
+        _config.doDebug && console.debug("--> Checking for old links");
+        // endRemoveIf(!allowDebug)
         const now = Date.now(),
           maxAge = 5 * 60 * 1000;
         Object.keys(_observedLinks)
@@ -81,131 +98,244 @@ function createObserver() {
           .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
       }
     }
-
-    /**
-     * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
-     */
-    function unobserveLink(link, removeDaxTags) {
-      const luid = link.dataset.luid;
-      _observer.unobserve(link);
-      delete _observedLinks[luid];
-      delete link.dataset.luid;
-      link.removeAttribute("data-luid");
-      if (removeDaxTags) {
-        link.classList.remove("dax-tagged", "dax-clicked");
-      }
-      _options.doDebug &&
-        console.debug(
-          '--> unobserved "%s" link %s; removeDaxTags: %s',
-          link.className,
-          luid,
-          removeDaxTags,
-          link
-        );
-    } // end of unobserveLink().
   } // end of processObservedEntries().
 } // end of createObserver().
 
 function processNewLinks() {
-  // Since processNewLinks can be called by refreshOptions when checkInterval is
+  // Since processNewLinks() can be called by refreshConfig() when checkInterval is
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
-  if (_timer) {
-    clearTimeout(_timer);
-  }
-  if (!_options.checkInterval) {
-    _options.doDebug && console.debug("Stopping the timeout loop.");
+  _timer && clearTimeout(_timer);
+  if (!_config.checkInterval) {
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("Stopping the timeout loop.");
+    // endRemoveIf(!allowDebug)
     return;
   }
 
-  // Find new links to observe.
-  _options.doDebug && console.debug("Finding new links to observe.");
-  let repliesSelector = [];
-  if (_options.moreReplies) {
-    repliesSelector.push(
-      "div.show-children-wrapper:not(.hidden) > a.show-children:not(.busy):not([data-luid])"
-    );
-  }
-  if (_options.newReplies) {
-    repliesSelector.push(
-      'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
-    );
-  }
-  // Observe "replies" links that haven't already been observed.
-  if (repliesSelector.length) {
-    document.querySelectorAll(repliesSelector.join(",")).forEach(observeLink);
-  }
-  // Observe "see more" links that haven't already been observed.
-  if (_options.longItems) {
-    const longItemsSelector =
-      'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])';
-    document.querySelectorAll(longItemsSelector).forEach(observeLink);
-  }
-
-  // Observe "Load more comments" "button" at the bottom of the comments.
-  if (_options.moreComments) {
-    const moreCommentsSelector =
-      'div.load-more:not([style*="none"]) > a.load-more__button';
-    document.querySelectorAll(moreCommentsSelector).forEach(observeLink);
-  }
-
-  // Observe "Show # New Comments" button at the top of the comments.
-  if (_options.newComments) {
-    const newCommentsSelector = 'button.alert--realtime:not([style*="none"])';
-    document.querySelectorAll(newCommentsSelector).forEach(observeLink);
-  }
+  // Observe new links.
+  // removeIf(!allowDebug)
+  _config.doDebug && console.debug("Finding new links to observe.");
+  // endRemoveIf(!allowDebug)
+  findNewLinks(_config).forEach(observeLink);
 
   // Make external links open in a new browser tab/window.
-  if (_options.openInNewWindow) {
-    const extLinkSelector = `a[href*='disq.us/url?'][rel*='noopener']:not([target])`;
+  if (_config.openInNewWindow) {
+    const extLinkSelector =
+      "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
     document.querySelectorAll(extLinkSelector).forEach(link => {
       link.target = "_blank";
-      _options.doDebug &&
+      link.title = "[new window] " + link.title;
+      // removeIf(!allowDebug)
+      _config.doDebug &&
         console.debug('Added target="_blank" to external link:', link);
+      // endRemoveIf(!allowDebug)
     });
   }
 
   // Reprocess after the checkInterval.
-  _timer = window.setTimeout(processNewLinks, _options.checkInterval * 1000);
+  _timer = window.setTimeout(processNewLinks, _config.checkInterval * 1000);
 
   // Observe a link. Instructs the IntersectionOserver to start observing the
   // link and does some record keeping.
   function observeLink(link) {
     let luid = link.dataset.luid;
-    if (!luid) {
-      luid = `${Date.now()}-${_linkCounter++}`;
-      link.setAttribute("data-luid", luid);
-      link.classList.add("dax-tagged");
-      _observer.observe(link);
-      _observedLinks[luid] = link;
-      _options.doDebug &&
-        console.debug(
-          '--> Observing "%s" link %s (now %d observed)',
-          link.className,
-          luid,
-          Object.keys(_observedLinks).length,
-          _observedLinks
-        );
+    if (luid) {
+      // Already being observed.
+      return;
     }
+    luid = tagLink(link);
+    _observer.observe(link);
+    _observedLinks[luid] = link;
+    // removeIf(!allowDebug)
+    _config.doDebug &&
+      console.debug(
+        '--> Observing "%s" link %s (now %d observed)',
+        link.className,
+        luid,
+        Object.keys(_observedLinks).length,
+        _observedLinks
+      );
+    // endRemoveIf(!allowDebug)
   }
 }
 
-function refreshOptions() {
-  browser.storage.sync
-    .get(defaultConfig)
-    .then(options => {
-      const oldCheckInterval = +_options.checkInterval;
-      _options = options;
-      _options.doDebug && console.debug("--> Got sync'd options: %o", _options);
-      // Check if we need to resume processing links.
-      if (
-        oldCheckInterval === 0 &&
-        _options.checkInterval !== oldCheckInterval
-      ) {
-        processNewLinks();
-      }
-    })
-    .catch(error => {
-      console.error(`Couldn't get configuration form sync'd storage: ${error}`);
+async function refreshConfig(setIcon) {
+  try {
+    const config = await browser.storage.sync.get(defaultConfig);
+    const oldCheckInterval = +_config.checkInterval;
+    _config = config;
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("--> Got sync'd config: %o", _config);
+    // endRemoveIf(!allowDebug)
+    if (setIcon) {
+      chrome.runtime.sendMessage({
+        action: "setIcon",
+        data: !!_config.checkInterval,
+      });
+    }
+    // Check if we need to resume processing links.
+    if (oldCheckInterval === 0 && _config.checkInterval !== oldCheckInterval) {
+      processNewLinks();
+    }
+  } catch (error) {
+    console.error(`Couldn't get configuration from storage: ${error}`);
+  }
+}
+
+/**
+ * Remove a link from observation and record-keeping. (Reverses proecessNewLinks()#observeLink().)
+ */
+function unobserveLink(link, removeDaxTags) {
+  const luid = link.dataset.luid;
+  if (!luid) {
+    // Link isn't being observed.
+    return;
+  }
+  _observer.unobserve(link);
+  delete _observedLinks[luid];
+  delete link.dataset.luid;
+  link.removeAttribute("data-luid");
+  if (removeDaxTags) {
+    link.classList.remove("dax-tagged", "dax-clicked");
+    link.title = link.title.replace(/^\[\w+\]\s/, "");
+  }
+  // removeIf(!allowDebug)
+  _config.doDebug &&
+    console.debug(
+      '--> unobserved "%s" link %s; removeDaxTags: %s',
+      link.className,
+      luid,
+      removeDaxTags,
+      link
+    );
+  // endRemoveIf(!allowDebug)
+} // end of unobserveLink().
+
+function findNewLinks(config) {
+  const newLinks = [];
+  // Find new "See more replies" links.
+  if (!config || config.moreReplies) {
+    document
+      .querySelectorAll(
+        "div.show-children-wrapper:not(.hidden) > a.show-children:not(.busy):not([data-luid])"
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find new "See ### new replies" links.
+  if (!config || config.newReplies) {
+    document
+      .querySelectorAll(
+        'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find new "see more" links.
+  if (!config || config.longItems) {
+    document
+      .querySelectorAll(
+        'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find the active "Load more comments" "button" at the bottom of the comments.
+  if (!config || config.moreComments) {
+    document
+      .querySelectorAll(
+        'div.load-more:not([style*="none"]) > a.load-more__button'
+      )
+      .forEach(elt => newLinks.push(elt));
+  }
+  // Find the active "Show # New Comments" button at the top of the comments.
+  if (!config || config.newComments) {
+    document
+      .querySelectorAll('button.alert--realtime:not([style*="none"])')
+      .forEach(elt => newLinks.push(elt));
+  }
+  return newLinks;
+}
+
+function tagLink(link) {
+  luid = `${Date.now()}-${_linkCounter++}`;
+  link.setAttribute("data-luid", luid);
+  link.classList.add("dax-tagged");
+  if (!/^\[(tagged|clicked)\] /.test(link.title)) {
+    link.title = `[tagged] ${link.title}`;
+  }
+  return luid;
+}
+
+function activateLink(link) {
+  link.click();
+  link.classList.add("dax-clicked");
+  link.title = link.title.replace("[tagged] ", "[clicked] ");
+}
+
+function loadAllContent() {
+  // removeIf(!allowDebug)
+  _config.doDebug && console.debug("loadAllContent(): entering.");
+  // endRemoveIf(!allowDebug)
+  // Stop the processNewLinks() timeout loop.
+  _timer && clearTimeout(_timer);
+
+  const newLinks = findNewLinks();
+  // removeIf(!allowDebug)
+  _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
+  // endRemoveIf(!allowDebug)
+  if (newLinks.length) {
+    showToast("Please wait while the content loads…");
+    newLinks.forEach(link => {
+      unobserveLink(link);
+      tagLink(link);
+      activateLink(link);
     });
+    // Map checkInterval range (0-30 sec.) to delay range (5-10 sec.).
+    const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
+    _timer = setTimeout(loadAllContent, delay);
+  } else {
+    hideToast("All content has been loaded.", 3000);
+    processNewLinks();
+  }
+
+  function showToast(message) {
+    // removeIf(!allowDebug)
+    _config.doDebug && console.debug("showToast(): entering");
+    // endRemoveIf(!allowDebug)
+
+    // Make sure the discussion forum (and therefore the toast) is visible.
+    document.body.scrollIntoView();
+
+    let toast = document.getElementById("dax-toast"),
+      toastText = message || "";
+    if (!toast) {
+      // removeIf(!allowDebug)
+      _config.doDebug && console.debug("--> creating toast");
+      // endRemoveIf(!allowDebug)
+      toast = document.createElement("div");
+      toast.id = "dax-toast";
+      toast.setAttribute("role", "alert");
+      toast.innerText = toastText;
+      toast.className = "toast";
+      document.body.prepend(toast);
+      toast.classList.add("toast-open");
+    } else {
+      if (toast.innerText !== toastText) {
+        toast.innerText = toastText;
+      }
+    }
+    return toast;
+  }
+
+  function hideToast(message, delay) {
+    const toast = document.getElementById("dax-toast") || showToast(),
+      hideDelay = delay || 3000;
+    toast.innerText = message || "";
+    toast.classList.add("toast-done");
+    setTimeout(() => {
+      toast.classList.remove("toast-open");
+    }, hideDelay);
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, hideDelay + 500);
+  }
 }
