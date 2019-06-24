@@ -265,12 +265,14 @@ function initLoadAllContent() {
 } // end of initLoadAllContent().
 
 async function sendContentCommand(commandData, responseCallback) {
+  let operation = 'browser.tabs.query';
   try {
     const tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
     });
-    const responseCallback = await browser.tabs.sendMessage(
+    operation = 'browser.tabs.sendMessage';
+    const response = await browser.tabs.sendMessage(
       tabs[0].id,
       commandData
     );
@@ -278,7 +280,7 @@ async function sendContentCommand(commandData, responseCallback) {
       responseCallback(response);
     }
   } catch (error) {
-    console.info(`sendContentCommand(): couldn't send command: ${error}.`);
+    console.info(`sendContentCommand(): ${operation} failed: ${error}.`);
   }
 } // end of sendContentCommand().
 
