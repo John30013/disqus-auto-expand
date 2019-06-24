@@ -2,7 +2,8 @@ let _config = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
-  _linkCounter = 0;
+  _linkCounter = 0,
+  _loadAllInitialized = false;
 
 // Start the extension.
 refreshConfig(true);
@@ -28,14 +29,6 @@ function listenForMessages() {
       _config.doDebug &&
         console.debug(`[${msg.caller}] ${msg.message}`, ...msg.data);
       // endRemoveIf(!allowDebug)
-    } else if (msg.action === "ping") {
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug("Got 'ping' message; replying with 'pong'.");
-      // endRemoveIf(!allowDebug)
-      sendReply({ value: "pong" });
-    } else if (msg.action === "loadAllContent") {
-      loadAllContent();
     }
   });
 }
@@ -106,7 +99,7 @@ function processNewLinks() {
   // set to zero, clear any pending timeout first. It's a no-op if this call is
   // the result of the timer timing out.
   _timer && clearTimeout(_timer);
-  if (!_config.checkInterval) {
+  if (!_config.checkInterval && _loadAllInitialized) {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("Stopping the timeout loop.");
     // endRemoveIf(!allowDebug)
@@ -117,7 +110,15 @@ function processNewLinks() {
   // removeIf(!allowDebug)
   _config.doDebug && console.debug("Finding new links to observe.");
   // endRemoveIf(!allowDebug)
-  findNewLinks(_config).forEach(observeLink);
+  const newLinks = findNewLinks(_config);
+  if (newLinks.length) {
+    if (!_loadAllInitialized) {
+      initLoadAllContent();
+    }
+    if (_config.checkInterval) {
+      newLinks.forEach(observeLink);
+    }
+  }
 
   // Make external links open in a new browser tab/window.
   if (_config.openInNewWindow) {
@@ -277,7 +278,18 @@ function activateLink(link) {
   link.title = link.title.replace("[tagged] ", "[clicked] ");
 }
 
-function loadAllContent() {
+function initLoadAllContent() {
+  const button = document.createElement("button");
+  button.innerText = "Load entire discussion";
+  button.id = "dax-loadAll";
+  button.addEventListener("click", () => {
+    loadAllContent(0);
+  });
+  document.getElementById("posts").prepend(button);
+  _loadAllInitialized = true;
+}
+
+function loadAllContent(iteration) {
   // removeIf(!allowDebug)
   _config.doDebug && console.debug("loadAllContent(): entering.");
   // endRemoveIf(!allowDebug)
@@ -288,8 +300,17 @@ function loadAllContent() {
   // removeIf(!allowDebug)
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   // endRemoveIf(!allowDebug)
+  iteration = iteration || 0;
   if (newLinks.length) {
-    showToast("Please wait while the content loads…");
+    if (iteration < 5) {
+      showToast("Please wait while the content loads…");
+    } else if (iteration < 10) {
+      showToast("Still working on it…");
+    } else if (iteration < 20) {
+      showToast("Wow, this is a long discussion…");
+    } else if (iteration < 30) {
+      showToast("Looks like the end is in sight…");
+    }
     newLinks.forEach(link => {
       unobserveLink(link);
       tagLink(link);
@@ -297,7 +318,7 @@ function loadAllContent() {
     });
     // Map checkInterval range (0-30 sec.) to delay range (5-10 sec.).
     const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
-    _timer = setTimeout(loadAllContent, delay);
+    _timer = setTimeout(loadAllContent, delay, iteration + 1);
   } else {
     hideToast("All content has been loaded.", 3000);
     processNewLinks();
@@ -307,9 +328,6 @@ function loadAllContent() {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("showToast(): entering");
     // endRemoveIf(!allowDebug)
-
-    // Make sure the discussion forum (and therefore the toast) is visible.
-    document.body.scrollIntoView();
 
     let toast = document.getElementById("dax-toast"),
       toastText = message || "";
@@ -322,6 +340,8 @@ function loadAllContent() {
       toast.setAttribute("role", "alert");
       toast.innerText = toastText;
       toast.className = "toast";
+      // Make sure the discussion forum (and therefore the toast) is visible, and display the toast.
+      document.body.scrollIntoView();
       document.body.prepend(toast);
       toast.classList.add("toast-open");
     } else {

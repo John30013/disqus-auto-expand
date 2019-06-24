@@ -8,9 +8,6 @@ initUiText();
 getCurrentConfig();
 listenForUpdates();
 
-// Initialize the "Load all content" button and confirmation dialog.
-initLoadAllContent();
-
 /* ========== End of main code. ==========
    ===== Helper functions follow. ===== */
 
@@ -174,99 +171,6 @@ function setIcon(isRunning) {
     data: isRunning,
   });
 } // end of setIcon().
-
-// Initailize the "Load all content" button and confirmation dialog.
-function initLoadAllContent() {
-  // Initialize the confirmation dialog.
-  const dialog = document.getElementById("confirmLoadAllContent"),
-    dialogClickablesSelector = "a:link, button",
-    openClass = "dialog-open",
-    focusableClass = "dialog-focusable";
-
-  dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-    elt.classList.add(focusableClass);
-  });
-  closeDialog(dialog);
-
-  // Initialize the "Load all content" button. The button is disabled
-  // by default, and only an affirmative ping from the content script
-  // will enable it.
-  const button = document.getElementById("loadAllContent");
-  button.addEventListener("click", event => {
-    openDialog(dialog, event.target);
-  });
-  sendContentCommand({ action: "ping", caller: "config" }, reply => {
-    if (reply && reply.value === "pong") {
-      logDebug(
-        "Got reply from 'ping' request: %o; enabling Load all content button.",
-        reply
-      );
-      button.disabled = false;
-    }
-  });
-
-  /* ========== Helpers ========== */
-  function closeDialog(dialog) {
-    // removeIf(!allowDebug)
-    logDebug("closeDialog: %o", dialog);
-    // endRmoveIf(!allowDebug)
-    getNonDialogFocusables().forEach(elt => {
-      if (elt.dataset.tabindex) {
-        elt.tabIndex = elt.dataset.tabindex;
-      } else {
-        elt.tabIndex = 0;
-      }
-    });
-    dialog.classList.remove(openClass);
-    dialog.setAttribute("aria-hidden", "true");
-    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-      elt.tabIndex = -1;
-    });
-  } // end of closeDialog().
-
-  function openDialog(dialog, opener) {
-    // removeIf(!allowDebug)
-    logDebug("openDialog: %o", dialog);
-    // endRemoveIf(!allowDebug)
-    // Disable focus on focusable elements outside the dialog.
-    getNonDialogFocusables().forEach(elt => {
-      if (elt.tabIndex) {
-        elt.dataset.tabindex = elt.tabIndex;
-      }
-      elt.tabIndex = -1;
-    });
-    // Show the dialog.
-    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-      elt.tabIndex = 0;
-    });
-    dialog.tabIndex = -1;
-    dialog.focus();
-    dialog.classList.add(openClass);
-    dialog.setAttribute("aria-hidden", "false");
-    dialog.addEventListener("click", event => {
-      const source = event.target;
-      if (source.tagName === "BUTTON") {
-        event.preventDefault();
-        if (source.value === "yes") {
-          sendContentCommand({
-            action: "loadAllContent",
-            caller: "config",
-          });
-          window.close();
-        } else {
-          closeDialog(dialog);
-          opener.focus();
-        }
-      }
-    });
-  } // end of openDialog().
-
-  function getNonDialogFocusables() {
-    return Array.from(
-      document.querySelectorAll("a:link, button, input")
-    ).filter(elt => !elt.classList.contains(focusableClass));
-  } // end of getNonDialogClickables().
-} // end of initLoadAllContent().
 
 function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {

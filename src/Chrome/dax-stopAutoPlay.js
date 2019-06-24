@@ -14,22 +14,26 @@
 const origLocation = window.location.href;
 chrome.storage.sync.get(defaultConfig, config => {
   if (chrome.runtime.lastError) {
-    console.error(
+    console.info(
       `Couldn't get configuration from storage: ${chrome.runtime.lastError}.`
     );
   } else {
+    // removeIf(!allowDebug)
     config.doDebug &&
       console.debug(
         `dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`
       );
+    // endRemoveIf(!allowDebug)
     if (config.stopAutoplay) {
       const newLocation = origLocation.replace(
         /[?&]auto[_-]?(?:play|start)=[^&]+/gi,
         ""
       );
       if (newLocation !== origLocation) {
+        // removeIf(!allowDebug)
         config.doDebug &&
           console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
+        // endRemoveIf(!allowDebug)
         window.location.href = newLocation;
       }
     }

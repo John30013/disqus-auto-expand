@@ -220,82 +220,12 @@ main > section:first-of-type {
   align-items: start;
 }
 
-main > section:first-of-type > header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+main > section:first-of-type > h2 {
   border-bottom: 1px dotted;
   grid-area: heading;
   margin: 0 0 0.5rem;
   padding: 0 0 calc(0.5rem - 1px);
   position: relative;
-}
-
-main > section:first-of-type > header > h2 {
-  border-bottom: 0;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-main > section:first-of-type > header > .dialog-wrapper {
-  pointer-events: none;
-  position: absolute;
-  right: 0.25rem;
-  top: 2.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease-in 0.1s;
-  z-index: 20;
-}
-
-main > section:first-of-type > header > .dialog-wrapper > .dialog {
-  background-color: var(--color-bkgd);
-  border: 1px solid var(--color-brdr);
-  border-radius: 5px;
-  box-shadow: 0 0 0.25rem 0.25rem var(--color-ctrl-on);
-  color: var(--color-text);
-  padding: 1rem;
-}
-
-main > section:first-of-type > header > .dialog-wrapper > .dialog h3 {
-  color: var(--color-text-sec);
-  font-size: 1.125rem;
-  font-weight: normal;
-  margin: 0 0 0.5rem;
-  padding: 0 0 calc(0.5rem - 1px);
-  border-bottom: 1px dotted;
-}
-
-main > section:first-of-type > header > .dialog-wrapper > .dialog p {
-  display: block;
-}
-
-main > section:first-of-type > header > .dialog-wrapper > .dialog p:last-of-type {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-main > section:first-of-type > header > .dialog-wrapper::after {
-  background-color: #000;
-  content: "";
-  cursor: none;
-  opacity: 0;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transition: opacity 0.3s ease-in;
-  z-index: -10;
-}
-
-main > section:first-of-type > header > .dialog-wrapper.dialog-open {
-  opacity: 1;
-  pointer-events: all;
-}
-
-main > section:first-of-type > header > .dialog-wrapper.dialog-open::after {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 @media screen and (max-device-width: 560px) {
