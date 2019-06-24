@@ -168,7 +168,11 @@ function setIcon(isRunning) {
   // removeIf(!allowDebug)
   logDebug(`[proxy] setIcon(${isRunning}): entering.`);
   // endRemoveIf(!allowDebug)
-  chrome.runtime.sendMessage({ action: "setIcon", caller: "config", data: isRunning });
+  chrome.runtime.sendMessage({
+    action: "setIcon",
+    caller: "config",
+    data: isRunning,
+  });
 } // end of setIcon().
 
 // Initailize the "Load all content" button and confirmation dialog.
