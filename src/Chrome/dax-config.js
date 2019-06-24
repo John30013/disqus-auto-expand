@@ -165,7 +165,14 @@ function listenForUpdates() {
 } // end of listenForUpdates().
 
 function setIcon(isRunning) {
-  chrome.runtime.sendMessage({ action: "setIcon", data: isRunning });
+  // removeIf(!allowDebug)
+  logDebug(`[proxy] setIcon(${isRunning}): entering.`);
+  // endRemoveIf(!allowDebug)
+  chrome.runtime.sendMessage({
+    action: "setIcon",
+    caller: "config",
+    data: isRunning,
+  });
 } // end of setIcon().
 
 // Initailize the "Load all content" button and confirmation dialog.
