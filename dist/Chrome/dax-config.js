@@ -8,9 +8,13 @@ initUiText();
 getCurrentConfig();
 listenForUpdates();
 
-/* ========== End of main code. ==========
-   ===== Helper functions follow. ===== */
+/* ===== End of main code. ===== */
+/* ===== Helper functions. ===== */
 
+/**
+ * Inserts the current version number and link to the Chrome Web Store in the
+ * configuration page.
+ */
 function initUiText() {
   const manifest = chrome.runtime.getManifest();
   document.querySelectorAll(".version").forEach(elt => {
@@ -21,8 +25,11 @@ function initUiText() {
       "https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US";
     link.innerText = "Chrome Web Store";
   });
-}
+} // end of initUiText().
 
+/**
+ * Retrieves the current configuration values from storage.
+ */
 function getCurrentConfig() {
   chrome.storage.sync.get(defaultConfig, config => {
     if (chrome.runtime.lastError) {
@@ -75,7 +82,9 @@ function getCurrentConfig() {
   });
 } // end of getCurrentConfig().
 
-// Handle changes in the configuration values.
+/**
+ * Handles changes in the configuration values.
+ */
 function listenForUpdates() {
   document.body.addEventListener("input", event => {
     // removeIf(!allowDebug)
@@ -124,6 +133,12 @@ function listenForUpdates() {
     }
   });
 
+  /* ===== Helper functions. ===== */
+  /**
+   * Updates the new value for the specified configuration key in storage.
+   * @param {*} key - the configuration key to update.
+   * @param {*} value - the nw value of the key.
+   */
   function updateConfigValue(key, value) {
     chrome.storage.sync.set({ [key]: value }, () => {
       if (chrome.runtime.lastError) {
@@ -161,6 +176,12 @@ function listenForUpdates() {
   } // end of updateConfigValue().
 } // end of listenForUpdates().
 
+/**
+ * Requests the background script update the extension's icon, depending on
+ * the value of the parameter.
+ * @param {*} isRunning - Boolean value indicating whether the extension is
+ * processing new links (i.e., checkInterval is not zero).
+ */
 function setIcon(isRunning) {
   // removeIf(!allowDebug)
   logDebug(`[proxy] setIcon(${isRunning}): entering.`);
@@ -172,6 +193,13 @@ function setIcon(isRunning) {
   });
 } // end of setIcon().
 
+/**
+ * Sends a command (message) to the content script in the active tab.
+ * @param {*} commandData - an object describing the command to send, including
+ * any parameters.
+ * @param {*} responseCallback - an optional callback function that will be
+ * called if the content script replies to this message.
+ */
 function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (chrome.runtime.lastError) {
@@ -198,6 +226,14 @@ function sendContentCommand(commandData, responseCallback) {
 } // end of sendContentCommand().
 
 // removeIf(!allowDebug)
+/**
+ * Asks the content script to output a debug message to the console. Also
+ * logs the message to the config script's console (which is not generally
+ * visible).
+ * @param {*} message - A string containing the debug message (can include
+ * console logging parameter placeholders).
+ * @param  {...any} params - Parameters that will replace the placeholders.
+ */
 function logDebug(message, ...params) {
   console.debug(message, ...params);
   sendContentCommand({
