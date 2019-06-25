@@ -296,20 +296,41 @@ function loadAllContent(iteration) {
   // Stop the processNewLinks() timeout loop.
   _timer && clearTimeout(_timer);
 
+  iteration = iteration || 0;
+  if (iteration === 0) {
+    const commentCount = parseInt(
+      document.querySelector(".comment-count").innerText
+    );
+    if (
+      commentCount > 500 &&
+      !confirm(
+        `Loading this entire discussion will take some time and
+  could consume a lot of memory and data. Your browser 
+  might become very slow, or stop responding at all.
+
+Do you want to proceed?`
+      )
+    ) {
+      return;
+    }
+  }
+  const button = document.getElementById("dax-loadAll");
   const newLinks = findNewLinks();
   // removeIf(!allowDebug)
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   // endRemoveIf(!allowDebug)
-  iteration = iteration || 0;
   if (newLinks.length) {
+    button.classList.add("processing");
+    // During processing the button acts as a progress indicator. We change the
+    // text occasionally to keep it interesting.
     if (iteration < 5) {
-      showToast("Please wait while the content loads…");
+      button.innerText = "Please wait while the content loads…";
     } else if (iteration < 10) {
-      showToast("Still working on it…");
+      button.innerText = "Still working on it…";
     } else if (iteration < 20) {
-      showToast("Wow, this is a long discussion…");
+      button.innerText = "Wow, this is a really long discussion…";
     } else if (iteration < 30) {
-      showToast("Looks like the end is in sight…");
+      button.innerText = "Looks like the end is in sight…";
     }
     newLinks.forEach(link => {
       unobserveLink(link);
@@ -320,48 +341,8 @@ function loadAllContent(iteration) {
     const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
     _timer = setTimeout(loadAllContent, delay, iteration + 1);
   } else {
-    hideToast("All content has been loaded.", 3000);
+    button.classList.remove("processing");
+    button.innerText = "Load entire discussion";
     processNewLinks();
-  }
-
-  function showToast(message) {
-    // removeIf(!allowDebug)
-    _config.doDebug && console.debug("showToast(): entering");
-    // endRemoveIf(!allowDebug)
-
-    let toast = document.getElementById("dax-toast"),
-      toastText = message || "";
-    if (!toast) {
-      // removeIf(!allowDebug)
-      _config.doDebug && console.debug("--> creating toast");
-      // endRemoveIf(!allowDebug)
-      toast = document.createElement("div");
-      toast.id = "dax-toast";
-      toast.setAttribute("role", "alert");
-      toast.innerText = toastText;
-      toast.className = "toast";
-      // Make sure the discussion forum (and therefore the toast) is visible, and display the toast.
-      document.body.scrollIntoView();
-      document.body.prepend(toast);
-      toast.classList.add("toast-open");
-    } else {
-      if (toast.innerText !== toastText) {
-        toast.innerText = toastText;
-      }
-    }
-    return toast;
-  }
-
-  function hideToast(message, delay) {
-    const toast = document.getElementById("dax-toast") || showToast(),
-      hideDelay = delay || 3000;
-    toast.innerText = message || "";
-    toast.classList.add("toast-done");
-    setTimeout(() => {
-      toast.classList.remove("toast-open");
-    }, hideDelay);
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, hideDelay + 500);
   }
 }

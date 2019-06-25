@@ -1,15 +1,17 @@
 $toast-width: 18rem;
 $brand-color: #459cf9;
+$button-background: #e2e2e2;
 $background-color: #282828;
 
 #dax-loadAll {
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IB2cksfwAAARRQTFRFAAAAhb78a7H6a7H7Z6/6drf8ksb9qtP9w+D9xeH9isH8cLP6RZz5ern7z+b+7vb/+fz/////pdD9b7L6hL78ttj92er+pM/9b7P6TqH5bLH7os78jcL9b7L5W6j6UKL5aK769vr+dbb7b7P7xOD9rdP8oc386/X/Vqb6brH6hL773Oz+0ef+rtT8zOb/Q5v4brH7TqD5vdv9i8H71uj+e7r7RZ36e7n71+n+udr98/n/tNf+arD6zeb+isH7xeD9crT7RZz6ebj77PX/3O3+cbT7lsj99/v/Z676Wqf6RJz6tNn+xuL+2On+tdj9crX7RJz5x+P+7PX+zub+lMj8wt/+qdH9kcX8aK/6a7D6bLD6aq/5y7radAAAAFx0Uk5TAP////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9Xfj3LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA0ElEQVR4nC2PazsCURSFt3FJrGhVxJCTLkMJuRXdyC3XFEmm//8/7DNjfXvfvc9z1pYZJ8zs3PxCZDG6JMsIE1tZjZNMSDLA1No6g6RlQ3HTtXLLim3JKO8ARk2W3M1JHnBhCmQR8Li3LyWUYQ5YIQ8BHh1L9eRU+czuA+cXNSnVL3HFRhYVGjQBabV1oqbDa+AGXbm9o2cN7w0e9Ct57JFPapSflV/k1dbxbBE71ydvYeX3/kdww0CGSvHPr3r3/0gZRb/HP7nJr+O4ru/70z/1XxyUXZMmVgAAAABJRU5ErkJggg==")
-    #e2e2e2 no-repeat left top;
+  background: $button-background
+    url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IB2cksfwAAARRQTFRFAAAAhb78a7H6a7H7Z6/6drf8ksb9qtP9w+D9xeH9isH8cLP6RZz5ern7z+b+7vb/+fz/////pdD9b7L6hL78ttj92er+pM/9b7P6TqH5bLH7os78jcL9b7L5W6j6UKL5aK769vr+dbb7b7P7xOD9rdP8oc386/X/Vqb6brH6hL773Oz+0ef+rtT8zOb/Q5v4brH7TqD5vdv9i8H71uj+e7r7RZ36e7n71+n+udr98/n/tNf+arD6zeb+isH7xeD9crT7RZz6ebj77PX/3O3+cbT7lsj99/v/Z676Wqf6RJz6tNn+xuL+2On+tdj9crX7RJz5x+P+7PX+zub+lMj8wt/+qdH9kcX8aK/6a7D6bLD6aq/5y7radAAAAFx0Uk5TAP////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9Xfj3LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA0ElEQVR4nC2PazsCURSFt3FJrGhVxJCTLkMJuRXdyC3XFEmm//8/7DNjfXvfvc9z1pYZJ8zs3PxCZDG6JMsIE1tZjZNMSDLA1No6g6RlQ3HTtXLLim3JKO8ARk2W3M1JHnBhCmQR8Li3LyWUYQ5YIQ8BHh1L9eRU+czuA+cXNSnVL3HFRhYVGjQBabV1oqbDa+AGXbm9o2cN7w0e9Ct57JFPapSflV/k1dbxbBE71ydvYeX3/kdww0CGSvHPr3r3/0gZRb/HP7nJr+O4ru/70z/1XxyUXZMmVgAAAABJRU5ErkJggg==")
+    no-repeat left top;
   border: 2px solid $brand-color;
   border-radius: 4px;
   box-sizing: content-box;
-  color: $brand-color;
-  font-size: 12px;
+  color: darken($brand-color, 20%);
+  font-size: 14px;
   font-weight: bold;
   height: 16px;
   margin: 0 auto 1rem;
@@ -17,7 +19,8 @@ $background-color: #282828;
   outline: none;
   padding-left: calc(16px + 0.5rem);
   padding-right: 0.5rem;
-  transition: opacity 0.3s ease;
+  text-align: center;
+  transition: width 1s ease;
 
   &:focus,
   &:hover {
@@ -29,67 +32,20 @@ $background-color: #282828;
     color: #fff;
   }
 
-  #dax-toast ~ #layout & {
-    cursor: not-allowed;
-    opacity: 0.25;
+  &.processing {
+    animation: loadAllThrobber 3s ease-in-out 0s infinite alternate forwards;
+    background-color: #fff;
+    color: #000;
+    cursor: progress;
     pointer-events: none;
+    width: 18rem;
   }
 }
-
-.toast {
-  background-color: $background-color;
-  border: 2px solid $brand-color;
-  border-radius: 5px;
-  box-shadow: 0.125rem 0.125rem 0.5rem #666;
-  box-sizing: border-box;
-  color: #ddd;
-  display: block;
-  margin: 0.5rem 0;
-  opacity: 0;
-  padding: 0.5rem 0.5rem 1rem;
-  position: fixed;
-  left: calc(50% - #{$toast-width} / 2);
-  top: 2rem;
-  text-align: center;
-  transition: opacity 0.5s ease-in-out;
-  width: $toast-width;
-  z-index: 20000;
-
-  &::before {
-    animation: 3s ease-in-out infinite alternate paused toast-throbber;
-    background-color: transparent;
-    border-top: 1px solid $brand-color;
-    box-sizing: border-box;
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0.5rem;
-    height: 0.65rem;
-    z-index: 20001;
-    opacity: 0;
-    transition: opacity 1s ease-out 1s;
-  }
-
-  &.toast-open {
-    opacity: 1;
-
-    &::before {
-      animation-play-state: running;
-      opacity: 1;
-    }
-    &.toast-done::before {
-      animation-play-state: paused;
-      opacity: 0;
-    }
-  }
-}
-@keyframes toast-throbber {
+@keyframes loadAllThrobber {
   0% {
-    left: 2;
-    width: calc(#{$toast-width} - 1rem - 4px);
+    background-position-x: 0;
   }
   100% {
-    left: calc(50% - 1rem);
-    width: 2rem;
+    background-position-x: 100%;
   }
 }

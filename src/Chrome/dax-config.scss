@@ -2,7 +2,7 @@
 $theme-lite-color-bkgd: #eeeeee;
 $theme-lite-color-brand: #459cf9;
 $theme-lite-color-brdr: #666666;
-$theme-lite-color-ctrl: #0000000f;
+$theme-lite-color-ctrl: #00000018;
 $theme-lite-color-ctrl-focus: #ffffffc0;
 $theme-lite-color-ctrl-invalid: #ff00000f;
 $theme-lite-color-dlg-bkdrp: #00000080;
@@ -24,7 +24,7 @@ $theme-dark-color-text-sec: #aaaaaa;
 
 // Font stack & text sizing & spacing.
 $font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
-$oneRem: 14px;
+$oneRem: 1rem;
 $lineHeight: 1.7;
 $semiboldWeight: 600;
 
@@ -52,12 +52,12 @@ $desktopMaxWidth: $desktopWidth;
 html {
   border: 0;
   font-family: $font-family;
-  font-size: $oneRem;
+  // font-size: $oneRem;
   margin: 0;
   padding: 0;
 }
 body {
-  --ctrl-radius: 5px;
+  --ctrl-radius: .375rem;
   // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
   --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
@@ -198,22 +198,24 @@ main {
 
     h1 {
       background-image: url(images/disqus_eye_48.png);
-      background-position: 0 0.5rem;
+      background-position: 0 0.375rem;
       background-repeat: no-repeat;
       background-size: fit;
       color: var(--color-text);
       font-size: 1.5rem;
       font-weight: normal;
-      line-height: 1.5;
+      line-height: 1.25;
       margin: 0;
-      @include white-space();
+      // @include white-space();
+      white-space: nowrap;
+      overflow: hidden;
 
       a:link,
       a:visited,
       a:active {
         color: inherit;
         display: block;
-        text-indent: 4rem;
+        text-indent: 3.5rem;
         text-decoration: none;
       }
       a:focus {
@@ -224,6 +226,14 @@ main {
         // display: block;
         font-size: 1rem;
         font-weight: normal;
+
+        &:first-child {
+          display: none;
+
+          @media screen and (min-width: 22.5rem) {
+            display: inline;
+          }
+        }
 
         &:last-child {
           display: block;
@@ -335,6 +345,7 @@ main {
           font-weight: $semiboldWeight;
           grid-area: label;
           min-width: 10rem;
+          white-space: nowrap;
         }
         &:last-child {
           grid-area: input;
@@ -411,7 +422,7 @@ textarea {
     cursor: pointer;
     display: block;
     left: calc(100% - 2.5rem);
-    margin-bottom: 5px;
+    margin-bottom: .5rem;
     overflow: hidden;
     position: relative;
     text-indent: 100%;
@@ -438,8 +449,7 @@ textarea {
   // Toggle knob/thumb in the on position.
   > input:checked + label::after {
     background-color: var(--color-ctrl-on);
-    left: calc(100% - 1px);
-    transform: translateX(calc(-100% + 2px));
+    left: 1rem;
   }
 
   // Focus state.

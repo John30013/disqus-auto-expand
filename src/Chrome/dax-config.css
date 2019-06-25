@@ -5,17 +5,16 @@
 html {
   border: 0;
   font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
-  font-size: 14px;
   margin: 0;
   padding: 0;
 }
 
 body {
-  --ctrl-radius: 5px;
+  --ctrl-radius: .375rem;
   --color-bkgd: #eeeeee;
   --color-bkgd-clear: #eeeeee00;
   --color-brdr: #666666;
-  --color-ctrl: #0000000f;
+  --color-ctrl: #00000018;
   --color-ctrl-focus: #ffffffc0;
   --color-ctrl-invalid: #ff00000f;
   --color-ctrl-on: #459cf9;
@@ -32,8 +31,8 @@ body {
   margin: 0;
   overflow-x: hidden;
   padding: 0 0.5rem 0.5rem;
-  max-width: 574px;
-  min-width: 574px;
+  max-width: 41rem;
+  min-width: 41rem;
   -webkit-transition: -webkit-filter 0.4s ease-in 0.1s, background-color 0.5s ease-in;
 }
 
@@ -51,7 +50,7 @@ body.theme-dark {
   --color-link: #459cf9;
 }
 
-@media screen and (max-device-width: 560px) {
+@media screen and (max-device-width: 40rem) {
   body {
     line-height: 1.25;
     min-width: 320px;
@@ -133,7 +132,7 @@ main {
   align-items: start;
 }
 
-@media screen and (max-device-width: 560px) {
+@media screen and (max-device-width: 40rem) {
   main {
     display: block;
   }
@@ -145,21 +144,16 @@ main > header {
 
 main > header h1 {
   background-image: url(images/disqus_eye_48.png);
-  background-position: 0 0.5rem;
+  background-position: 0 0.375rem;
   background-repeat: no-repeat;
   background-size: fit;
   color: var(--color-text);
   font-size: 1.5rem;
   font-weight: normal;
-  line-height: 1.5;
+  line-height: 1.25;
   margin: 0;
   white-space: nowrap;
-}
-
-@media screen and (max-width: 560px) {
-  main > header h1 {
-    white-space: normal;
-  }
+  overflow: hidden;
 }
 
 main > header h1 a:link,
@@ -167,7 +161,7 @@ main > header h1 a:visited,
 main > header h1 a:active {
   color: inherit;
   display: block;
-  text-indent: 4rem;
+  text-indent: 3.5rem;
   text-decoration: none;
 }
 
@@ -178,6 +172,16 @@ main > header h1 a:focus {
 main > header h1 small {
   font-size: 1rem;
   font-weight: normal;
+}
+
+main > header h1 small:first-child {
+  display: none;
+}
+
+@media screen and (min-width: 22.5rem) {
+  main > header h1 small:first-child {
+    display: inline;
+  }
 }
 
 main > header h1 small:last-child {
@@ -193,7 +197,7 @@ main > footer {
   padding-top: 0.5rem;
 }
 
-@media screen and (max-device-width: 560px) {
+@media screen and (max-device-width: 40rem) {
   main > footer {
     margin-top: 0.625rem;
   }
@@ -228,7 +232,7 @@ main > section:first-of-type > h2 {
   position: relative;
 }
 
-@media screen and (max-device-width: 560px) {
+@media screen and (max-device-width: 40rem) {
   main > section:first-of-type {
     display: block;
   }
@@ -238,7 +242,7 @@ main > section:last-of-type {
   grid-area: extopts;
 }
 
-@media screen and (max-device-width: 560px) {
+@media screen and (max-device-width: 40rem) {
   main > section > div {
     margin-bottom: 0.625rem;
   }
@@ -267,6 +271,7 @@ main > section p label:first-child {
   font-weight: 600;
   grid-area: label;
   min-width: 10rem;
+  white-space: nowrap;
 }
 
 main > section p span:last-child,
@@ -289,7 +294,7 @@ main > section p > span.input {
   white-space: nowrap;
 }
 
-@media screen and (max-width: 560px) {
+@media screen and (max-width: 40rem) {
   main > section p > span.input {
     white-space: normal;
   }
@@ -357,7 +362,7 @@ textarea::selection {
   cursor: pointer;
   display: block;
   left: calc(100% - 2.5rem);
-  margin-bottom: 5px;
+  margin-bottom: .5rem;
   overflow: hidden;
   position: relative;
   text-indent: 100%;
@@ -382,8 +387,7 @@ textarea::selection {
 
 .input-toggle > input:checked + label::after {
   background-color: var(--color-ctrl-on);
-  left: calc(100% - 1px);
-  transform: translateX(calc(-100% + 2px));
+  left: 1rem;
 }
 
 .input-toggle > input:focus + label {
