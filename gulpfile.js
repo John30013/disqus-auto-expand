@@ -1,6 +1,7 @@
 // Include gulp & plugins
 const gulp = require("gulp"),
   argv = require("yargs").argv,
+  childProc = require("child_process"),
   csso = require("gulp-csso"),
   del = require("del"),
   fs = require("fs"),
@@ -12,14 +13,45 @@ const gulp = require("gulp"),
   zip = require("gulp-zip");
 
 // Options specified at the command line.
-const optDebug = false || argv.debug,
+const taskName = argv._[0],
+  optDebug = false || argv.debug,
   optMinify = false || argv.minify,
   optZip = false || argv.zip;
 
-let src, dest;
+let src, dist, packed;
 
-// Tasks
-const scripts = function() {
+/* ===== Utility tasks. =====
+  These tasks are not exported, and require targetChrome() or targetFirefox() 
+  to be called first to set the src, dist and packed directories. */
+const targetChrome = function(done) {
+  src = "./src/Chrome/";
+  dist = "./dist/Chrome/";
+  packed = "./dist/packed/Chrome/";
+  done();
+};
+targetChrome.description = 'Targets the "Chrome" src and dist directories.';
+
+const targetFirefox = function(done) {
+  src = "./src/Firefox/";
+  dist = "./dist/Firefox/";
+  packed = "./dist/packed/Firefox/";
+  done();
+};
+targetFirefox.description = 'Targets the "Firefox" src and dist directories.';
+
+const makeDistWritable = function(done) {
+  childProc.exec(`attrib -r ${dist}*.* /s`, done);
+};
+makeDistWritable.description =
+  "Makes the files in the targeted dist directory writeable.";
+
+const makeDistReadOnly = function(done) {
+  childProc.exec(`attrib +r ${dist}*.* /s`, done);
+};
+makeDistReadOnly.description =
+  "Makes the files in the targeted disd directory read-only.";
+
+const copyScripts = function() {
   return gulp
     .src(`${src}*.js`)
     .pipe(
@@ -54,26 +86,26 @@ const scripts = function() {
     )
     .pipe(gulpIf(!optDebug, removeCode({ allowDebug: false })))
     .pipe(gulpIf(optMinify, terser()))
-    .pipe(gulp.dest(dest));
+    .pipe(gulp.dest(dist));
 };
-scripts.description = `Process and deploy Javascript files (${src}*.js).`;
-scripts.flags = {
+copyScripts.description = `Process and deploy Javascript files (${src}*.js).`;
+copyScripts.flags = {
   "--debug": "Keep debug related logic in the JavaScript (default: false)",
   "--minify": "Minify the Javascript source code (default: false)",
 };
 
-const styles = function() {
+const copyStyles = function() {
   return gulp
     .src(`${src}*.css`)
     .pipe(gulpIf(optMinify, csso()))
-    .pipe(gulp.dest(dest));
+    .pipe(gulp.dest(dist));
 };
-styles.description = `Process and deploy CSS files (${src}*.css).`;
-styles.flags = {
+copyStyles.description = `Process and deploy CSS files (${src}*.css).`;
+copyStyles.flags = {
   "--minify": "optMinify the CSS source code (default: false)",
 };
 
-const html = function() {
+const copyHtml = function() {
   return gulp
     .src(`${src}*.html`)
     .pipe(gulpIf(!optDebug, removeCode({ allowDebug: false })))
@@ -86,10 +118,10 @@ const html = function() {
         })
       )
     )
-    .pipe(gulp.dest(dest));
+    .pipe(gulp.dest(dist));
 };
-html.description = `Process and deploy HTML files (${src}*.html).`;
-html.flags = {
+copyHtml.description = `Process and deploy HTML files (${src}*.html).`;
+copyHtml.flags = {
   "--debug": "Keep debug related logic in the HTML (default: false)",
   "--minify": "Minify the HTML source code (default: false)",
 };
@@ -97,71 +129,47 @@ html.flags = {
 const copyFiles = function() {
   return gulp
     .src([`${src}manifest.json`, `${src}images/*`], { base: src })
-    .pipe(gulp.dest(dest));
+    .pipe(gulp.dest(dist));
 };
-copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dest}.`;
+copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dist}.`;
 
-const zipItUp = function() {
-  if (!optZip) {
-    return;
+const zipTarget = function(done) {
+  if (!optZip && !taskName.startsWith("zip")) {
+    done();
   }
-  const manifest = JSON.parse(fs.readFileSync(`${dest}manifest.json`)),
+  const manifest = JSON.parse(fs.readFileSync(`${dist}manifest.json`)),
     zipFilename =
       manifest.name.toLowerCase().replace(/\s/g, "-") +
       "-v" +
       manifest.version.replace(/\./g, "_") +
-      (dest.endsWith("fox/") ? "@john30013.com.zip" : ".zip");
+      (dist.endsWith("fox/") ? "@john30013.com.zip" : ".zip");
   return gulp
-    .src(`${dest}**/*`)
+    .src(`${dist}**/*`)
     .pipe(zip(zipFilename))
     .pipe(gulp.dest(packed));
 };
-
-const targetChrome = function(done) {
-  src = "./src/Chrome/";
-  dest = "./dist/Chrome/";
-  packed = "./dist/packed/Chrome/";
-  done();
-};
-targetChrome.description = 'Targets the "Chrome" src and dist directories.';
-
-const targetFirefox = function(done) {
-  src = "./src/Firefox/";
-  dest = "./dist/Firefox/";
-  packed = "./dist/packed/Firefox/";
-  done();
-};
-targetFirefox.description = 'Targets the "Firefox" src and dist directories.';
-
-const cleanAll = function() {
-  return del(["./dist/"]);
-};
-cleanAll.description = "Cleans the entire dist directory tree.";
+zipTarget.description =
+  "Zips the targeted dist directory into its packed directory.";
 
 const cleanTarget = function() {
-  return del([dest]);
+  return del([dist]);
 };
 cleanTarget.description = "Cleans the target dist directory tree.";
 
-const cleanChrome = function(done) {
-  return gulp.series(targetChrome, cleanTarget)(done);
-};
-cleanChrome.description =
-  "Targets Chrome and cleans the Chrome dist directory tree.";
-
-const zipChrome = function(done) {
-  return gulp.series(targetChrome, zipItUp)(done);
-};
-
-const zipFirefox = function(done) {
-  return gulp.series(targetFirefox, zipItUp)(done);
+/* ===== Exported tasks. ===== */
+const listArgs = function(done) {
+  console.log({ taskName, optDebug, optMinify, optZip, argv });
+  done();
 };
 
 const buildChrome = function(done) {
   return gulp.series(
-    cleanChrome,
-    gulp.parallel(scripts, styles, html, copyFiles),
-    zipItUp
+    targetChrome,
+    makeDistWritable,
+    cleanTarget,
+    gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
+    zipTarget,
+    makeDistReadOnly
   )(done);
 };
 buildChrome.description =
@@ -173,17 +181,14 @@ buildChrome.flags = {
     "Zip the dist files for deployment to the Chrome web store (default: false)",
 };
 
-const cleanFirefox = function(done) {
-  return gulp.series(targetFirefox, cleanTarget)(done);
-};
-cleanChrome.description =
-  "Targets Chrome and cleans the Chrome dist directory tree.";
-
 const buildFirefox = function(done) {
   return gulp.series(
-    cleanFirefox,
-    gulp.parallel(scripts, styles, html, copyFiles),
-    zipItUp
+    targetFirefox,
+    makeDistWritable,
+    cleanTarget,
+    gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
+    zipTarget,
+    makeDistReadOnly
   )(done);
 };
 buildFirefox.description =
@@ -194,6 +199,55 @@ buildFirefox.flags = {
   "--zip":
     "Zip the dist files for deployment to the Firefox Add-ons store (default: false)",
 };
+
+const cleanAll = function() {
+  return del(["./dist/"]);
+};
+cleanAll.description = "Cleans the entire dist directory tree.";
+
+const cleanChrome = function(done) {
+  return gulp.series(
+    targetChrome,
+    makeDistWritable,
+    cleanTarget,
+    makeDistReadOnly
+  )(done);
+};
+cleanChrome.description =
+  "Targets Chrome and cleans the Chrome dist directory tree.";
+
+const cleanFirefox = function(done) {
+  return gulp.series(
+    targetFirefox,
+    makeDistWritable,
+    cleanTarget,
+    makeDistReadOnly
+  )(done);
+};
+cleanChrome.description =
+  "Targets Chrome and cleans the Chrome dist directory tree.";
+
+const zipChrome = function(done) {
+  return gulp.series(
+    targetChrome,
+    makeDistWritable,
+    zipTarget,
+    makeDistReadOnly
+  )(done);
+};
+zipChrome.description =
+  "Zips the Chrome dist directory to its packed directory.";
+
+const zipFirefox = function(done) {
+  return gulp.series(
+    targetFirefox,
+    makeDistWritable,
+    zipTarget,
+    makeDistReadOnly
+  )(done);
+};
+zipFirefox.description =
+  "Zips the Firefox dist directory to its packed directory.";
 
 const defaultTasks = function(done) {
   return gulp.series(buildChrome, buildFirefox)(done);
@@ -215,5 +269,6 @@ module.exports = {
   cleanFirefox,
   zipChrome,
   zipFirefox,
+  listArgs,
 };
 module.exports.default = defaultTasks;
