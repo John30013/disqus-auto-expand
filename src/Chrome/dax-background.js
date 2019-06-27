@@ -1,8 +1,8 @@
 chrome.runtime.onInstalled.addListener(() => {
-  let _config = defaultConfig;
-  // Make sure the extension's options are stored when the extension starts up.
-  // Pass `null` so we get everything in storage. This allows us to clean up
-  // obsolete config values (see else block below).
+  let _config = { ...defaultConfig };
+  /* Make sure the extension's options are stored when the extension starts up.
+  Pass `null` so we get everything in storage. This allows us to clean up
+  obsolete config values (see the `else` block below). */
   chrome.storage.sync.get(null, config => {
     if (chrome.runtime.lastError) {
       console.info(
@@ -69,7 +69,12 @@ chrome.runtime.onInstalled.addListener(() => {
     }
   });
 
-  // Set the extension's icon.
+  /* ===== Helper functions.===== */
+  /**
+   * Sets the extension icon based on the value of the parameter.
+   * @param {Boolean} isRunning - Whether the extension is actively processing
+   * new links (i.e., checkInterval is zero).
+   */
   function setIcon(isRunning) {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug(`setIcon(${isRunning}): entering.`);
@@ -97,7 +102,7 @@ chrome.runtime.onInstalled.addListener(() => {
             ? "images/disqus_eye_16.png"
             : "images/disqus_eye_16_paused.png",
         });
-      }
+      } // end of chrome.tabs.query() callback.
     );
   } // end of setIcon().
 }); // end of onInstalled listener.
