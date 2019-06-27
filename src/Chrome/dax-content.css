@@ -10,10 +10,13 @@
   margin: 0 auto 1rem;
   opacity: 1;
   outline: none;
+  overflow: hidden;
   padding-left: calc(16px + 0.5rem);
   padding-right: 0.5rem;
   text-align: center;
-  transition: width 1s ease;
+  transition: width 1s ease, opacity 1s ease 3s;
+  white-space: nowrap;
+  width: 10rem;
 }
 
 #dax-loadAll:focus, #dax-loadAll:hover {
@@ -27,12 +30,19 @@
 }
 
 #dax-loadAll.processing {
-  animation: loadAllThrobber 3s ease-in-out 0s infinite alternate forwards;
+  animation: loadAllThrobber 3s ease-in-out 1s infinite alternate forwards;
   background-color: #fff;
   color: #000;
   cursor: progress;
+  padding-right: calc(16px + 0.5rem);
   pointer-events: none;
-  width: 18rem;
+  width: 17rem;
+}
+
+#dax-loadAll.processing.complete {
+  animation-direction: reverse;
+  animation-iteration-count: 1;
+  opacity: 0;
 }
 
 @keyframes loadAllThrobber {
@@ -42,5 +52,12 @@
   100% {
     background-position-x: 100%;
   }
+}
+
+/* On the Disqus site (on small screens at least) the Disqus ad iframe above the
+Disqus discussion iframe cuts off the top of the discussion iframe. This rule 
+adds some top padding to fix that. */
+#layout {
+  padding-top: 1rem;
 }
 /*# sourceMappingURL=dax-content.css.map */
