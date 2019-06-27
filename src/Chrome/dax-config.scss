@@ -52,12 +52,11 @@ $desktopMaxWidth: $desktopWidth;
 html {
   border: 0;
   font-family: $font-family;
-  // font-size: $oneRem;
   margin: 0;
   padding: 0;
 }
 body {
-  --ctrl-radius: .375rem;
+  --ctrl-radius: 0.375rem;
   // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
   --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
@@ -73,6 +72,7 @@ body {
   --color-link: #{darken($theme-lite-color-brand, 20%)};
   --prompt-brightness: 0.5;
   &.theme-dark {
+    // Dark color theme.
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
     --color-ctrl: #{$theme-dark-color-ctrl};
@@ -160,7 +160,6 @@ p {
   padding: 0;
 
   &:last-child {
-    // border-bottom: 0;
     margin-bottom: 0;
     padding-bottom: 0;
   }
@@ -206,7 +205,6 @@ main {
       font-weight: normal;
       line-height: 1.25;
       margin: 0;
-      // @include white-space();
       white-space: nowrap;
       overflow: hidden;
 
@@ -223,7 +221,6 @@ main {
       }
 
       small {
-        // display: block;
         font-size: 1rem;
         font-weight: normal;
 
@@ -301,20 +298,18 @@ main {
     }
 
     // In the dual-column layout (large screens), the bottom paragraph in each
-    // column loses its bottom border, margin and padding (since the next section
-    // and footer sit below them and have top margins and borders).
-    // In the single-column layout (small screens), the two "columns" are stacked
-    // and we need to restore the bottom margin on both "columns", and the bottom
-    // border and padding on the first one (since it's visually in the middle of
-    // the single column). We do this on the DIVs ("columns") to avoid complex
-    // style rules on the paragraphs.
+    // column loses its bottom border, margin and padding (since the next
+    // section and footer sit below them and have top margins and borders).
+    // In the single-column layout (small screens), the two "columns" are
+    // stacked and we need to restore the bottom margin on both "columns", and
+    // the bottom border and padding on the first one (since it's visually in
+    // the middle of the single column). We do this on the DIVs ("columns") to
+    // avoid complex style rules on the paragraphs.
     @media screen and (max-device-width: $mobileBreakpoint) {
       > div {
         margin-bottom: 0.625rem;
 
         &:first-of-type {
-          // border-bottom: 1px dotted var(--color-text-sec);
-          // padding-bottom: calc(0.625rem - 1px);
           padding-bottom: 0.625rem;
         }
       }
@@ -333,9 +328,7 @@ main {
         "label input" auto
         "help  help" auto
         / auto 8.25rem;
-      // border-bottom: 1px dotted var(--color-text-sec);
       margin-bottom: 0.625rem;
-      // padding-bottom: calc(0.625rem - 1px);
       padding-bottom: 0.625rem;
 
       span,
@@ -374,7 +367,7 @@ main {
   }
 }
 
-/* Text-like inputs */
+// Text-like inputs.
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 select,
 textarea {
@@ -386,7 +379,7 @@ textarea {
   font-size: 1rem;
   font-weight: $semiboldWeight;
   padding: 0 0.25rem;
-  position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
+  position: relative; // Prevent movement on focus (bottom border width -> 2px).
 
   &:focus {
     background-color: var(--color-ctrl-focus);
@@ -404,7 +397,7 @@ textarea {
   }
 }
 
-/* Toggle switch (styled checkbox) input */
+// Toggle switch (styled checkbox) input.
 .input-toggle {
   line-height: 1.5;
 
@@ -422,7 +415,7 @@ textarea {
     cursor: pointer;
     display: block;
     left: calc(100% - 2.5rem);
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
     overflow: hidden;
     position: relative;
     text-indent: 100%;

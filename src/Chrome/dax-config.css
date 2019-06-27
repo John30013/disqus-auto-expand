@@ -10,7 +10,7 @@ html {
 }
 
 body {
-  --ctrl-radius: .375rem;
+  --ctrl-radius: 0.375rem;
   --color-bkgd: #eeeeee;
   --color-bkgd-clear: #eeeeee00;
   --color-brdr: #666666;
@@ -305,7 +305,6 @@ main > section p input#checkInterval {
   text-align: center;
 }
 
-/* Text-like inputs */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 select,
 textarea {
@@ -318,7 +317,6 @@ textarea {
   font-weight: 600;
   padding: 0 0.25rem;
   position: relative;
-  /* Keeps the input from moving when focused (bottom border gets thicker). */
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
@@ -344,7 +342,6 @@ textarea::selection {
   background-color: var(--color-ctrl-on);
 }
 
-/* Toggle switch (styled checkbox) input */
 .input-toggle {
   line-height: 1.5;
 }
@@ -362,7 +359,7 @@ textarea::selection {
   cursor: pointer;
   display: block;
   left: calc(100% - 2.5rem);
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
   overflow: hidden;
   position: relative;
   text-indent: 100%;
