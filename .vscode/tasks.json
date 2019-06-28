@@ -1,0 +1,9 @@
+{
+  "tasks": [
+    {
+      "type": "gulp",
+      "task": "buildChrome",
+      "problemMatcher": []
+    }
+  ]
+}

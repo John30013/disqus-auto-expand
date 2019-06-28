@@ -1,5 +1,4 @@
 .private
-.vscode
 node_modules
 **/*.map
 **/*.pem
