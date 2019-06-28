@@ -136,8 +136,8 @@ function listenForUpdates() {
   /* ===== Helper functions. ===== */
   /**
    * Updates the new value for the specified configuration key in storage.
-   * @param {*} key - the configuration key to update.
-   * @param {*} value - the nw value of the key.
+   * @param {String} key - the configuration key to update.
+   * @param {Boolean|Number} value - the nw value of the key.
    */
   function updateConfigValue(key, value) {
     chrome.storage.sync.set({ [key]: value }, () => {
@@ -179,8 +179,8 @@ function listenForUpdates() {
 /**
  * Requests the background script update the extension's icon, depending on
  * the value of the parameter.
- * @param {*} isRunning - Boolean value indicating whether the extension is
- * processing new links (i.e., checkInterval is not zero).
+ * @param {Boolean} isRunning - Boolean value indicating whether the extension
+ * is processing new links (i.e., checkInterval is not zero).
  */
 function setIcon(isRunning) {
   // removeIf(!allowDebug)
@@ -195,10 +195,10 @@ function setIcon(isRunning) {
 
 /**
  * Sends a command (message) to the content script in the active tab.
- * @param {*} commandData - an object describing the command to send, including
- * any parameters.
- * @param {*} responseCallback - an optional callback function that will be
- * called if the content script replies to this message.
+ * @param {Object} commandData - an object describing the command to send,
+ * including any parameters.
+ * @param {Function} responseCallback - an optional callback function that will
+ * be called if the content script replies to this message.
  */
 function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -230,8 +230,8 @@ function sendContentCommand(commandData, responseCallback) {
  * Asks the content script to output a debug message to the console. Also
  * logs the message to the config script's console (which is not generally
  * visible).
- * @param {*} message - A string containing the debug message (can include
- * console logging parameter placeholders).
+ * @param {String} message - The debug message (can include console logging
+ * placeholders).
  * @param  {...any} params - Parameters that will replace the placeholders.
  */
 function logDebug(message, ...params) {

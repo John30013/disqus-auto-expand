@@ -1,9 +1,11 @@
+// "Global" variables and flags.
 let _config = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
   _linkCounter = 0,
-  _loadAllInitialized = false;
+  _loadAllInitialized = false,
+  _warnedAboutLoadAll = false;
 
 // Start the extension.
 refreshConfig(true);
@@ -13,7 +15,8 @@ _config.doDebug &&
 // endRemoveIf(!allowDebug)
 // Listen for option updates and debug messages from config page.
 listenForMessages();
-// Set up the IntersectionObserver to watch for auto-expand links coming into view.
+// Set up the IntersectionObserver to watch for auto-expand links entering the
+// viewport.
 createObserver();
 // Start processing.
 processNewLinks();
@@ -21,7 +24,7 @@ processNewLinks();
 
 /* ===== Helper functions. ===== */
 /**
- * Listens for messages from the configuration page.
+ * Listens for messages from other scripts in the extension.
  */
 function listenForMessages() {
   chrome.runtime.onMessage.addListener(msg => {
@@ -48,8 +51,9 @@ function createObserver() {
   /**
    * Activates (clicks) observed links when they enter the viewport, and
    * removes them from observation.
-   * @param {*} entries - array of observed links that have either been
-   * initially put under observation or have entered the viewport.
+   * @param {IntersectionObserverEntry[]} entries - array of observed links that
+   * have either been initially put under observation or have entered the
+   * viewport.
    */
   function processObservedEntries(entries) {
     if (!_config.checkInterval) {
@@ -118,7 +122,7 @@ function processNewLinks() {
   /* Since processNewLinks() is called by refreshConfig() when checkInterval is
   zero, clear any pending timeout first. It's a no-op if this call is due to 
   the timer timing out.
-  Note: if _loadAllInitialized is `false`, we keep the loop going until the
+    Note: if _loadAllInitialized is `false`, we keep the loop going until the
   content loads, so we can install the "Load all content" button at the top of
   the posts. (Also see the setTimout() call at the end of this method.) */
   _timer && clearTimeout(_timer);
@@ -168,7 +172,8 @@ function processNewLinks() {
   /**
    * Instructs the IntersectionOserver to start observing the link, and does
    * some record keeping.
-   * @param {*} link - the link to observe for intersection with the viewport.
+   * @param {HTMLAnchorElement} link - the link to observe for intersection with
+   * the viewport.
    */
   function observeLink(link) {
     let luid = link.dataset.luid;
@@ -193,9 +198,11 @@ function processNewLinks() {
 } // end of processNewLinks().
 
 /**
- * Reloads the configuration from storage, and asks the background script to
- * update the icon based on the checkInterval if setIcon is `true`.
- * @param {*} setIcon
+ * Gets the latest configuration values from storage, and optionally asks the
+ * background script to update the extension's icon based on the value of
+ * checkInterval.
+ * @param {Boolean} setIcon - whether to change the extension's icon based on
+ * the value of the checkInterval config value (0 -> paused; 1–30 -> active).
  */
 function refreshConfig(setIcon) {
   chrome.storage.sync.get(defaultConfig, config => {
@@ -228,7 +235,10 @@ function refreshConfig(setIcon) {
 
 /**
  * Remove a link from observation and record-keeping.
- * (Reverses proecessNewLinks()#observeLink().)
+ * (Reverses processNewLinks()#observeLink().)
+ * @param {HTMLAnchorElement} link - a link currently under observation.
+ * @param {Boolean} removeDaxTags - whether to remove "bookkeeping" classes set
+ * on the link by tagLink() and activateLink().
  */
 function unobserveLink(link, removeDaxTags) {
   const luid = link.dataset.luid;
@@ -259,7 +269,7 @@ function unobserveLink(link, removeDaxTags) {
 /**
  * Finds new links to observe, based on the configuration options. This
  * function is called by both processNewLinks() and loadAllContent().
- * @param {*} config
+ * @param {Object} config
  */
 function findNewLinks(config) {
   const newLinks = [];
@@ -307,7 +317,7 @@ function findNewLinks(config) {
 /**
  * Marks the link as being under observation for intersection with the
  * viewport.
- * @param {*} link
+ * @param {HTMLAnchorElement} link - the link under observation.
  */
 function tagLink(link) {
   luid = `${Date.now()}-${_linkCounter++}`;
@@ -321,7 +331,7 @@ function tagLink(link) {
 
 /**
  * Marks the link as having been activated (clicked).
- * @param {*} link
+ * @param {HTMLAnchorElement} link - the link that has been clicked.
  */
 function activateLink(link) {
   link.click();
@@ -345,7 +355,7 @@ function initLoadAllContent() {
 
 /**
  * Recursively loads all of the available content in the discussion.
- * @param {*} iteration - the count of how many times this method has been
+ * @param {Number} iteration - the count of how many times this method has been
  * called. Used to vary the status message shown to the user while the content
  * is being loaded.
  */
@@ -356,20 +366,66 @@ function loadAllContent(iteration) {
   // Stop the processNewLinks() timeout loop.
   _timer && clearTimeout(_timer);
 
-  const newLinks = findNewLinks();
+  iteration = iteration || 0;
+  if (iteration === 0) {
+    /* Try to get the number of comments. When Disqus is embedded on a page, the
+    comment count is in a div.comment-count element within the iframe; when on
+    the Disqus site itself, we have to get it from the disqus-threadData JSON
+    object, which is more expensive because the object is potentially large. */
+    let commentCount = -1;
+    let commentCountElt = document.querySelector(".comment-count");
+    if (commentCountElt) {
+      commentCount = parseInt(commentCountElt.innerText, 10);
+    } else {
+      commentCountElt = document.getElementById("disqus-threadData");
+      try {
+        commentCount = JSON.parse(commentCountElt.innerText).cursor.total;
+      } catch (error) {
+        console.info("Couldn't get comment count from JSON: %s", error);
+      }
+    }
+    if (commentCount > 500 && !_warnedAboutLoadAll) {
+      _warnedAboutLoadAll = true;
+      if (
+        !confirm(
+          `Loading this entire discussion will take some time and
+  could consume a lot of memory and data. Your browser 
+  might become very slow, or stop responding at all.
+
+Do you want to proceed?`
+        )
+      ) {
+        return;
+      }
+    }
+  } // end of block to handle first iteration.
+  const button = document.getElementById("dax-loadAll"),
+    newLinks = findNewLinks(),
+    animDelaySecs = 1,
+    animDurationSecs = 3,
+    opacDelaySecs = 3,
+    opacDurationSecs = 1;
+
   // removeIf(!allowDebug)
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   // endRemoveIf(!allowDebug)
-  iteration = iteration || 0;
   if (newLinks.length) {
+    button.classList.add("processing");
+    // Note: opacity delay + duration must equal animation delay + duration.
+    button.style.setProperty("--anim-delay", `${animDelaySecs}s`);
+    button.style.setProperty("--anim-duration", `${animDurationSecs}s`);
+    button.style.setProperty("--opac-delay", `${opacDelaySecs}s`);
+    button.style.setProperty("--opac-duration", `${opacDurationSecs}s`);
+    // During processing the button acts as a progress indicator. We change the
+    // text occasionally to keep it interesting.
     if (iteration < 5) {
-      showToast("Please wait while the content loads…");
+      button.innerText = "Please wait while the content loads…";
     } else if (iteration < 10) {
-      showToast("Still working on it…");
+      button.innerText = "Still working on it…";
     } else if (iteration < 20) {
-      showToast("Wow, this is a long discussion…");
+      button.innerText = "Wow, this is a really long discussion…";
     } else if (iteration < 30) {
-      showToast("Looks like the end is in sight…");
+      button.innerText = "Looks like the end is in sight…";
     }
     newLinks.forEach(link => {
       unobserveLink(link);
@@ -380,59 +436,17 @@ function loadAllContent(iteration) {
     const delay = Math.floor(1000 * (5 + (_config.checkInterval * 5) / 30));
     _timer = setTimeout(loadAllContent, delay, iteration + 1);
   } else {
-    hideToast("All content has been loaded.", 3000);
-    processNewLinks();
+    button.classList.add("complete");
+    button.innerText = "The entire discussion is now loaded.";
+    setTimeout(
+      button => {
+        button.classList.remove("processing", "complete");
+        button.innerText = "Load entire discussion";
+        button.blur();
+        processNewLinks();
+      },
+      1000 * (animDelaySecs + animDurationSecs),
+      button
+    );
   }
-
-  /* ===== Helper functions. ===== */
-  /**
-   * Displays a notification to the user about the status of the operation.
-   * @param {*} message
-   */
-  function showToast(message) {
-    // removeIf(!allowDebug)
-    _config.doDebug && console.debug("showToast(): entering");
-    // endRemoveIf(!allowDebug)
-
-    let toast = document.getElementById("dax-toast"),
-      toastText = message || "";
-    if (!toast) {
-      // removeIf(!allowDebug)
-      _config.doDebug && console.debug("--> creating toast");
-      // endRemoveIf(!allowDebug)
-      toast = document.createElement("div");
-      toast.id = "dax-toast";
-      toast.setAttribute("role", "alert");
-      toast.innerText = toastText;
-      toast.className = "toast";
-      // Make sure the discussion forum (and therefore the toast) is visible, and display the toast.
-      document.body.scrollIntoView();
-      document.body.prepend(toast);
-      toast.classList.add("toast-open");
-    } else {
-      if (toast.innerText !== toastText) {
-        toast.innerText = toastText;
-      }
-    }
-    return toast;
-  } // end of showToast().
-
-  /**
-   * Displays a final status message and then hides the notification after the
-   * specified delay.
-   * @param {*} message
-   * @param {*} delay
-   */
-  function hideToast(message, delay) {
-    const toast = document.getElementById("dax-toast") || showToast(),
-      hideDelay = delay || 3000;
-    toast.innerText = message || "";
-    toast.classList.add("toast-done");
-    setTimeout(() => {
-      toast.classList.remove("toast-open");
-    }, hideDelay);
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, hideDelay + 500);
-  } // end of hideToast().
-} // end of loadAllContent().
+}

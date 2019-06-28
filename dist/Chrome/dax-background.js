@@ -72,8 +72,8 @@ chrome.runtime.onInstalled.addListener(() => {
   /* ===== Helper functions.===== */
   /**
    * Sets the extension icon based on the value of the parameter.
-   * @param {*} isRunning - Boolean value indicating whether the extension is
-   * actively processing new links (i.e., checkInterval is zero).
+   * @param {Boolean} isRunning - Whether the extension is actively processing
+   * new links (i.e., checkInterval is zero).
    */
   function setIcon(isRunning) {
     // removeIf(!allowDebug)
