@@ -30,6 +30,34 @@ function initUiText() {
 /**
  * Retrieves the current configuration values from storage.
  */
+function setEnabledStateUi(isEnabled) {
+  setIcon(isEnabled);
+  enableConfigOptionInputs(isEnabled);
+
+  function enableConfigOptionInputs(isEnabled) {
+    document
+      .querySelectorAll("section:first-of-type > div input")
+      .forEach(elt => (elt.disabled = !isEnabled));
+  } // end of enableConfigOptionInputs().
+
+  /**
+   * Requests the background script update the extension's icon, depending on
+   * the value of the parameter.
+   * @param {Boolean} isEnabled - Boolean value indicating whether the extension
+   * is processing new links (i.e., checkInterval is not zero).
+   */
+  function setIcon(isEnabled) {
+    // removeIf(!allowDebug)
+    logDebug(`proxy setIcon(${isEnabled}): entering.`);
+    // endRemoveIf(!allowDebug)
+    chrome.runtime.sendMessage({
+      action: "setIcon",
+      caller: "config",
+      data: isEnabled,
+    });
+  } // end of setIcon().
+}
+
 function getCurrentConfig() {
   chrome.storage.sync.get(defaultConfig, config => {
     if (chrome.runtime.lastError) {
@@ -58,6 +86,8 @@ function getCurrentConfig() {
           // removeIf(!allowDebug)
           logDebug("--> document.body class: %s", document.body.className);
           // endRemoveIf(!allowDebug)
+        } else if (key === "isEnabled") {
+          setEnabledStateUi(input.checked);
         }
         // removeIf(!allowDebug)
         logDebug(
@@ -68,15 +98,14 @@ function getCurrentConfig() {
         // endRemoveIf(!allowDebug)
       } else if (key === "checkInterval") {
         input.value = "" + config[key];
-        setIcon(!!config[key]);
         // removeIf(!allowDebug)
         logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
-      } else if (key === "loadAllContent") {
+        /* } else if (key === "loadAllContent") {
         // true =  operation is in progress, so the button should be diabled.
         // false = operation is not in progress, so the button should be enanbled.
         input.toggleAttribute("disabled", !!value);
-        input.disabled = !!value;
+        input.disabled = !!value; */
       }
     }
   });
@@ -168,30 +197,14 @@ function listenForUpdates() {
           return;
         }
         chrome.tabs.sendMessage(tabs[0].id, { action: "refreshConfig" });
-        if (key === "checkInterval") {
-          setIcon(!!value);
+        if (key === "isEnabled") {
+          setIcon(value);
+          enableConfigOptionInputs(value);
         }
       });
     } // end of dark theme handling.
   } // end of updateConfigValue().
 } // end of listenForUpdates().
-
-/**
- * Requests the background script update the extension's icon, depending on
- * the value of the parameter.
- * @param {Boolean} isRunning - Boolean value indicating whether the extension
- * is processing new links (i.e., checkInterval is not zero).
- */
-function setIcon(isRunning) {
-  // removeIf(!allowDebug)
-  logDebug(`[proxy] setIcon(${isRunning}): entering.`);
-  // endRemoveIf(!allowDebug)
-  chrome.runtime.sendMessage({
-    action: "setIcon",
-    caller: "config",
-    data: isRunning,
-  });
-} // end of setIcon().
 
 /**
  * Sends a command (message) to the content script in the active tab.

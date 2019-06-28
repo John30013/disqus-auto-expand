@@ -1,4 +1,5 @@
 const defaultConfig = {
+  isEnabled: true,
   moreReplies: true,
   newReplies: true,
   longItems: true,

@@ -4,6 +4,7 @@ let _config = { ...defaultConfig },
   _observer = null,
   _observedLinks = {},
   _linkCounter = 0,
+  _replyTextboxesInView = 0,
   _loadAllInitialized = false,
   _warnedAboutLoadAll = false;
 
@@ -15,7 +16,8 @@ _config.doDebug &&
 // endRemoveIf(!allowDebug)
 // Listen for option updates and debug messages from config page.
 listenForMessages();
-// Set up the IntersectionObserver to watch for auto-expand links coming into view.
+// Set up the IntersectionObserver to watch for auto-expand links entering the
+// viewport.
 createObserver();
 // Start processing.
 processNewLinks();
@@ -50,11 +52,12 @@ function createObserver() {
   /**
    * Activates (clicks) observed links when they enter the viewport, and
    * removes them from observation.
-   * @param {IntersectionObserverEntry[]} entries - array of observed links that have either been
-   * initially put under observation or have entered the viewport.
+   * @param {IntersectionObserverEntry[]} entries - array of observed links that
+   * have either been initially put under observation or have entered the
+   * viewport.
    */
   function processObservedEntries(entries) {
-    if (!_config.checkInterval) {
+    if (!_config.isEnabled) {
       return;
     }
     let foundIntersects = false;
@@ -69,6 +72,59 @@ function createObserver() {
           luid
         );
       // endRemoveIf(!allowDebug)
+
+      // Handle open Reply textareas. If an open Reply textarea is in view,
+      // abort the process.
+      //
+      // TODO: track *active* LIs by TID (maintain TIDs in a map?). Unobserve  
+      // (and untrack) when no longer "active". (Zombie cleanup will catch old 
+      // LIs that aren't intersecting. unobserveLink() must include untracking 
+      // logic. Zombie cleanup should run if there are any tracked LIs.) 
+      // Q: Do some/all of this in findNewLinks?
+      // Only allow active LIs to abort processing .
+      if (link.tagName === "LI") {
+        if (!link.className.contains("active")) {
+          unobserveLink(link);
+          return;
+        }
+        if (entry.isIntersecting) {
+          _replyTextboxesInView += 1;
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "--> Active textarea control (LI) is visible: %o;",
+              link
+            );
+          _config.doDebug &&
+            console.debug(
+              "--> # of textboxes in view: %d",
+              _replyTextboxesInView
+            );
+          // endRemoveIf(!allowDebug)
+        } else {
+          _replyTextboxesInView -= 1;
+          if (_replyTextboxesInView < 0) {
+            _replyTextboxesInView = 0;
+          }
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "--> Active textarea control (LI) not visible: %o;",
+              link
+            );
+          _config.doDebug &&
+            console.debug(
+              "--> # of textboxes in view: %d",
+              _replyTextboxesInView
+            );
+          // endRemoveIf(!allowDebug)
+        }
+      } // end of block to count reply textboxes in view.
+      if (_replyTextboxesInView > 0 || link.tagName === "LI") {
+        return;
+      }
+
+      // Handle actual links :-)
       if (entry.isIntersecting) {
         foundIntersects = true;
         // removeIf(!allowDebug)
@@ -120,11 +176,11 @@ function processNewLinks() {
   /* Since processNewLinks() is called by refreshConfig() when checkInterval is
   zero, clear any pending timeout first. It's a no-op if this call is due to 
   the timer timing out.
-  Note: if _loadAllInitialized is `false`, we keep the loop going until the
+    Note: if _loadAllInitialized is `false`, we keep the loop going until the
   content loads, so we can install the "Load all content" button at the top of
   the posts. (Also see the setTimout() call at the end of this method.) */
   _timer && clearTimeout(_timer);
-  if (!_config.checkInterval && _loadAllInitialized) {
+  if (!_config.isEnabled && _loadAllInitialized) {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("Stopping the timeout loop.");
     // endRemoveIf(!allowDebug)
@@ -140,7 +196,7 @@ function processNewLinks() {
     if (!_loadAllInitialized) {
       initLoadAllContent();
     }
-    if (_config.checkInterval) {
+    if (_config.isEnabled) {
       newLinks.forEach(observeLink);
     }
   }
@@ -200,7 +256,7 @@ function processNewLinks() {
  * background script to update the extension's icon based on the value of
  * checkInterval.
  * @param {Boolean} setIcon - whether to change the extension's icon based on
- * the value of the checkInterval config value (0 -> paused; > 0 -> active).
+ * the value of the checkInterval config value (0 -> paused; 1–30 -> active).
  */
 function refreshConfig(setIcon) {
   chrome.storage.sync.get(defaultConfig, config => {
@@ -212,7 +268,7 @@ function refreshConfig(setIcon) {
       );
       return;
     }
-    const oldCheckInterval = +_config.checkInterval;
+    const oldisEnabled = _config.isEnabled;
     _config = config;
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("Got sync'd config: %o", _config);
@@ -221,11 +277,11 @@ function refreshConfig(setIcon) {
       chrome.runtime.sendMessage({
         action: "setIcon",
         caller: "content",
-        data: !!_config.checkInterval,
+        data: _config.isEnabled,
       });
     }
     // Check if we need to resume processing links.
-    if (oldCheckInterval === 0 && _config.checkInterval !== oldCheckInterval) {
+    if (!oldisEnabled && _config.isEnabled !== oldisEnabled) {
       processNewLinks();
     }
   });
@@ -233,7 +289,7 @@ function refreshConfig(setIcon) {
 
 /**
  * Remove a link from observation and record-keeping.
- * (Reverses proecessNewLinks()#observeLink().)
+ * (Reverses processNewLinks()#observeLink().)
  * @param {HTMLAnchorElement} link - a link currently under observation.
  * @param {Boolean} removeDaxTags - whether to remove "bookkeeping" classes set
  * on the link by tagLink() and activateLink().
@@ -267,10 +323,22 @@ function unobserveLink(link, removeDaxTags) {
 /**
  * Finds new links to observe, based on the configuration options. This
  * function is called by both processNewLinks() and loadAllContent().
- * @param {Object} config
+ * @param {Object} config - the configuration object.
  */
 function findNewLinks(config) {
-  const newLinks = [];
+  const newLinks = [],
+/*     handleCloseReplyLi = evt => {
+      const { target } = evt;
+      unobserveLink(target);
+      target.removeEventListener(handleCloseReplyLi);
+    }; */
+  // Find any active (open) "reply/edit" textareas. When one of these is
+  // visible, the operation pauses immediately.
+  document.querySelectorAll("li.reply.active, li.edit.active").forEach(elt => {
+    newLinks.push(elt);
+ /*    elt.addEventListener("click", handleCloseReplyLi); */
+  });
+
   // Find new "See more replies" links.
   if (!config || config.moreReplies) {
     document
@@ -309,6 +377,7 @@ function findNewLinks(config) {
       .querySelectorAll('button.alert--realtime:not([style*="none"])')
       .forEach(elt => newLinks.push(elt));
   }
+
   return newLinks;
 } // end of findNewLinks().
 
@@ -341,7 +410,6 @@ function activateLink(link) {
  * Installs and enables the "Load all content" button.
  */
 function initLoadAllContent() {
-  console.debug("initLoadAllContent(): entering");
   const button = document.createElement("button");
   button.innerText = "Load entire discussion";
   button.id = "dax-loadAll";
@@ -350,7 +418,6 @@ function initLoadAllContent() {
   });
   document.getElementById("posts").prepend(button);
   _loadAllInitialized = true;
-  console.debug("initLoadAllContent(): exiting.");
 } // end of initLoadAllContent().
 
 /**
@@ -389,23 +456,33 @@ function loadAllContent(iteration) {
       if (
         !confirm(
           `Loading this entire discussion will take some time and
-          could consume a lot of memory and data. Your browser 
-          might become very slow, or stop responding at all.
+  could consume a lot of memory and data. Your browser 
+  might become very slow, or stop responding at all.
 
-        Do you want to proceed?`
+Do you want to proceed?`
         )
       ) {
         return;
       }
     }
   } // end of block to handle first iteration.
-  const button = document.getElementById("dax-loadAll");
-  const newLinks = findNewLinks();
+  const button = document.getElementById("dax-loadAll"),
+    newLinks = findNewLinks(),
+    animDelaySecs = 1,
+    animDurationSecs = 3,
+    opacDelaySecs = 3,
+    opacDurationSecs = 1;
+
   // removeIf(!allowDebug)
   _config.doDebug && console.debug(`--> found ${newLinks.length} new links.`);
   // endRemoveIf(!allowDebug)
   if (newLinks.length) {
     button.classList.add("processing");
+    // Note: opacity delay + duration must equal animation delay + duration.
+    button.style.setProperty("--anim-delay", `${animDelaySecs}s`);
+    button.style.setProperty("--anim-duration", `${animDurationSecs}s`);
+    button.style.setProperty("--opac-delay", `${opacDelaySecs}s`);
+    button.style.setProperty("--opac-duration", `${opacDurationSecs}s`);
     // During processing the button acts as a progress indicator. We change the
     // text occasionally to keep it interesting.
     if (iteration < 5) {
@@ -435,7 +512,7 @@ function loadAllContent(iteration) {
         button.blur();
         processNewLinks();
       },
-      4000, // see
+      1000 * (animDelaySecs + animDurationSecs),
       button
     );
   }

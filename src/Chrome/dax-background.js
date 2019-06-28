@@ -1,5 +1,6 @@
 chrome.runtime.onInstalled.addListener(() => {
-  let _config = { ...defaultConfig };
+  let _config = { ...defaultConfig },
+    manifest = chrome.runtime.getManifest();
   /* Make sure the extension's options are stored when the extension starts up.
   Pass `null` so we get everything in storage. This allows us to clean up
   obsolete config values (see the `else` block below). */
@@ -43,7 +44,7 @@ chrome.runtime.onInstalled.addListener(() => {
       }
       _config = config;
     } // end of else block (got config items from storage).
-    setIcon(!!_config.checkInterval);
+    setIcon(!!_config.isEnabled);
   }); // end of chrome.storage.sync.get() callback.
 
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
@@ -65,19 +66,19 @@ chrome.runtime.onInstalled.addListener(() => {
     _config.doDebug && console.debug("Got message: %o", msg);
     // endRemoveIf(!allowDebug)
     if (msg.action === "setIcon" && typeof msg.data !== "undefined") {
-      setIcon(!!msg.data);
+      setIcon(msg.data);
     }
   });
 
   /* ===== Helper functions.===== */
   /**
    * Sets the extension icon based on the value of the parameter.
-   * @param {Boolean} isRunning - Whether the extension is actively processing
+   * @param {Boolean} isEnabled - Whether the extension is actively processing
    * new links (i.e., checkInterval is zero).
    */
-  function setIcon(isRunning) {
+  function setIcon(isEnabled) {
     // removeIf(!allowDebug)
-    _config.doDebug && console.debug(`setIcon(${isRunning}): entering.`);
+    _config.doDebug && console.debug(`setIcon(${isEnabled}): entering.`);
     // endRemoveIf(!allowDebug)
     chrome.tabs.query(
       {
@@ -98,9 +99,15 @@ chrome.runtime.onInstalled.addListener(() => {
         // endRemoveIf(!allowDebug)
         chrome.pageAction.setIcon({
           tabId: tabs[0].id,
-          path: isRunning
+          path: isEnabled
             ? "images/disqus_eye_16.png"
             : "images/disqus_eye_16_paused.png",
+        });
+        chrome.pageAction.setTitle({
+          tabId: tabs[0].id,
+          title: `${manifest.page_action.default_title}${
+            isEnabled ? "" : " (paused)"
+          }`,
         });
       } // end of chrome.tabs.query() callback.
     );

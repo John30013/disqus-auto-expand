@@ -22,7 +22,7 @@ $background-color: #282828;
   padding-left: calc(16px + 0.5rem);
   padding-right: 0.5rem;
   text-align: center;
-  transition: width 1s ease, opacity 1s ease 3s;
+  transition: width 1s ease, opacity var(--opac-duration) ease var(--opac-delay);
   white-space: nowrap;
   width: 10rem;
 
@@ -37,7 +37,8 @@ $background-color: #282828;
   }
 
   &.processing {
-    animation: loadAllThrobber 3s ease-in-out 1s infinite alternate forwards;
+    animation: loadAllThrobber var(--anim-duration) ease-in-out
+      var(--anim-delay) infinite alternate forwards;
     background-color: #fff;
     color: #000;
     cursor: progress;

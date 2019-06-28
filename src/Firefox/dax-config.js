@@ -160,14 +160,14 @@ function listenForUpdates() {
   } // end of updateConfigValue().
 } // end of listenForUpdates().
 
-function setIcon(isRunning) {
+function setIcon(isEnabled) {
   // removeIf(!allowDebug)
-  logDebug(`[proxy] setIcon(${isRunning}): entering.`);
+  logDebug(`[proxy] setIcon(${isEnabled}): entering.`);
   // endRemoveIf(!allowDebug)
   browser.runtime.sendMessage({
     action: "setIcon",
     caller: "config",
-    data: isRunning,
+    data: isEnabled,
   });
 } // end of setIcon().
 
@@ -265,17 +265,14 @@ function initLoadAllContent() {
 } // end of initLoadAllContent().
 
 async function sendContentCommand(commandData, responseCallback) {
-  let operation = 'browser.tabs.query';
+  let operation = "browser.tabs.query";
   try {
     const tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
     });
-    operation = 'browser.tabs.sendMessage';
-    const response = await browser.tabs.sendMessage(
-      tabs[0].id,
-      commandData
-    );
+    operation = "browser.tabs.sendMessage";
+    const response = await browser.tabs.sendMessage(tabs[0].id, commandData);
     if (responseCallback) {
       responseCallback(response);
     }

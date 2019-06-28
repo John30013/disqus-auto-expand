@@ -39,19 +39,18 @@ browser.runtime.onInstalled.addListener(async () => {
   });
 
   // Set the extension's icon.
-  async function setIcon(isRunning) {
+  async function setIcon(isEnabled) {
     try {
       const tabs = await browser.tabs.query({
         active: true,
         currentWindow: true,
       });
       // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug(`--> Setting icon.`);
+      _config.doDebug && console.debug(`--> Setting icon.`);
       // endRemoveIf(!allowDebug)
       browser.pageAction.setIcon({
         tabId: tabs[0].id,
-        path: isRunning
+        path: isEnabled
           ? "images/disqus_eye_16.png"
           : "images/disqus_eye_16_paused.png",
       });

@@ -25,12 +25,14 @@ $theme-dark-color-text-sec: #aaaaaa;
 // Font stack & text sizing & spacing.
 $font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
 $oneRem: 1rem;
+$oneIota: 0.0625rem;
 $lineHeight: 1.7;
 $semiboldWeight: 600;
 
 // Mobile breakpoint
-$mobileBreakpoint: $oneRem * 40;
-$mobileMinWidth: 320px;
+$mobileBreakpoint: 40rem;
+$mobileMedWidth: 27.5rem;
+$mobileMinWidth: 20rem;
 $desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
@@ -42,9 +44,10 @@ $desktopMaxWidth: $desktopWidth;
 }
 
 @mixin disabled {
+  border-style: dotted;
   color: var(--color-text-sec);
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.333;
 }
 * {
   box-sizing: border-box;
@@ -56,7 +59,7 @@ html {
   padding: 0;
 }
 body {
-  --ctrl-radius: 0.375rem;
+  --ctrl-radius: 0.375em;
   // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
   --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
@@ -144,6 +147,11 @@ a:active {
   text-decoration: underline;
 }
 
+abbr {
+  border: 0;
+  text-decoration: none;
+}
+
 h2 {
   color: var(--color-text);
   font-size: 1.25rem;
@@ -205,8 +213,8 @@ main {
       font-weight: normal;
       line-height: 1.25;
       margin: 0;
+      overflow: visible;
       white-space: nowrap;
-      overflow: hidden;
 
       a:link,
       a:visited,
@@ -278,13 +286,47 @@ main {
       column-gap: 1rem;
       align-items: start;
 
-      & > h2 {
+      & > header {
         border-bottom: 1px dotted;
         grid-area: heading;
         margin: 0 0 0.5rem;
         padding: 0 0 calc(0.5rem - 1px);
         position: relative;
-      }
+
+        display: grid;
+        align-items: baseline;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 1rem;
+
+        > h2 {
+          border-bottom: 0;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+        > p {
+          grid-template-columns: 1fr auto;
+
+          span:first-child {
+            font-size: 1rem;
+            font-weight: normal;
+            min-width: 0;
+            text-align: end;
+          }
+          label {
+            font-size: 1.25rem;
+            top: 0.1875rem;
+          }
+        } // end of main > section > header > p
+
+        @media screen and (max-device-width: $mobileBreakpoint) {
+          grid-template-columns: 1fr 1fr;
+          padding-bottom: 0;
+
+          & > p label {
+            top: 0;
+          }
+        }
+      } // end of main > section > header
 
       // On small screens we fall back to a single-column layout.
       @media screen and (max-device-width: $mobileBreakpoint) {
@@ -315,19 +357,13 @@ main {
       }
     }
 
-    > header,
-    > h2 {
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
     p {
       display: grid;
       column-gap: 1rem;
       grid-template:
         "label input" auto
         "help  help" auto
-        / auto 8.25rem;
+        / auto 1fr;
       margin-bottom: 0.625rem;
       padding-bottom: 0.625rem;
 
@@ -355,13 +391,17 @@ main {
       }
 
       & > span.input {
-        text-align: start;
+        text-align: end;
         @include white-space();
       }
 
       input#checkInterval {
-        width: 1.75rem;
         text-align: center;
+        width: 1.75rem;
+
+        &:disabled {
+          @include disabled();
+        }
       }
     }
   }
@@ -414,14 +454,14 @@ textarea {
     box-sizing: content-box;
     cursor: pointer;
     display: block;
-    left: calc(100% - 2.5rem);
+    left: calc(100% - 2em - 0.25rem);
     margin-bottom: 0.5rem;
     overflow: hidden;
     position: relative;
     text-indent: 100%;
-    top: 0.25rem;
-    width: 2rem;
-    height: 1rem;
+    top: 0.25em;
+    width: 2em;
+    height: 1em;
 
     // Toggle knob/thumb (in the default off position).
     &::after {
@@ -434,15 +474,15 @@ textarea {
       position: absolute;
       top: -1px;
       left: -1px;
-      width: 1rem;
-      height: 1rem;
+      width: 1em;
+      height: 1em;
     }
   }
 
   // Toggle knob/thumb in the on position.
   > input:checked + label::after {
     background-color: var(--color-ctrl-on);
-    left: 1rem;
+    left: 1em;
   }
 
   // Focus state.
@@ -456,46 +496,7 @@ textarea {
     @include disabled();
     &::after {
       background-color: var(--color-ctrl);
+      border-style: dotted;
     }
-  }
-}
-
-button {
-  background-color: var(--color-ctrl);
-  border: 1px solid var(--color-brdr);
-  border-radius: var(--ctrl-radius);
-  box-sizing: content-box;
-  color: var(--color-text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: $semiboldWeight;
-  height: 1.5rem;
-  margin-right: 0.25rem;
-  min-width: 5rem;
-  outline: none;
-  padding: 0 0.5rem;
-  width: auto;
-
-  svg {
-    height: 1rem;
-    margin-right: 0.5rem;
-    width: 1rem;
-  }
-
-  &:active {
-    background-color: var(--color-ctrl-on);
-    color: var(--color-ctrl-focus);
-  }
-  &:disabled {
-    border-style: dotted;
-    @include disabled();
-  }
-  &:focus:not(:active) {
-    background-color: var(--color-ctrl-focus);
-    box-shadow: 0 0 0 1px var(--color-ctrl-on);
   }
 }
