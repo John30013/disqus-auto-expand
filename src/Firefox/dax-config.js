@@ -77,6 +77,12 @@ async function getCurrentConfig() {
 
 // Handle changes in the configuration controls.
 function listenForUpdates() {
+
+  window.matchMedia('screen and (prefers-color-scheme: dark)').addEventListener('change', event => {
+    logDebug('prefers-color-scheme: dark change handler: %o', event);
+    updateConfigValue('useDarkTheme', event.matches);
+  });
+
   document.body.addEventListener("input", event => {
     // removeIf(!allowDebug)
     logDebug("Handling change event on %s", event.target.id);

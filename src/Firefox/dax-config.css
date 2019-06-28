@@ -37,18 +37,20 @@ body {
   -webkit-transition: -webkit-filter 0.4s ease-in 0.1s, background-color 0.5s ease-in;
 }
 
-body.theme-dark {
-  --color-bkgd: #282828;
-  --color-brdr: #999999;
-  --color-ctrl: #00000033;
-  --color-ctrl-focus: #00000080;
-  --color-ctrl-invalid: #ff000033;
-  --color-ctrl-on: #459cf9;
-  --color-dlg-bkdrp: #00000099;
-  --color-error: #ff9999;
-  --color-text: #dddddd;
-  --color-text-sec: #aaaaaa;
-  --color-link: #459cf9;
+@media screen and (prefers-color-scheme: dark) {
+  body {
+    --color-bkgd: #282828;
+    --color-brdr: #999999;
+    --color-ctrl: #00000033;
+    --color-ctrl-focus: #00000080;
+    --color-ctrl-invalid: #ff000033;
+    --color-ctrl-on: #459cf9;
+    --color-dlg-bkdrp: #00000099;
+    --color-error: #ff9999;
+    --color-text: #dddddd;
+    --color-text-sec: #aaaaaa;
+    --color-link: #459cf9;
+  }
 }
 
 @media screen and (max-device-width: 560px) {

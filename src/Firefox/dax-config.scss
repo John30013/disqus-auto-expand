@@ -72,7 +72,8 @@ body {
   --color-text-sec: #{$theme-lite-color-text-sec};
   --color-link: #{darken($theme-lite-color-brand, 20%)};
   --prompt-brightness: 0.5;
-  &.theme-dark {
+
+  @media screen and (prefers-color-scheme: dark) {
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
     --color-ctrl: #{$theme-dark-color-ctrl};

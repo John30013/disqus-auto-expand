@@ -7,6 +7,6 @@ const defaultConfig = {
   checkInterval: 5,
   stopAutoplay: true,
   openInNewWindow: true,
-  useDarkTheme: false,
+  useDarkTheme: matchMedia("screen and (prefers-color-scheme: dark").matches,
   doDebug: false
 };
