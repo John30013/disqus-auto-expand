@@ -31,8 +31,8 @@ function initUiText() {
  * Retrieves the current configuration values from storage.
  */
 function setEnabledStateUi(isEnabled) {
-  setIcon(isEnabled);
   enableConfigOptionInputs(isEnabled);
+  setIcon(isEnabled);
 
   function enableConfigOptionInputs(isEnabled) {
     document
@@ -198,8 +198,7 @@ function listenForUpdates() {
         }
         chrome.tabs.sendMessage(tabs[0].id, { action: "refreshConfig" });
         if (key === "isEnabled") {
-          setIcon(value);
-          enableConfigOptionInputs(value);
+          setEnabledStateUi(value);
         }
       });
     } // end of dark theme handling.
