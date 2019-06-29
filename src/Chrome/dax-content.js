@@ -1,5 +1,5 @@
 // "Global" variables and flags.
-let _config = { ...defaultConfig },
+let _config = defaultConfig,
   _timer = null,
   _observer = null,
   _observedLinks = {},
@@ -8,19 +8,30 @@ let _config = { ...defaultConfig },
   _loadAllInitialized = false,
   _warnedAboutLoadAll = false;
 
-// Start the extension.
-refreshConfig(true);
-// removeIf(!allowDebug)
-_config.doDebug &&
-  console.debug(`content.js is running in iframe ${window.name}.`);
-// endRemoveIf(!allowDebug)
-// Listen for option updates and debug messages from config page.
-listenForMessages();
-// Set up the IntersectionObserver to watch for auto-expand links entering the
-// viewport.
-createObserver();
-// Start processing.
-processNewLinks();
+(async () => {
+  try {
+    _config = await getCurrentConfig();
+  } catch (error) {
+    console.warn("getCurrentConfig failed; using defaultConfig.", error);
+  }
+  // removeIf(!allowDebug)
+  _config.doDebug &&
+    console.debug(`content.js is running in iframe ${window.name}.`);
+  // endRemoveIf(!allowDebug)
+
+  // The content script has to set the icon because Chrome changes it to the
+  // default (active) icon when a matched page comes into view. After this, the
+  // config script handles updating the icon.
+  chrome.runtime.sendMessage({ action: "setIcon", data: _config.isEnabled });
+
+  // Listen for option updates and debug messages from config page.
+  listenForMessages();
+  // Set up the IntersectionObserver to watch for auto-expand links entering the
+  // viewport.
+  createObserver();
+  // Start processing.
+  processNewLinks();
+})();
 /* ===== End of main code. ===== */
 
 /* ===== Helper functions. ===== */
@@ -29,8 +40,8 @@ processNewLinks();
  */
 function listenForMessages() {
   chrome.runtime.onMessage.addListener(msg => {
-    if (msg.action === "refreshConfig") {
-      refreshConfig(false);
+    if (msg.action === "updateConfig") {
+      updateConfig(msg.data);
     } else if (msg.action === "logDebug" && msg.message) {
       // removeIf(!allowDebug)
       _config.doDebug &&
@@ -190,8 +201,8 @@ function createObserver() {
  * the checkInterval configuration option.
  */
 function processNewLinks() {
-  /* Since processNewLinks() is called by refreshConfig() when checkInterval is
-  zero, clear any pending timeout first. It's a no-op if this call is due to 
+  /* Since processNewLinks() is called by updateConfig() when isEnabled becomes
+  true, clear any pending timeout first. It's a no-op if this call is due to 
   the timer timing out.
     Note: if _loadAllInitialized is `false`, we keep the loop going until the
   content loads, so we can install the "Load all content" button at the top of
@@ -205,30 +216,41 @@ function processNewLinks() {
   }
 
   // Remove inactive reply/edit 'LI's from _activeTextAreasInView list.
-  // processObservedEntries() handles removing 'LI's no longer in view (and also
+  // processObservedEntries() removes 'LI's no longer in view (and also
   // inactive), but it only acts when the LI's intersection state changes--not
   // each time processObservedEntries() runs.
-  // Since there's no "event" for the "active" state change, we have to detect
+  // Since there's no event for the "active" state change, we have to detect
   // that by polling, and since this is the main logic loop it's the best place
   // to do it.
-  Object.keys(_activeTextareasInView).forEach(tid => {
-    const liElt = _activeTextareasInView[tid];
-    if (false === liElt.classList.contains("active")) {
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug(
-          "Untracking & unobserving inactive reply/edit LI: %o",
-          liElt
-        );
-      // endRemoveIf(!allowDebug)
-      delete _activeTextareasInView[tid];
-      unobserveLink(liElt, true);
-    }
-  });
+  if (_config.isEnabled) {
+    Object.keys(_activeTextareasInView).forEach(tid => {
+      const liElt = _activeTextareasInView[tid];
+      if (false === liElt.classList.contains("active")) {
+        // removeIf(!allowDebug)
+        _config.doDebug &&
+          console.debug(
+            "Untracking & unobserving inactive reply/edit LI: %o",
+            liElt
+          );
+        // endRemoveIf(!allowDebug)
+        delete _activeTextareasInView[tid];
+        unobserveLink(liElt, true);
+      }
+    }); // forEach() callback to clean up inactive reply/edit LIs.
+  } // if (_config.isEnabled)
 
-  // Observe new links.
+  // Observe new links. This code runs even if _config.isEnabled is false, so we
+  // can initialize the "Load all content" button.
   // removeIf(!allowDebug)
-  _config.doDebug && console.debug("Finding new links to observe.");
+  if (_config.doDebug) {
+    if (_config.isEnabled) {
+      console.debug("Finding new links to observe.");
+    } else {
+      console.debug(
+        'Waiting for content to initialize "Load entire discussion" button.'
+      );
+    }
+  }
   // endRemoveIf(!allowDebug)
   const newLinks = findNewLinks(_config);
   if (newLinks.length) {
@@ -241,7 +263,7 @@ function processNewLinks() {
   }
 
   // Force external URLs open in a new browser tab/window.
-  if (_config.openInNewWindow) {
+  if (_config.isEnabled && _config.openInNewWindow) {
     const extLinkSelector =
       "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
     document.querySelectorAll(extLinkSelector).forEach(link => {
@@ -291,40 +313,54 @@ function processNewLinks() {
 } // end of processNewLinks().
 
 /**
- * Gets the latest configuration values from storage, and optionally asks the
- * background script to update the extension's icon based on the value of
- * checkInterval.
- * @param {Boolean} setIcon - whether to change the extension's icon based on
- * the value of the checkInterval config value (0 -> paused; 1–30 -> active).
+ * Updates the local copy of the config with the key and value identified in
+ * the parameter. If the key is "isEnabled", also checks whether to resume
+ * processing content links.
+ * @param {Object} newConfigData - an object containing the configuration key
+ * and value to update.
  */
-function refreshConfig(setIcon) {
-  chrome.storage.sync.get(defaultConfig, config => {
-    if (chrome.runtime.lastError) {
-      console.warn(
-        `Couldn't get configuration from storage: ${
-          chrome.runtime.lastError.message
-        }`
-      );
-      return;
-    }
-    const oldisEnabled = _config.isEnabled;
-    _config = config;
+function updateConfig(newConfigData) {
+  const { key, value } = newConfigData,
+    oldValue = _config[key];
+
+  _config[key] = value;
+  // removeIf(!allowDebug)
+  _config.doDebug &&
+    console.debug(
+      "Updated _config.%s to %s. _config is now:",
+      key,
+      value,
+      _config
+    );
+  // endRemoveIf(!allowDebug)
+
+  // Check if we need to resume processing content links.
+  if (key === "isEnabled" && !oldValue && value) {
     // removeIf(!allowDebug)
-    _config.doDebug && console.debug("Got sync'd config: %o", _config);
-    // endRemoveIf(!allowDebug)
-    if (setIcon) {
-      chrome.runtime.sendMessage({
-        action: "setIcon",
-        caller: "content",
-        data: _config.isEnabled,
+    _config.doDebug &&
+      console.debug("Restarting content processing: %o", {
+        oldIsEnabled: oldValue,
+        newIsEnabled: value,
       });
-    }
-    // Check if we need to resume processing links.
-    if (!oldisEnabled && _config.isEnabled !== oldisEnabled) {
-      processNewLinks();
-    }
+    // endRemoveIf(!allowDebug)
+    processNewLinks();
+  }
+} // end of updateConfig().
+
+/**
+ * Gets the curreent configuration values from storage.
+ */
+async function getCurrentConfig() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(defaultConfig, config => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError.message);
+      } else {
+        resolve(config);
+      }
+    });
   });
-}
+} // end of getCurrentConfig().
 
 /**
  * Remove a link from observation and record-keeping.
