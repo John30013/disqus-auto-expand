@@ -3,8 +3,8 @@ let _config = { ...defaultConfig },
   _timer = null,
   _observer = null,
   _observedLinks = {},
+  _activeTextareasInView = {},
   _linkCounter = 0,
-  _replyTextboxesInView = 0,
   _loadAllInitialized = false,
   _warnedAboutLoadAll = false;
 
@@ -61,93 +61,110 @@ function createObserver() {
       return;
     }
     let foundIntersects = false;
-    entries.forEach(entry => {
-      const link = entry.target,
-        luid = link.dataset.luid;
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug(
-          'Checking intersection of "%s" link %s',
-          link.className,
-          luid
-        );
-      // endRemoveIf(!allowDebug)
 
-      // Handle open Reply textareas. If an open Reply textarea is in view,
-      // abort the process.
-      //
-      // TODO: track *active* LIs by TID (maintain TIDs in a map?). Unobserve  
-      // (and untrack) when no longer "active". (Zombie cleanup will catch old 
-      // LIs that aren't intersecting. unobserveLink() must include untracking 
-      // logic. Zombie cleanup should run if there are any tracked LIs.) 
-      // Q: Do some/all of this in findNewLinks?
-      // Only allow active LIs to abort processing .
-      if (link.tagName === "LI") {
-        if (!link.className.contains("active")) {
-          unobserveLink(link);
-          return;
-        }
-        if (entry.isIntersecting) {
-          _replyTextboxesInView += 1;
-          // removeIf(!allowDebug)
-          _config.doDebug &&
-            console.debug(
-              "--> Active textarea control (LI) is visible: %o;",
-              link
-            );
-          _config.doDebug &&
-            console.debug(
-              "--> # of textboxes in view: %d",
-              _replyTextboxesInView
-            );
-          // endRemoveIf(!allowDebug)
-        } else {
-          _replyTextboxesInView -= 1;
-          if (_replyTextboxesInView < 0) {
-            _replyTextboxesInView = 0;
-          }
-          // removeIf(!allowDebug)
-          _config.doDebug &&
-            console.debug(
-              "--> Active textarea control (LI) not visible: %o;",
-              link
-            );
-          _config.doDebug &&
-            console.debug(
-              "--> # of textboxes in view: %d",
-              _replyTextboxesInView
-            );
-          // endRemoveIf(!allowDebug)
-        }
-      } // end of block to count reply textboxes in view.
-      if (_replyTextboxesInView > 0 || link.tagName === "LI") {
-        return;
+    // Bring all edit/reply 'LI' entries to the front of the list.
+    entries.sort((a, b) =>
+      a.tagName === "LI" ? -1 : b.tagName === "LI" ? 1 : 0
+    );
+
+    // Handle edit/reply 'LI' entries.
+    while (entries.length) {
+      const entry = entries[0],
+        liElt = entry.target;
+      if (liElt.tagName !== "LI") {
+        break; // We've run out of 'LI' entries.
       }
 
-      // Handle actual links :-)
+      const tid = liElt.firstElementChild.dataset.tid;
       if (entry.isIntersecting) {
         foundIntersects = true;
+        if (liElt.classList.contains("active")) {
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug("Tracking active reply/edit LI in view: %o", liElt);
+          // endRemoveIf(!allowDebug)
+          _activeTextareasInView[tid] = liElt;
+        } else {
+          // The cleanup code in processNewLinks() would do this, but we need to
+          // know now (for the next block of code), so we do it here (too).
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "Untracking & unobserving inactive reply/edit LI in view: %o",
+              liElt
+            );
+          // endRemoveIf(!allowDebug)
+          delete _activeTextareasInView[tid];
+          unobserveLink(liElt, true);
+        }
+      } else {
+        // Not in view, but might still be active. So we just remove it from
+        // the tracking list, but we don't unobserve it (in case it comes back
+        // into view).
+        // removeIf(!allowDebug)
+        _config.doDebug &&
+          console.debug("Untracking reply/edit LI not in view: %o", liElt);
+        // endRemoveIf(!allowDebug)
+        delete _activeTextareasInView[tid];
+      }
+      entries.shift();
+    } // end of while loop to process edit/reply 'LI' entries.
+
+    // Handle comment/reply loading/expanding links.
+    entries.forEach(entry => {
+      if (Object.keys(_activeTextareasInView).length) {
+        // There is an active reply/edit link in view, so we unobserve this
+        // content link (since it only lands here when its intersection status
+        // changes, and we want it to be clicked once the reply/edit link is
+        // no longer active, without having to scroll it out and back in to
+        // view). So by unobserving it, the main processing loop will keep
+        // re-observing it until the reply/edit link is inactive or goes out of
+        // view.
         // removeIf(!allowDebug)
         _config.doDebug &&
           console.debug(
-            '--> link.classList: %o; link.innerText: "%s"',
-            link.classList,
-            link.innerText
+            "An active textarea is visible; unobserving content link in view: %o",
+            entry.target
           );
         // endRemoveIf(!allowDebug)
-        activateLink(link);
-        unobserveLink(link);
+        unobserveLink(entry.target);
+      } else {
+        const link = entry.target,
+          luid = link.dataset.luid;
         // removeIf(!allowDebug)
         _config.doDebug &&
           console.debug(
-            "--> Clicked %s (now %d observed)",
-            luid,
-            Object.keys(_observedLinks).length,
-            _observedLinks
+            'Checking intersection of "%s" link %s',
+            link.className,
+            luid
           );
         // endRemoveIf(!allowDebug)
+
+        if (entry.isIntersecting) {
+          foundIntersects = true;
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              '--> link.classList: %o; link.innerText: "%s"',
+              link.classList,
+              link.innerText
+            );
+          // endRemoveIf(!allowDebug)
+          activateLink(link);
+          unobserveLink(link);
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "--> Clicked %s (now %d observed)",
+              luid,
+              Object.keys(_observedLinks).length,
+              _observedLinks
+            );
+          // endRemoveIf(!allowDebug)
+        }
       }
     });
+
     if (foundIntersects) {
       /* Clean up old observed links. Disqus seems to output some (mostly "
       see more") links that become hidden before they are clicked (a/k/a, 
@@ -186,6 +203,28 @@ function processNewLinks() {
     // endRemoveIf(!allowDebug)
     return;
   }
+
+  // Remove inactive reply/edit 'LI's from _activeTextAreasInView list.
+  // processObservedEntries() handles removing 'LI's no longer in view (and also
+  // inactive), but it only acts when the LI's intersection state changes--not
+  // each time processObservedEntries() runs.
+  // Since there's no "event" for the "active" state change, we have to detect
+  // that by polling, and since this is the main logic loop it's the best place
+  // to do it.
+  Object.keys(_activeTextareasInView).forEach(tid => {
+    const liElt = _activeTextareasInView[tid];
+    if (false === liElt.classList.contains("active")) {
+      // removeIf(!allowDebug)
+      _config.doDebug &&
+        console.debug(
+          "Untracking & unobserving inactive reply/edit LI: %o",
+          liElt
+        );
+      // endRemoveIf(!allowDebug)
+      delete _activeTextareasInView[tid];
+      unobserveLink(liElt, true);
+    }
+  });
 
   // Observe new links.
   // removeIf(!allowDebug)
@@ -326,8 +365,8 @@ function unobserveLink(link, removeDaxTags) {
  * @param {Object} config - the configuration object.
  */
 function findNewLinks(config) {
-  const newLinks = [],
-/*     handleCloseReplyLi = evt => {
+  const newLinks = [];
+  /* const handleCloseReplyLi = evt => {
       const { target } = evt;
       unobserveLink(target);
       target.removeEventListener(handleCloseReplyLi);
@@ -336,7 +375,7 @@ function findNewLinks(config) {
   // visible, the operation pauses immediately.
   document.querySelectorAll("li.reply.active, li.edit.active").forEach(elt => {
     newLinks.push(elt);
- /*    elt.addEventListener("click", handleCloseReplyLi); */
+    /*    elt.addEventListener("click", handleCloseReplyLi); */
   });
 
   // Find new "See more replies" links.
