@@ -442,7 +442,6 @@ textarea::selection {
 }
 
 .input-toggle input:disabled + label::after {
-  background-color: var(--color-ctrl);
   border-style: dotted;
 }
 /*# sourceMappingURL=dax-config.css.map */
