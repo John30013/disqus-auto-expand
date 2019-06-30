@@ -16,7 +16,7 @@ const gulp = require("gulp"),
 const taskName = argv._[0],
   optDebug = false || !!argv.debug,
   optMinify = false || !!argv.minify,
-  optZip = false || !!argv.zip;
+  optZip = taskName.startsWith("zip") || !!argv.zip;
 
 let src, dist, packed;
 
@@ -133,9 +133,9 @@ const copyFiles = function() {
 };
 copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dist}.`;
 
-const zipTargetIf = function(done) {
-  if (!taskName.startsWith("zip") && !optZip) {
-    console.log("zipTargetIf() aborting: %o", { taskName, optZip });
+const zipTarget = function(done) {
+  if (!optZip) {
+    console.log("Skipping zipTarget task.");
     done();
     return;
   }
@@ -150,7 +150,7 @@ const zipTargetIf = function(done) {
     .pipe(zip(zipFilename))
     .pipe(gulp.dest(packed));
 };
-zipTargetIf.description =
+zipTarget.description =
   "Zips the targeted dist directory into its packed directory. If called from another script, runs only if --zip command line option is specified.";
 
 const cleanTarget = function() {
@@ -178,7 +178,7 @@ const buildChrome = function(done) {
     makeDistWritable,
     cleanTarget,
     gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
-    zipTargetIf,
+    zipTarget,
     makeDistReadOnly
   )(done);
 };
@@ -197,7 +197,7 @@ const buildFirefox = function(done) {
     makeDistWritable,
     cleanTarget,
     gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
-    zipTargetIf,
+    zipTarget,
     makeDistReadOnly
   )(done);
 };
@@ -241,7 +241,7 @@ const zipChrome = function(done) {
   return gulp.series(
     targetChrome,
     makeDistWritable,
-    zipTargetIf,
+    zipTarget,
     makeDistReadOnly
   )(done);
 };
@@ -252,7 +252,7 @@ const zipFirefox = function(done) {
   return gulp.series(
     targetFirefox,
     makeDistWritable,
-    zipTargetIf,
+    zipTarget,
     makeDistReadOnly
   )(done);
 };
