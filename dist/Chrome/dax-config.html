@@ -19,7 +19,15 @@
       </h1>
     </header>
     <section>
-      <h2>Content options</h2>
+      <header>
+        <h2>Content options</h2>
+        <p>
+          <span id="isEnabled-label">Enabled</span>
+          <span class="input input-toggle"><input type="checkbox" id="isEnabled"
+              checked>
+            <label for="isEnabled">Content options are enabled</label></span>
+        </p>
+      </header>
       <div>
         <p>
           <span id="moreReplies-label">Expand hidden replies</span>
@@ -103,10 +111,11 @@
       <p>
         <label for="checkInterval">Check for new content</label>
         <span class="input">every <input inputmode="numeric" id="checkInterval"
-            pattern="[0-9]|[12][0-9]|30" minlength="1" maxlength="2" value="0"
-            aria-describedby="checkInterval-desc" required> seconds</span>
+            pattern="[1-9]|[12][0-9]|30" minlength="1" maxlength="2" value="5"
+            aria-describedby="checkInterval-desc" required> <abbr
+            title="seconds">secs</abbr></span>
         <small id="checkInterval-desc">Choose 1<abbr title="to">&ndash;</abbr>30
-          seconds, or 0&#160;to disable.</small>
+          seconds.</small>
       </p>
       <p>
         <span id="useDarkTheme-label">Use dark theme</span>
@@ -135,7 +144,7 @@
         <b>Version:</b>
         <span class="version">0.0.0</span>. <a class="italic"
           href="https://github.com/John30013/disqus-auto-expand#changelog"
-          target="daxinfo">View the changelog.</a>
+          target="daxinfo">View the changelog.</>
       </p>
       <p><b>Help, feedback, and bug reporting:</b><br>
         visit our <a href="https://github.com/John30013/disqus-auto-expand/"

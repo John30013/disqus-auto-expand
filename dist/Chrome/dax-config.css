@@ -10,7 +10,7 @@ html {
 }
 
 body {
-  --ctrl-radius: 0.375rem;
+  --ctrl-radius: 0.375em;
   --color-bkgd: #eeeeee;
   --color-bkgd-clear: #eeeeee00;
   --color-brdr: #666666;
@@ -53,7 +53,7 @@ body.theme-dark {
 @media screen and (max-device-width: 40rem) {
   body {
     line-height: 1.25;
-    min-width: 320px;
+    min-width: 20rem;
     width: auto;
   }
   body::before, body::after {
@@ -86,6 +86,11 @@ a:hover,
 a:active {
   outline: none;
   text-decoration: underline;
+}
+
+abbr {
+  border: 0;
+  text-decoration: none;
 }
 
 h2 {
@@ -152,8 +157,8 @@ main > header h1 {
   font-weight: normal;
   line-height: 1.25;
   margin: 0;
+  overflow: visible;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 main > header h1 a:link,
@@ -224,12 +229,48 @@ main > section:first-of-type {
   align-items: start;
 }
 
-main > section:first-of-type > h2 {
+main > section:first-of-type > header {
   border-bottom: 1px dotted;
   grid-area: heading;
   margin: 0 0 0.5rem;
   padding: 0 0 calc(0.5rem - 1px);
   position: relative;
+  display: grid;
+  align-items: baseline;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 1rem;
+}
+
+main > section:first-of-type > header > h2 {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+main > section:first-of-type > header > p {
+  grid-template-columns: 1fr auto;
+}
+
+main > section:first-of-type > header > p span:first-child {
+  font-size: 1rem;
+  font-weight: normal;
+  min-width: 0;
+  text-align: end;
+}
+
+main > section:first-of-type > header > p label {
+  font-size: 1.25rem;
+  top: 0.1875rem;
+}
+
+@media screen and (max-device-width: 40rem) {
+  main > section:first-of-type > header {
+    grid-template-columns: 1fr 1fr;
+    padding-bottom: 0;
+  }
+  main > section:first-of-type > header > p label {
+    top: 0;
+  }
 }
 
 @media screen and (max-device-width: 40rem) {
@@ -251,16 +292,10 @@ main > section:last-of-type {
   }
 }
 
-main > section > header,
-main > section > h2 {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
 main > section p {
   display: grid;
   column-gap: 1rem;
-  grid-template: "label input" auto "help  help" auto / auto 8.25rem;
+  grid-template: "label input" auto "help  help" auto / auto 1fr;
   margin-bottom: 0.625rem;
   padding-bottom: 0.625rem;
 }
@@ -290,7 +325,7 @@ main > section p > small {
 }
 
 main > section p > span.input {
-  text-align: start;
+  text-align: end;
   white-space: nowrap;
 }
 
@@ -301,8 +336,15 @@ main > section p > span.input {
 }
 
 main > section p input#checkInterval {
-  width: 1.75rem;
   text-align: center;
+  width: 1.75rem;
+}
+
+main > section p input#checkInterval:disabled {
+  border-style: dotted;
+  color: var(--color-text-sec);
+  cursor: not-allowed;
+  opacity: 0.333;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -358,14 +400,14 @@ textarea::selection {
   box-sizing: content-box;
   cursor: pointer;
   display: block;
-  left: calc(100% - 2.5rem);
+  left: calc(100% - 2em - 0.25rem);
   margin-bottom: 0.5rem;
   overflow: hidden;
   position: relative;
   text-indent: 100%;
-  top: 0.25rem;
-  width: 2rem;
-  height: 1rem;
+  top: 0.25em;
+  width: 2em;
+  height: 1em;
 }
 
 .input-toggle > label::after {
@@ -378,13 +420,13 @@ textarea::selection {
   position: absolute;
   top: -1px;
   left: -1px;
-  width: 1rem;
-  height: 1rem;
+  width: 1em;
+  height: 1em;
 }
 
 .input-toggle > input:checked + label::after {
   background-color: var(--color-ctrl-on);
-  left: 1rem;
+  left: 1em;
 }
 
 .input-toggle > input:focus + label {
@@ -393,56 +435,13 @@ textarea::selection {
 }
 
 .input-toggle input:disabled + label {
-  color: var(--color-text-sec);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.input-toggle input:disabled + label::after {
-  background-color: var(--color-ctrl);
-}
-
-button {
-  background-color: var(--color-ctrl);
-  border: 1px solid var(--color-brdr);
-  border-radius: var(--ctrl-radius);
-  box-sizing: content-box;
-  color: var(--color-text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  height: 1.5rem;
-  margin-right: 0.25rem;
-  min-width: 5rem;
-  outline: none;
-  padding: 0 0.5rem;
-  width: auto;
-}
-
-button svg {
-  height: 1rem;
-  margin-right: 0.5rem;
-  width: 1rem;
-}
-
-button:active {
-  background-color: var(--color-ctrl-on);
-  color: var(--color-ctrl-focus);
-}
-
-button:disabled {
   border-style: dotted;
   color: var(--color-text-sec);
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.333;
 }
 
-button:focus:not(:active) {
-  background-color: var(--color-ctrl-focus);
-  box-shadow: 0 0 0 1px var(--color-ctrl-on);
+.input-toggle input:disabled + label::after {
+  border-style: dotted;
 }
 /*# sourceMappingURL=dax-config.css.map */

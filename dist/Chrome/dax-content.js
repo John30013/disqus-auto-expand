@@ -1,25 +1,37 @@
 // "Global" variables and flags.
-let _config = { ...defaultConfig },
+let _config = defaultConfig,
   _timer = null,
   _observer = null,
   _observedLinks = {},
+  _activeTextareasInView = {},
   _linkCounter = 0,
   _loadAllInitialized = false,
   _warnedAboutLoadAll = false;
 
-// Start the extension.
-refreshConfig(true);
-// removeIf(!allowDebug)
-_config.doDebug &&
-  console.debug(`content.js is running in iframe ${window.name}.`);
-// endRemoveIf(!allowDebug)
-// Listen for option updates and debug messages from config page.
-listenForMessages();
-// Set up the IntersectionObserver to watch for auto-expand links entering the
-// viewport.
-createObserver();
-// Start processing.
-processNewLinks();
+(async () => {
+  try {
+    _config = await getCurrentConfig();
+  } catch (error) {
+    console.warn("getCurrentConfig failed; using defaultConfig.", error);
+  }
+  // removeIf(!allowDebug)
+  _config.doDebug &&
+    console.debug(`content.js is running in iframe ${window.name}.`);
+  // endRemoveIf(!allowDebug)
+
+  // The content script has to set the icon because Chrome changes it to the
+  // default (active) icon when a matched page comes into view. After this, the
+  // config script handles updating the icon.
+  chrome.runtime.sendMessage({ action: "setIcon", data: _config.isEnabled });
+
+  // Listen for option updates and debug messages from config page.
+  listenForMessages();
+  // Set up the IntersectionObserver to watch for auto-expand links entering the
+  // viewport.
+  createObserver();
+  // Start processing.
+  processNewLinks();
+})();
 /* ===== End of main code. ===== */
 
 /* ===== Helper functions. ===== */
@@ -28,8 +40,8 @@ processNewLinks();
  */
 function listenForMessages() {
   chrome.runtime.onMessage.addListener(msg => {
-    if (msg.action === "refreshConfig") {
-      refreshConfig(false);
+    if (msg.action === "updateConfig") {
+      updateConfig(msg.data);
     } else if (msg.action === "logDebug" && msg.message) {
       // removeIf(!allowDebug)
       _config.doDebug &&
@@ -56,44 +68,114 @@ function createObserver() {
    * viewport.
    */
   function processObservedEntries(entries) {
-    if (!_config.checkInterval) {
+    if (!_config.isEnabled) {
       return;
     }
     let foundIntersects = false;
-    entries.forEach(entry => {
-      const link = entry.target,
-        luid = link.dataset.luid;
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug(
-          'Checking intersection of "%s" link %s',
-          link.className,
-          luid
-        );
-      // endRemoveIf(!allowDebug)
+
+    // Bring all edit/reply 'LI' entries to the front of the list.
+    entries.sort((a, b) =>
+      a.tagName === "LI" ? -1 : b.tagName === "LI" ? 1 : 0
+    );
+
+    // Handle edit/reply 'LI' entries.
+    while (entries.length) {
+      const entry = entries[0],
+        liElt = entry.target;
+      if (liElt.tagName !== "LI") {
+        break; // We've run out of 'LI' entries.
+      }
+
+      const tid = liElt.firstElementChild.dataset.tid;
       if (entry.isIntersecting) {
         foundIntersects = true;
+        if (liElt.classList.contains("active")) {
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug("Tracking active reply/edit LI in view: %o", liElt);
+          // endRemoveIf(!allowDebug)
+          _activeTextareasInView[tid] = liElt;
+        } else {
+          // The cleanup code in processNewLinks() would do this, but we need to
+          // know now (for the next block of code), so we do it here (too).
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "Untracking & unobserving inactive reply/edit LI in view: %o",
+              liElt
+            );
+          // endRemoveIf(!allowDebug)
+          delete _activeTextareasInView[tid];
+          unobserveLink(liElt, true);
+        }
+      } else {
+        // Not in view, but might still be active. So we just remove it from
+        // the tracking list, but we don't unobserve it (in case it comes back
+        // into view).
+        // removeIf(!allowDebug)
+        _config.doDebug &&
+          console.debug("Untracking reply/edit LI not in view: %o", liElt);
+        // endRemoveIf(!allowDebug)
+        delete _activeTextareasInView[tid];
+      }
+      entries.shift();
+    } // end of while loop to process edit/reply 'LI' entries.
+
+    // Handle comment/reply loading/expanding links.
+    entries.forEach(entry => {
+      if (Object.keys(_activeTextareasInView).length) {
+        // There is an active reply/edit link in view, so we unobserve this
+        // content link (since it only lands here when its intersection status
+        // changes, and we want it to be clicked once the reply/edit link is
+        // no longer active, without having to scroll it out and back in to
+        // view). So by unobserving it, the main processing loop will keep
+        // re-observing it until the reply/edit link is inactive or goes out of
+        // view.
         // removeIf(!allowDebug)
         _config.doDebug &&
           console.debug(
-            '--> link.classList: %o; link.innerText: "%s"',
-            link.classList,
-            link.innerText
+            "An active textarea is visible; unobserving content link in view: %o",
+            entry.target
           );
         // endRemoveIf(!allowDebug)
-        activateLink(link);
-        unobserveLink(link);
+        unobserveLink(entry.target);
+      } else {
+        const link = entry.target,
+          luid = link.dataset.luid;
         // removeIf(!allowDebug)
         _config.doDebug &&
           console.debug(
-            "--> Clicked %s (now %d observed)",
-            luid,
-            Object.keys(_observedLinks).length,
-            _observedLinks
+            'Checking intersection of "%s" link %s',
+            link.className,
+            luid
           );
         // endRemoveIf(!allowDebug)
+
+        if (entry.isIntersecting) {
+          foundIntersects = true;
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              '--> link.classList: %o; link.innerText: "%s"',
+              link.classList,
+              link.innerText
+            );
+          // endRemoveIf(!allowDebug)
+          activateLink(link);
+          unobserveLink(link);
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(
+              "--> Clicked %s (now %d observed)",
+              luid,
+              Object.keys(_observedLinks).length,
+              _observedLinks
+            );
+          // endRemoveIf(!allowDebug)
+        }
       }
     });
+
     if (foundIntersects) {
       /* Clean up old observed links. Disqus seems to output some (mostly "
       see more") links that become hidden before they are clicked (a/k/a, 
@@ -119,36 +201,69 @@ function createObserver() {
  * the checkInterval configuration option.
  */
 function processNewLinks() {
-  /* Since processNewLinks() is called by refreshConfig() when checkInterval is
-  zero, clear any pending timeout first. It's a no-op if this call is due to 
+  /* Since processNewLinks() is called by updateConfig() when isEnabled becomes
+  true, clear any pending timeout first. It's a no-op if this call is due to 
   the timer timing out.
     Note: if _loadAllInitialized is `false`, we keep the loop going until the
   content loads, so we can install the "Load all content" button at the top of
   the posts. (Also see the setTimout() call at the end of this method.) */
   _timer && clearTimeout(_timer);
-  if (!_config.checkInterval && _loadAllInitialized) {
+  if (!_config.isEnabled && _loadAllInitialized) {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("Stopping the timeout loop.");
     // endRemoveIf(!allowDebug)
     return;
   }
 
-  // Observe new links.
+  // Remove inactive reply/edit 'LI's from _activeTextAreasInView list.
+  // processObservedEntries() removes 'LI's no longer in view (and also
+  // inactive), but it only acts when the LI's intersection state changes--not
+  // each time processObservedEntries() runs.
+  // Since there's no event for the "active" state change, we have to detect
+  // that by polling, and since this is the main logic loop it's the best place
+  // to do it.
+  if (_config.isEnabled) {
+    Object.keys(_activeTextareasInView).forEach(tid => {
+      const liElt = _activeTextareasInView[tid];
+      if (false === liElt.classList.contains("active")) {
+        // removeIf(!allowDebug)
+        _config.doDebug &&
+          console.debug(
+            "Untracking & unobserving inactive reply/edit LI: %o",
+            liElt
+          );
+        // endRemoveIf(!allowDebug)
+        delete _activeTextareasInView[tid];
+        unobserveLink(liElt, true);
+      }
+    }); // forEach() callback to clean up inactive reply/edit LIs.
+  } // if (_config.isEnabled)
+
+  // Observe new links. This code runs even if _config.isEnabled is false, so we
+  // can initialize the "Load all content" button.
   // removeIf(!allowDebug)
-  _config.doDebug && console.debug("Finding new links to observe.");
+  if (_config.doDebug) {
+    if (_config.isEnabled) {
+      console.debug("Finding new links to observe.");
+    } else {
+      console.debug(
+        'Waiting for content to initialize "Load entire discussion" button.'
+      );
+    }
+  }
   // endRemoveIf(!allowDebug)
   const newLinks = findNewLinks(_config);
   if (newLinks.length) {
     if (!_loadAllInitialized) {
       initLoadAllContent();
     }
-    if (_config.checkInterval) {
+    if (_config.isEnabled) {
       newLinks.forEach(observeLink);
     }
   }
 
   // Force external URLs open in a new browser tab/window.
-  if (_config.openInNewWindow) {
+  if (_config.isEnabled && _config.openInNewWindow) {
     const extLinkSelector =
       "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
     document.querySelectorAll(extLinkSelector).forEach(link => {
@@ -198,40 +313,54 @@ function processNewLinks() {
 } // end of processNewLinks().
 
 /**
- * Gets the latest configuration values from storage, and optionally asks the
- * background script to update the extension's icon based on the value of
- * checkInterval.
- * @param {Boolean} setIcon - whether to change the extension's icon based on
- * the value of the checkInterval config value (0 -> paused; 1–30 -> active).
+ * Updates the local copy of the config with the key and value identified in
+ * the parameter. If the key is "isEnabled", also checks whether to resume
+ * processing content links.
+ * @param {Object} newConfigData - an object containing the configuration key
+ * and value to update.
  */
-function refreshConfig(setIcon) {
-  chrome.storage.sync.get(defaultConfig, config => {
-    if (chrome.runtime.lastError) {
-      console.warn(
-        `Couldn't get configuration from storage: ${
-          chrome.runtime.lastError.message
-        }`
-      );
-      return;
-    }
-    const oldCheckInterval = +_config.checkInterval;
-    _config = config;
+function updateConfig(newConfigData) {
+  const { key, value } = newConfigData,
+    oldValue = _config[key];
+
+  _config[key] = value;
+  // removeIf(!allowDebug)
+  _config.doDebug &&
+    console.debug(
+      "Updated _config.%s to %s. _config is now:",
+      key,
+      value,
+      _config
+    );
+  // endRemoveIf(!allowDebug)
+
+  // Check if we need to resume processing content links.
+  if (key === "isEnabled" && !oldValue && value) {
     // removeIf(!allowDebug)
-    _config.doDebug && console.debug("Got sync'd config: %o", _config);
-    // endRemoveIf(!allowDebug)
-    if (setIcon) {
-      chrome.runtime.sendMessage({
-        action: "setIcon",
-        caller: "content",
-        data: !!_config.checkInterval,
+    _config.doDebug &&
+      console.debug("Restarting content processing: %o", {
+        oldIsEnabled: oldValue,
+        newIsEnabled: value,
       });
-    }
-    // Check if we need to resume processing links.
-    if (oldCheckInterval === 0 && _config.checkInterval !== oldCheckInterval) {
-      processNewLinks();
-    }
+    // endRemoveIf(!allowDebug)
+    processNewLinks();
+  }
+} // end of updateConfig().
+
+/**
+ * Gets the curreent configuration values from storage.
+ */
+async function getCurrentConfig() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(defaultConfig, config => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError.message);
+      } else {
+        resolve(config);
+      }
+    });
   });
-}
+} // end of getCurrentConfig().
 
 /**
  * Remove a link from observation and record-keeping.
@@ -269,10 +398,22 @@ function unobserveLink(link, removeDaxTags) {
 /**
  * Finds new links to observe, based on the configuration options. This
  * function is called by both processNewLinks() and loadAllContent().
- * @param {Object} config
+ * @param {Object} config - the configuration object.
  */
 function findNewLinks(config) {
   const newLinks = [];
+  /* const handleCloseReplyLi = evt => {
+      const { target } = evt;
+      unobserveLink(target);
+      target.removeEventListener(handleCloseReplyLi);
+    }; */
+  // Find any active (open) "reply/edit" textareas. When one of these is
+  // visible, the operation pauses immediately.
+  document.querySelectorAll("li.reply.active, li.edit.active").forEach(elt => {
+    newLinks.push(elt);
+    /*    elt.addEventListener("click", handleCloseReplyLi); */
+  });
+
   // Find new "See more replies" links.
   if (!config || config.moreReplies) {
     document
@@ -311,6 +452,7 @@ function findNewLinks(config) {
       .querySelectorAll('button.alert--realtime:not([style*="none"])')
       .forEach(elt => newLinks.push(elt));
   }
+
   return newLinks;
 } // end of findNewLinks().
 

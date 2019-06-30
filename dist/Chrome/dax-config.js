@@ -58,6 +58,8 @@ function getCurrentConfig() {
           // removeIf(!allowDebug)
           logDebug("--> document.body class: %s", document.body.className);
           // endRemoveIf(!allowDebug)
+        } else if (key === "isEnabled") {
+          setEnabledStateUi(input.checked);
         }
         // removeIf(!allowDebug)
         logDebug(
@@ -68,15 +70,9 @@ function getCurrentConfig() {
         // endRemoveIf(!allowDebug)
       } else if (key === "checkInterval") {
         input.value = "" + config[key];
-        setIcon(!!config[key]);
         // removeIf(!allowDebug)
         logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
-      } else if (key === "loadAllContent") {
-        // true =  operation is in progress, so the button should be diabled.
-        // false = operation is not in progress, so the button should be enanbled.
-        input.toggleAttribute("disabled", !!value);
-        input.disabled = !!value;
       }
     }
   });
@@ -140,58 +136,50 @@ function listenForUpdates() {
    * @param {Boolean|Number} value - the nw value of the key.
    */
   function updateConfigValue(key, value) {
-    chrome.storage.sync.set({ [key]: value }, () => {
-      if (chrome.runtime.lastError) {
-        console.info(
-          `Couldn't store config option ${key} with value ${value}: ${
-            chrome.runtime.lastError.message
-          }.`
-        );
-      }
-      // removeIf(!allowDebug)
-      logDebug(
-        '--> Updated config option "%s" to (%s) "%s"',
-        key,
-        typeof value,
-        value
-      );
-      // endRemoveIf(!allowDebug)
-    });
-    if (key !== "useDarkTheme") {
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    chrome.storage.sync.set(
+      {
+        [key]: value,
+      },
+      () => {
         if (chrome.runtime.lastError) {
           console.info(
-            `updateConfigValue(): couldn't get active tab to send a message to: ${
+            `Couldn't store config option ${key} with value ${value}: ${
               chrome.runtime.lastError.message
             }.`
           );
           return;
         }
-        chrome.tabs.sendMessage(tabs[0].id, { action: "refreshConfig" });
-        if (key === "checkInterval") {
-          setIcon(!!value);
-        }
-      });
-    } // end of dark theme handling.
+        // removeIf(!allowDebug)
+        logDebug(
+          '--> Updated config option "%s" to (%s) "%s"',
+          key,
+          typeof value,
+          value
+        );
+        // endRemoveIf(!allowDebug)
+      }
+    ); // chrome.storage.sync.set() callback.
+    // Notify other scripts about the new config value.
+    if (key !== "useDarkTheme") {
+      const updateConfigCommand = {
+        action: "updateConfig",
+        data: { key, value },
+        sender: "config",
+      };
+      sendContentCommand(updateConfigCommand);
+      chrome.runtime.sendMessage(updateConfigCommand);
+      if (key === "isEnabled") {
+        setEnabledStateUi(value);
+      }
+    } // end of changed value handling (excluding "useDarkTheme").
   } // end of updateConfigValue().
 } // end of listenForUpdates().
 
-/**
- * Requests the background script update the extension's icon, depending on
- * the value of the parameter.
- * @param {Boolean} isRunning - Boolean value indicating whether the extension
- * is processing new links (i.e., checkInterval is not zero).
- */
-function setIcon(isRunning) {
-  // removeIf(!allowDebug)
-  logDebug(`[proxy] setIcon(${isRunning}): entering.`);
-  // endRemoveIf(!allowDebug)
-  chrome.runtime.sendMessage({
-    action: "setIcon",
-    caller: "config",
-    data: isRunning,
-  });
-} // end of setIcon().
+function setEnabledStateUi(isEnabled) {
+  document
+    .querySelectorAll("section:first-of-type > div input")
+    .forEach(elt => (elt.disabled = !isEnabled));
+} // end of setEnabledStateUi().
 
 /**
  * Sends a command (message) to the content script in the active tab.
@@ -209,6 +197,9 @@ function sendContentCommand(commandData, responseCallback) {
         }.`
       );
       return;
+    }
+    if (!commandData.sender) {
+      commandData.sender = "config";
     }
     chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
       if (chrome.runtime.lastError) {
