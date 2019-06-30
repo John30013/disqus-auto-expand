@@ -14,9 +14,9 @@ const gulp = require("gulp"),
 
 // Options specified at the command line.
 const taskName = argv._[0],
-  optDebug = false || argv.debug,
-  optMinify = false || argv.minify,
-  optZip = false || argv.zip;
+  optDebug = false || !!argv.debug,
+  optMinify = false || !!argv.minify,
+  optZip = false || !!argv.zip;
 
 let src, dist, packed;
 
@@ -133,9 +133,11 @@ const copyFiles = function() {
 };
 copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dist}.`;
 
-const zipTarget = function(done) {
-  if (!optZip && !taskName.startsWith("zip")) {
+const zipTargetIf = function(done) {
+  if (!taskName.startsWith("zip") && !optZip) {
+    console.log("zipTargetIf() aborting: %o", { taskName, optZip });
     done();
+    return;
   }
   const manifest = JSON.parse(fs.readFileSync(`${dist}manifest.json`)),
     zipFilename =
@@ -148,8 +150,8 @@ const zipTarget = function(done) {
     .pipe(zip(zipFilename))
     .pipe(gulp.dest(packed));
 };
-zipTarget.description =
-  "Zips the targeted dist directory into its packed directory.";
+zipTargetIf.description =
+  "Zips the targeted dist directory into its packed directory. If called from another script, runs only if --zip command line option is specified.";
 
 const cleanTarget = function() {
   return del([dist]);
@@ -157,9 +159,17 @@ const cleanTarget = function() {
 cleanTarget.description = "Cleans the target dist directory tree.";
 
 /* ===== Exported tasks. ===== */
-const listArgs = function(done) {
+const logArgs = function(done) {
   console.log({ taskName, optDebug, optMinify, optZip, argv });
   done();
+};
+logArgs.description =
+  "Logs the task name and arguments to the console (mainly for debugging).";
+logArgs.flags = {
+  "--debug": "Keep debug related logic in the extension (default: false)",
+  "--minify": "Minify the extension's source code (default: false)",
+  "--zip":
+    "Zip the dist files for deployment to the targeted browser's web store (default: false)",
 };
 
 const buildChrome = function(done) {
@@ -168,7 +178,7 @@ const buildChrome = function(done) {
     makeDistWritable,
     cleanTarget,
     gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
-    zipTarget,
+    zipTargetIf,
     makeDistReadOnly
   )(done);
 };
@@ -187,7 +197,7 @@ const buildFirefox = function(done) {
     makeDistWritable,
     cleanTarget,
     gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
-    zipTarget,
+    zipTargetIf,
     makeDistReadOnly
   )(done);
 };
@@ -224,14 +234,14 @@ const cleanFirefox = function(done) {
     makeDistReadOnly
   )(done);
 };
-cleanChrome.description =
-  "Targets Chrome and cleans the Chrome dist directory tree.";
+cleanFirefox.description =
+  "Targets Firefox and cleans the Firefox dist directory tree.";
 
 const zipChrome = function(done) {
   return gulp.series(
     targetChrome,
     makeDistWritable,
-    zipTarget,
+    zipTargetIf,
     makeDistReadOnly
   )(done);
 };
@@ -242,7 +252,7 @@ const zipFirefox = function(done) {
   return gulp.series(
     targetFirefox,
     makeDistWritable,
-    zipTarget,
+    zipTargetIf,
     makeDistReadOnly
   )(done);
 };
@@ -269,6 +279,6 @@ module.exports = {
   cleanFirefox,
   zipChrome,
   zipFirefox,
-  listArgs,
+  logArgs,
 };
 module.exports.default = defaultTasks;
