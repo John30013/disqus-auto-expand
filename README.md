@@ -1,12 +1,10 @@
 # Disqus Auto Expander
 
-Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 1.0 (see the [changelog](#changelog)).
+Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 1.1 (see the [changelog](#changelog)).
 
 ---
 
 ## Installation
-
-_**NOTE:** The Chrome and Firefox extensions are now available in their respective app stores._
 
 ### Chrome desktop browser
 
@@ -59,23 +57,21 @@ On the configuration popup or page you can change any of the options shown. Chan
 
 ### Configuration options
 
-Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page. 
+Click the Disqus Auto-Expander icon (![](docs/dax_icon_blue.png) or ![](docs/dax_icon_gray.png)) to display the Configuration options page.
 
 When the icon is blue, the active tab or window contains a Disqus discussion. The Options page appears as a popup when the icon is clicked. Note that you might have to scroll down to see all of the options in the popup.
 
-When the icon is gray, the active tab or window does not contain a Disqus discussion. The browser’s Extension management menu appears when the icon is clicked. Choose the “Options” menu item to display the Configuration options page in a new browser tab or window. 
+When the icon is gray, the active tab or window does not contain a Disqus discussion. The browser’s Extension management menu appears when the icon is clicked. Choose the “Options” menu item to display the Configuration options page in a new browser tab or window.
 
 The sections below provide more information about these configuration options.
 
 _**Note:** your changes on the Configuration options page are saved automatically. And if you use your browser’s synchronization feature, your settings will be synchronized to your other browsers._
 
-#### Load all content
+#### Enabled
 
-_**Note**: as of June 20, 2019, this feature is currently only available for Chrome, and has not yet been published to the Chrome web store._
+This option controls whether the extension runs on web pages with Disqus discussions. When this option is turned off, the extension pauses its search for new links to expand, the other Configuraton option toggles become disabled, and the extension’s icon changes to a “paused” image: ![Extension icon when paused](docs/dax_icon_paused.png).
 
-Click this button to automatically expand all content and reply links until all of the discussion content is loaded. This feature is most useful for discussions that are not receiving new comments or replies. The goal is to allow searching the full content of the discussion using your browser’s “Find...” (Ctrl+F) command.
-
-_**Notes**:_ 
+_**Notes**:_
 
 _1. This button is only available from the popup version of the options page, since it applies to the currently active tab or window that contains a Disqus discussion._
 
@@ -120,18 +116,28 @@ When you click on an embedded media item (image, Tweet, video), the item opens i
 
 These options control other aspects of the extension.
 
-- **Check for changes**: controls how often (in seconds) the extension checks for new links. If you set this value to 0 (zero), the extension pauses its search for new links to expand. In that case, the extension’s icon changes to a “paused” image: ![Extension icon when paused](docs/dax_icon_paused.png).
+- **Check for changes**: controls how often (in seconds) the extension checks for new links.
 
 - **Use dark theme**: displays the options page in a dark color scheme:
-![Configuration options popup in dark theme](docs/dax_config_page_dark.png)
+  ![Configuration options popup in dark theme](docs/dax_config_page_dark.png)
 
 - **Log debug output**: causes the extension to log debug messages to the brower’s Developer Console. You should not need to enable this option during normal usage.
+
+## Load entire discussion
+
+Unlike the other options, this button appears on the web page itself, at the top of the discussion area just above the "Join the discussion" entry field, whenever there is some hidden discussion content.
+![Load entire dicusssion button](docs/dax_load_entire_discussion_button.png)
+
+Click this button to automatically expand all content and reply links until all of the discussion content is loaded. This feature is most useful for discussions that are not receiving new comments or replies. The goal is to allow searching the full content of the discussion using your browser’s “Find...” (Ctrl+F) command.
+
+_**Note:** this feature can take some time to run and use a lot of data and memory, especially for long discussions. A warning about this appears the first time you select this option on a long discussion (more than 500 comments)._
 
 ---
 
 ## Reporting bugs
 
 If you encounter a bug, please create an Issue in this repository. Be sure include the following information:
+
 - The URL of the page where the error happened.
 - The issue you experienced (describe in as much detail as possible).
 - If you can reproduce the problem, provide the steps to do so.
@@ -142,6 +148,13 @@ If you encounter a bug, please create an Issue in this repository. Be sure inclu
 ---
 
 ## Changelog
+
+### Version 1.1
+
+- The **Load entire discussion** button has moved to the main web page to make the feature available on mobile browsers.
+- New **Enabled** option on the Configuration page to control whether the extension operates on the current page. Such control was previously possible by setting the “Check for new content” option to 0 (zero). With the new “Enabled” option, 0 is no longer an allowed value for “Check for new content”.
+- Content processing pauses when an open reply field is visible on the page. This is to prevent links above the reply field from expanding and pushing the reply field down (or possibly off the end of) the browser windown. Processing resumes when the reply field is closed or scrolled off the screen.
+- Various bug fixes and improvements in functionality.
 
 ### Version 1.0
 
