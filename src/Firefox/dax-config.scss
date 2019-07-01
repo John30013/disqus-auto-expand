@@ -2,7 +2,7 @@
 $theme-lite-color-bkgd: #eeeeee;
 $theme-lite-color-brand: #459cf9;
 $theme-lite-color-brdr: #666666;
-$theme-lite-color-ctrl: #0000000f;
+$theme-lite-color-ctrl: #00000018;
 $theme-lite-color-ctrl-focus: #ffffffc0;
 $theme-lite-color-ctrl-invalid: #ff00000f;
 $theme-lite-color-dlg-bkdrp: #00000080;
@@ -24,13 +24,15 @@ $theme-dark-color-text-sec: #aaaaaa;
 
 // Font stack & text sizing & spacing.
 $font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
-$oneRem: 14px;
+$oneRem: 1rem;
+$oneIota: 0.0625rem;
 $lineHeight: 1.7;
 $semiboldWeight: 600;
 
 // Mobile breakpoint
-$mobileBreakpoint: $oneRem * 40;
-$mobileMinWidth: 320px;
+$mobileBreakpoint: 40rem;
+$mobileMedWidth: 27.5rem;
+$mobileMinWidth: 20rem;
 $desktopWidth: $mobileBreakpoint + $oneRem;
 $desktopMaxWidth: $desktopWidth;
 
@@ -42,9 +44,10 @@ $desktopMaxWidth: $desktopWidth;
 }
 
 @mixin disabled {
+  border-style: dotted;
   color: var(--color-text-sec);
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.333;
 }
 * {
   box-sizing: border-box;
@@ -52,12 +55,11 @@ $desktopMaxWidth: $desktopWidth;
 html {
   border: 0;
   font-family: $font-family;
-  font-size: $oneRem;
   margin: 0;
   padding: 0;
 }
 body {
-  --ctrl-radius: 5px;
+  --ctrl-radius: 0.375em;
   // Default (light) color theme.
   --color-bkgd: #{$theme-lite-color-bkgd};
   --color-bkgd-clear: #{$theme-lite-color-bkgd}00;
@@ -72,8 +74,8 @@ body {
   --color-text-sec: #{$theme-lite-color-text-sec};
   --color-link: #{darken($theme-lite-color-brand, 20%)};
   --prompt-brightness: 0.5;
-
-  @media screen and (prefers-color-scheme: dark) {
+  &.theme-dark {
+    // Dark color theme.
     --color-bkgd: #{$theme-dark-color-bkgd};
     --color-brdr: #{$theme-dark-color-brdr};
     --color-ctrl: #{$theme-dark-color-ctrl};
@@ -145,6 +147,11 @@ a:active {
   text-decoration: underline;
 }
 
+abbr {
+  border: 0;
+  text-decoration: none;
+}
+
 h2 {
   color: var(--color-text);
   font-size: 1.25rem;
@@ -161,7 +168,6 @@ p {
   padding: 0;
 
   &:last-child {
-    // border-bottom: 0;
     margin-bottom: 0;
     padding-bottom: 0;
   }
@@ -199,22 +205,23 @@ main {
 
     h1 {
       background-image: url(images/disqus_eye_48.png);
-      background-position: 0 0.5rem;
+      background-position: 0 0.375rem;
       background-repeat: no-repeat;
       background-size: fit;
       color: var(--color-text);
       font-size: 1.5rem;
       font-weight: normal;
-      line-height: 1.5;
+      line-height: 1.25;
       margin: 0;
-      @include white-space();
+      overflow: visible;
+      white-space: nowrap;
 
       a:link,
       a:visited,
       a:active {
         color: inherit;
         display: block;
-        text-indent: 4rem;
+        text-indent: 3.5rem;
         text-decoration: none;
       }
       a:focus {
@@ -222,9 +229,16 @@ main {
       }
 
       small {
-        // display: block;
         font-size: 1rem;
         font-weight: normal;
+
+        &:first-child {
+          display: none;
+
+          @media screen and (min-width: 22.5rem) {
+            display: inline;
+          }
+        }
 
         &:last-child {
           display: block;
@@ -273,81 +287,46 @@ main {
       align-items: start;
 
       & > header {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between; // Align heading to the left, button to the right.
         border-bottom: 1px dotted;
         grid-area: heading;
         margin: 0 0 0.5rem;
         padding: 0 0 calc(0.5rem - 1px);
         position: relative;
 
+        display: grid;
+        align-items: baseline;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 1rem;
+
         > h2 {
           border-bottom: 0;
           margin-bottom: 0;
           padding-bottom: 0;
         }
+        > p {
+          grid-template-columns: 1fr auto;
 
-        > .dialog-wrapper {
-          pointer-events: none;
-          position: absolute;
-          right: 0.25rem;
-          top: 2.5rem;
-          opacity: 0;
-          transition: opacity 0.3s ease-in 0.1s;
-          z-index: 20;
-
-          > .dialog {
-            background-color: var(--color-bkgd);
-            border: 1px solid var(--color-brdr);
-            border-radius: 5px;
-            box-shadow: 0 0 0.25rem 0.25rem var(--color-ctrl-on);
-            color: var(--color-text);
-            padding: 1rem;
-
-            h3 {
-              color: var(--color-text-sec);
-              font-size: 1.125rem;
-              font-weight: normal;
-              margin: 0 0 0.5rem;
-              padding: 0 0 calc(0.5rem - 1px);
-              border-bottom: 1px dotted;
-            }
-            p {
-              display: block;
-
-              &:last-of-type {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-              }
-            }
+          span:first-child {
+            font-size: 1rem;
+            font-weight: normal;
+            min-width: 0;
+            text-align: end;
           }
+          label {
+            font-size: 1.25rem;
+            top: 0.1875rem;
+          }
+        } // end of main > section > header > p
 
-          &::after {
-            background-color: #000;
-            content: "";
-            cursor: none;
-            opacity: 0;
-            position: fixed;
+        @media screen and (max-device-width: $mobileBreakpoint) {
+          grid-template-columns: 1fr 1fr;
+          padding-bottom: 0;
+
+          & > p label {
             top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            transition: opacity 0.3s ease-in;
-            z-index: -10;
-          }
-
-          &.dialog-open {
-            opacity: 1;
-            pointer-events: all;
-
-            &::after {
-              cursor: not-allowed;
-              opacity: 0.5;
-            }
           }
         }
-      }
+      } // end of main > section > header
 
       // On small screens we fall back to a single-column layout.
       @media screen and (max-device-width: $mobileBreakpoint) {
@@ -361,29 +340,21 @@ main {
     }
 
     // In the dual-column layout (large screens), the bottom paragraph in each
-    // column loses its bottom border, margin and padding (since the next section
-    // and footer sit below them and have top margins and borders).
-    // In the single-column layout (small screens), the two "columns" are stacked
-    // and we need to restore the bottom margin on both "columns", and the bottom
-    // border and padding on the first one (since it's visually in the middle of
-    // the single column). We do this on the DIVs ("columns") to avoid complex
-    // style rules on the paragraphs.
+    // column loses its bottom border, margin and padding (since the next
+    // section and footer sit below them and have top margins and borders).
+    // In the single-column layout (small screens), the two "columns" are
+    // stacked and we need to restore the bottom margin on both "columns", and
+    // the bottom border and padding on the first one (since it's visually in
+    // the middle of the single column). We do this on the DIVs ("columns") to
+    // avoid complex style rules on the paragraphs.
     @media screen and (max-device-width: $mobileBreakpoint) {
       > div {
         margin-bottom: 0.625rem;
 
         &:first-of-type {
-          // border-bottom: 1px dotted var(--color-text-sec);
-          // padding-bottom: calc(0.625rem - 1px);
           padding-bottom: 0.625rem;
         }
       }
-    }
-
-    > header,
-    > h2 {
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
     }
 
     p {
@@ -392,10 +363,8 @@ main {
       grid-template:
         "label input" auto
         "help  help" auto
-        / auto 8.25rem;
-      // border-bottom: 1px dotted var(--color-text-sec);
+        / auto 1fr;
       margin-bottom: 0.625rem;
-      // padding-bottom: calc(0.625rem - 1px);
       padding-bottom: 0.625rem;
 
       span,
@@ -405,6 +374,7 @@ main {
           font-weight: $semiboldWeight;
           grid-area: label;
           min-width: 10rem;
+          white-space: nowrap;
         }
         &:last-child {
           grid-area: input;
@@ -421,19 +391,23 @@ main {
       }
 
       & > span.input {
-        text-align: start;
+        text-align: end;
         @include white-space();
       }
 
       input#checkInterval {
-        width: 1.75rem;
         text-align: center;
+        width: 1.75rem;
+
+        &:disabled {
+          @include disabled();
+        }
       }
     }
   }
 }
 
-/* Text-like inputs */
+// Text-like inputs.
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 select,
 textarea {
@@ -445,7 +419,7 @@ textarea {
   font-size: 1rem;
   font-weight: $semiboldWeight;
   padding: 0 0.25rem;
-  position: relative; /* Keeps the input from moving when focused (bottom border gets thicker). */
+  position: relative; // Prevent movement on focus (bottom border width -> 2px).
 
   &:focus {
     background-color: var(--color-ctrl-focus);
@@ -463,7 +437,7 @@ textarea {
   }
 }
 
-/* Toggle switch (styled checkbox) input */
+// Toggle switch (styled checkbox) input.
 .input-toggle {
   line-height: 1.5;
 
@@ -480,14 +454,14 @@ textarea {
     box-sizing: content-box;
     cursor: pointer;
     display: block;
-    left: calc(100% - 2.5rem);
-    margin-bottom: 5px;
+    left: calc(100% - 2em - 0.25rem);
+    margin-bottom: 0.5rem;
     overflow: hidden;
     position: relative;
     text-indent: 100%;
-    top: 0.25rem;
-    width: 2rem;
-    height: 1rem;
+    top: 0.25em;
+    width: 2em;
+    height: 1em;
 
     // Toggle knob/thumb (in the default off position).
     &::after {
@@ -500,16 +474,15 @@ textarea {
       position: absolute;
       top: -1px;
       left: -1px;
-      width: 1rem;
-      height: 1rem;
+      width: 1em;
+      height: 1em;
     }
   }
 
   // Toggle knob/thumb in the on position.
   > input:checked + label::after {
     background-color: var(--color-ctrl-on);
-    left: calc(100% - 1px);
-    transform: translateX(calc(-100% + 2px));
+    left: 1em;
   }
 
   // Focus state.
@@ -522,47 +495,7 @@ textarea {
   input:disabled + label {
     @include disabled();
     &::after {
-      background-color: var(--color-ctrl);
+      border-style: dotted;
     }
-  }
-}
-
-button {
-  background-color: var(--color-ctrl);
-  border: 1px solid var(--color-brdr);
-  border-radius: var(--ctrl-radius);
-  box-sizing: content-box;
-  color: var(--color-text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: $semiboldWeight;
-  height: 1.5rem;
-  margin-right: 0.25rem;
-  min-width: 5rem;
-  outline: none;
-  padding: 0 0.5rem;
-  width: auto;
-
-  svg {
-    height: 1rem;
-    margin-right: 0.5rem;
-    width: 1rem;
-  }
-
-  &:active {
-    background-color: var(--color-ctrl-on);
-    color: var(--color-ctrl-focus);
-  }
-  &:disabled {
-    border-style: dotted;
-    @include disabled();
-  }
-  &:focus:not(:active) {
-    background-color: var(--color-ctrl-focus);
-    box-shadow: 0 0 0 1px var(--color-ctrl-on);
   }
 }

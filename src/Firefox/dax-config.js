@@ -8,12 +8,13 @@ initUiText();
 getCurrentConfig();
 listenForUpdates();
 
-// Initialize the "Load all content" button and confirmation dialog.
-initLoadAllContent();
+/* ===== End of main code. ===== */
+/* ===== Helper functions. ===== */
 
-/* ========== End of main code. ==========
-  ===== Helper functions follow. ===== */
-
+/**
+ * Inserts the current version number and link to the Chrome Web Store in the
+ * configuration page.
+ */
 function initUiText() {
   const manifest = browser.runtime.getManifest();
   document.querySelectorAll(".version").forEach(elt => {
@@ -24,8 +25,11 @@ function initUiText() {
       "https://addons.mozilla.org/firefox/addon/disqus-auto-expander/";
     link.innerText = "Firefox Add-ons site";
   });
-}
+} // end of initUiText().
 
+/**
+ * Retrieves the current configuration values from storage.
+ */
 async function getCurrentConfig() {
   let config;
   try {
@@ -49,6 +53,8 @@ async function getCurrentConfig() {
           // removeIf(!allowDebug)
           logDebug("--> document.body classes: %s", document.body.className);
           // endRemoveIf(!allowDebug)
+        } else if (key === "isEnabled") {
+          setEnabledStateUi(input.checked);
         }
         // removeIf(!allowDebug)
         logDebug(
@@ -63,26 +69,17 @@ async function getCurrentConfig() {
         // removeIf(!allowDebug)
         logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
-      } else if (key === "loadAllContent") {
-        // true =  operation is in progress, so the button should be diabled.
-        // false = operation is not in progress, so the button should be enanbled.
-        input.toggleAttribute("disabled", !!value);
-        input.disabled = !!value;
       }
-    }
+    } // end for (let key in config).
   } catch (error) {
     console.info("Couldn't initialize config from storage: %s", error);
   }
 } // end of getCurrentConfig().
 
-// Handle changes in the configuration controls.
+/**
+ * Handles changes in the configuration values.
+ */
 function listenForUpdates() {
-
-  window.matchMedia('screen and (prefers-color-scheme: dark)').addEventListener('change', event => {
-    logDebug('prefers-color-scheme: dark change handler: %o', event);
-    updateConfigValue('useDarkTheme', event.matches);
-  });
-
   document.body.addEventListener("input", event => {
     // removeIf(!allowDebug)
     logDebug("Handling change event on %s", event.target.id);
@@ -131,6 +128,12 @@ function listenForUpdates() {
     }
   });
 
+  /* ===== Helper functions. ===== */
+  /**
+   * Updates the new value for the specified configuration key in storage.
+   * @param {String} key - the configuration key to update.
+   * @param {Boolean|Number} value - the nw value of the key.
+   */
   async function updateConfigValue(key, value) {
     try {
       await browser.storage.sync.set({ [key]: value });
@@ -146,133 +149,46 @@ function listenForUpdates() {
       console.info(
         `Couldn't store option ${key} with value ${value}: ${error}.`
       );
-    }
+      return;
+    } // storage.sync.set() try/catch.
+
+    // Notify content and background scripts about new config value.
     if (key !== "useDarkTheme") {
-      try {
-        const tabs = await browser.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-        browser.tabs.sendMessage(tabs[0].id, { action: "refreshConfig" });
-      } catch (error) {
-        console.info(
-          `updateConfigValue(): couldn't get active tab to send a message to: ${error}.`
-        );
+      const updateConfigCommand = {
+        action: "updateConfig",
+        data: { key, value },
+        sender: "config",
+      };
+      sendContentCommand(updateConfigCommand);
+      browser.runtime.sendMessage(updateConfigCommand);
+      if (key === "isEnabled") {
+        setEnabledStateUi(value);
       }
-      if (key === "checkInterval") {
-        setIcon(!!value);
-      }
-    } // end of dark theme handling.
+    } // end of changed value handling (excluding "useDarkTheme").
   } // end of updateConfigValue().
 } // end of listenForUpdates().
 
-function setIcon(isEnabled) {
-  // removeIf(!allowDebug)
-  logDebug(`[proxy] setIcon(${isEnabled}): entering.`);
-  // endRemoveIf(!allowDebug)
-  browser.runtime.sendMessage({
-    action: "setIcon",
-    caller: "config",
-    data: isEnabled,
-  });
-} // end of setIcon().
+/**
+ * Enables or disables the "Content options" toggles.
+ * @param {Boolean} isEnabled - whether the toggles should be enabled or
+ * disabled.
+ */
+function setEnabledStateUi(isEnabled) {
+  document
+    .querySelectorAll("section:first-of-type > div input")
+    .forEach(elt => (elt.disabled = !isEnabled));
+} // end of setEnabledStateUi().
 
-// Initailize the "Load all content" button and confirmation dialog.
-function initLoadAllContent() {
-  // Initialize the confirmation dialog.
-  const dialog = document.getElementById("confirmLoadAllContent"),
-    dialogClickablesSelector = "a:link, button",
-    openClass = "dialog-open",
-    focusableClass = "dialog-focusable";
-
-  dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-    elt.classList.add(focusableClass);
-  });
-  closeDialog(dialog);
-
-  // Initialize the "Load all content" button. The button is disabled
-  // by default, and only an affirmative ping from the content script
-  // will enable it.
-  const button = document.getElementById("loadAllContent");
-  button.addEventListener("click", event => {
-    openDialog(dialog, event.target);
-  });
-  sendContentCommand({ action: "ping", caller: "config" }, reply => {
-    if (reply && reply.value === "pong") {
-      logDebug(
-        "Got reply from 'ping' request: %o; enabling Load all content button.",
-        reply
-      );
-      button.disabled = false;
-    }
-  });
-
-  /* ========== Helpers ========== */
-  function closeDialog(dialog) {
-    // removeIf(!allowDebug)
-    logDebug("closeDialog: %o", dialog);
-    // endRmoveIf(!allowDebug)
-    getNonDialogFocusables().forEach(elt => {
-      if (elt.dataset.tabindex) {
-        elt.tabIndex = elt.dataset.tabindex;
-      } else {
-        elt.tabIndex = 0;
-      }
-    });
-    dialog.classList.remove(openClass);
-    dialog.setAttribute("aria-hidden", "true");
-    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-      elt.tabIndex = -1;
-    });
-  } // end of closeDialog().
-
-  function openDialog(dialog, opener) {
-    // removeIf(!allowDebug)
-    logDebug("openDialog: %o", dialog);
-    // endRemoveIf(!allowDebug)
-    // Disable focus on focusable elements outside the dialog.
-    getNonDialogFocusables().forEach(elt => {
-      if (elt.tabIndex) {
-        elt.dataset.tabindex = elt.tabIndex;
-      }
-      elt.tabIndex = -1;
-    });
-    // Show the dialog.
-    dialog.querySelectorAll(dialogClickablesSelector).forEach(elt => {
-      elt.tabIndex = 0;
-    });
-    dialog.tabIndex = -1;
-    dialog.focus();
-    dialog.classList.add(openClass);
-    dialog.setAttribute("aria-hidden", "false");
-    dialog.addEventListener("click", event => {
-      const source = event.target;
-      if (source.tagName === "BUTTON") {
-        event.preventDefault();
-        if (source.value === "yes") {
-          sendContentCommand({
-            action: "loadAllContent",
-            caller: "config",
-          });
-          window.close();
-        } else {
-          closeDialog(dialog);
-          opener.focus();
-        }
-      }
-    });
-  } // end of openDialog().
-
-  function getNonDialogFocusables() {
-    return Array.from(
-      document.querySelectorAll("a:link, button, input")
-    ).filter(elt => !elt.classList.contains(focusableClass));
-  } // end of getNonDialogClickables().
-} // end of initLoadAllContent().
-
+/**
+ * Sends a command (message) to the content script in the active tab.
+ * @param {Object} commandData - an object describing the command to send,
+ * including any parameters.
+ * @param {Function} responseCallback - an optional callback function that will
+ * be called if the content script replies to this message.
+ */
 async function sendContentCommand(commandData, responseCallback) {
-  let operation = "browser.tabs.query";
-  try {
+let operation = "browser.tabs.query";
+try {
     const tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
@@ -288,6 +204,14 @@ async function sendContentCommand(commandData, responseCallback) {
 } // end of sendContentCommand().
 
 // removeIf(!allowDebug)
+/**
+ * Asks the content script to output a debug message to the console. Also
+ * logs the message to the config script's console (which is not generally
+ * visible).
+ * @param {String} message - The debug message (can include console logging
+ * placeholders).
+ * @param  {...any} params - Parameters that will replace the placeholders.
+ */
 function logDebug(message, ...params) {
   console.debug(message, ...params);
   sendContentCommand({
