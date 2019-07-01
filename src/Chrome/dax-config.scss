@@ -24,8 +24,9 @@ $theme-dark-color-text-sec: #aaaaaa;
 
 // Font stack & text sizing & spacing.
 $font-family: "Segoe UI", Tahoma, Arial, Geneva, Verdana, sans-serif;
+$pixelsPerRem: 15;
 $oneRem: 1rem;
-$oneIota: 0.0625rem;
+$oneIota: $oneRem / $pixelsPerRem;
 $lineHeight: 1.7;
 $semiboldWeight: 600;
 
@@ -34,7 +35,7 @@ $mobileBreakpoint: 40rem;
 $mobileMedWidth: 27.5rem;
 $mobileMinWidth: 20rem;
 $desktopWidth: $mobileBreakpoint + $oneRem;
-$desktopMaxWidth: $desktopWidth;
+$desktopMaxWidth: $desktopWidth + $oneRem;
 
 @mixin white-space {
   white-space: nowrap;
@@ -55,6 +56,7 @@ $desktopMaxWidth: $desktopWidth;
 html {
   border: 0;
   font-family: $font-family;
+  font-size: 1px * $pixelsPerRem;
   margin: 0;
   padding: 0;
 }
@@ -213,6 +215,7 @@ main {
       font-weight: normal;
       line-height: 1.25;
       margin: 0;
+      padding-left: 56px;
       overflow: visible;
       white-space: nowrap;
 
@@ -221,7 +224,6 @@ main {
       a:active {
         color: inherit;
         display: block;
-        text-indent: 3.5rem;
         text-decoration: none;
       }
       a:focus {
