@@ -5,16 +5,18 @@ browser.runtime.onInstalled.addListener(async () => {
   // Make sure the extension's options are stored when the extension starts up.
   // Pass `null` so we get everything in storage. This allows us to clean up
   // obsolete config values (see else block below).
+  let op = "get current";
   try {
-    _config = await browser.storage.sync.get(null /*defaultConfig*/);
+    _config = await browser.storage.sync.get(null);
     if (!Object.keys(_config).length) {
       // removeIf(!allowDebug)
       console.debug("Config not found in storage; storing default config.");
       // endRemoveIf(!allowDebug)
+      op = "store default";
       browser.storage.sync.set(defaultConfig);
     } else {
       // removeIf(!allowDebug)
-      console.debug("Got config from storage: %o", config);
+      console.debug("Got config from storage: %o", _config);
       // endRemoveIf(!allowDebug)
 
       // Check for and remove obsolete config items.
@@ -25,15 +27,30 @@ browser.runtime.onInstalled.addListener(async () => {
         }
       }
       if (obsoleteKeys.length) {
+        op = "remove obsolete";
         await browser.storage.sync.remove(obsoleteKeys);
+        for (let key of obsoleteKeys) {
+          delete _config[key];
+        }
         // removeIf(!allowDebug)
         _config.doDebug &&
           console.debug("--> removed obsolete config value(s)", obsoleteKeys);
         // endRemoveIf(!allowDebug)
+      } // if (obsoleteKeys.length)
+
+      // See if we need to add any new keys to config.
+      if (Object.keys(_config).length < Object.keys(defaultConfig).length) {
+        _config = { ...defaultConfig, ..._config };
+        op = "store new";
+        await browser.storage.sync.set(_config);
+        // removeIf(!allowDebug)
+        _config.doDebug &&
+          console.debug("--> added new config values to storage", _config);
+        // endRemoveIf(!allowDebug)
       }
     } // end of block to process config values from storage.
   } catch (error) {
-    console.info(`Storage operation failed: ${error}.`);
+    console.info(`Storage operation "${op}" failed: ${error}.`);
   } // browser.storage.sync.get() try/catch block.
   setIcon(!!_config.isEnabled);
 }); // browser.runtime.onInstalled.addListener().

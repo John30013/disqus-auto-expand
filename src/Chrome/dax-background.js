@@ -13,13 +13,14 @@ chrome.runtime.onInstalled.addListener(() => {
         // endRemoveIf(!allowDebug)
         chrome.storage.sync.set(defaultConfig);
       } else {
+        _config = config;
         // removeIf(!allowDebug)
-        console.debug("Got config from storage: %o", config);
+        console.debug("Got config from storage: %o", _config);
         // endRemoveIf(!allowDebug)
 
         // Check for and remove obsolete config items.
         let obsoleteKeys = [];
-        for (let key in config) {
+        for (let key in _config) {
           if (!defaultConfig.hasOwnProperty(key)) {
             obsoleteKeys.push(key);
           }
@@ -28,7 +29,7 @@ chrome.runtime.onInstalled.addListener(() => {
           chrome.storage.sync.remove(obsoleteKeys, () => {
             if (!chrome.runtime.lastError) {
               // removeIf(!allowDebug)
-              config.doDebug &&
+              _config.doDebug &&
                 console.debug(
                   "--> removed obsolete config value(s),",
                   obsoleteKeys
@@ -42,8 +43,32 @@ chrome.runtime.onInstalled.addListener(() => {
               );
             }
           }); // end chrome.storage.sync.remove() callback.
+          for (let key of obsoleteKeys) {
+            delete _config[key];
+          }
         } // if (obsoleteKeys.length)
-        _config = config;
+
+        // See if we need to add any new keys to config.
+        if (Object.keys(_config).length < Object.keys(defaultConfig).length) {
+          _config = { ...defaultConfig, ..._config };
+          chrome.storage.sync.set(_config, () => {
+            if (!chrome.runtime.lastError) {
+              // removeIf(!allowDebug)
+              _config.doDebug &&
+                console.debug(
+                  "--> added new config values to storage",
+                  _config
+                );
+              // endRemoveIf(!allowDebug)
+            } else {
+              console.info(
+                `Couldn't update config in storage: ${
+                  chrome.runtime.lastError.message
+                }`
+              );
+            } // end error handling for storage.sync.set() callback.
+          }); // chrome.storage.sync.set() callback.
+        } // if ([fewer _config keys than defaultConfig keys]).
       } // end of else block (got config items from storage).
     } else {
       console.info(
