@@ -6,53 +6,53 @@ chrome.runtime.onInstalled.addListener(() => {
   Pass `null` so we get everything in storage. This allows us to clean up
   obsolete config values (see the `else` block below). */
   chrome.storage.sync.get(null, config => {
-    if (chrome.runtime.lastError) {
+    if (!chrome.runtime.lastError) {
+      if (!Object.keys(config).length) {
+        // removeIf(!allowDebug)
+        console.debug("Config not found in storage; storing default config.");
+        // endRemoveIf(!allowDebug)
+        chrome.storage.sync.set(defaultConfig);
+      } else {
+        // removeIf(!allowDebug)
+        console.debug("Got config from storage: %o", config);
+        // endRemoveIf(!allowDebug)
+
+        // Check for and remove obsolete config items.
+        let obsoleteKeys = [];
+        for (let key in config) {
+          if (!defaultConfig.hasOwnProperty(key)) {
+            obsoleteKeys.push(key);
+          }
+        }
+        if (obsoleteKeys.length) {
+          chrome.storage.sync.remove(obsoleteKeys, () => {
+            if (!chrome.runtime.lastError) {
+              // removeIf(!allowDebug)
+              config.doDebug &&
+                console.debug(
+                  "--> removed obsolete config value(s),",
+                  obsoleteKeys
+                );
+              // endRemoveIf(!allowDebug)
+            } else {
+              console.info(
+                `Couldn't remove obsolete keys from storage: ${
+                  chrome.runtime.lastError.message
+                }.`
+              );
+            }
+          }); // end chrome.storage.sync.remove() callback.
+        } // if (obsoleteKeys.length)
+        _config = config;
+      } // end of else block (got config items from storage).
+    } else {
       console.info(
         `Couldn't get configuration options from storage: ${
           chrome.runtime.lastError.message
         }`
       );
       return;
-    } // if (chrome.runtime.lastError)
-    if (!Object.keys(config).length) {
-      // removeIf(!allowDebug)
-      console.debug("Config not found in storage; storing default config.");
-      // endRemoveIf(!allowDebug)
-      chrome.storage.sync.set(defaultConfig);
-    } else {
-      // removeIf(!allowDebug)
-      console.debug("Got config from storage: %o", config);
-      // endRemoveIf(!allowDebug)
-
-      // Check for and remove obsolete config items.
-      let obsoleteKeys = [];
-      for (let key in config) {
-        if (!defaultConfig.hasOwnProperty(key)) {
-          obsoleteKeys.push(key);
-        }
-      }
-      if (obsoleteKeys.length) {
-        chrome.storage.sync.remove(obsoleteKeys, () => {
-          if (chrome.runtime.lastError) {
-            console.info(
-              `Couldn't remove obsolete keys from storage: ${
-                chrome.runtime.lastError.message
-              }.`
-            );
-          }
-          // removeIf(!allowDebug)
-          else {
-            config.doDebug &&
-              console.debug(
-                "--> removed obsolete config values,",
-                obsoleteKeys
-              );
-          }
-          // endRemoveIf(!allowDebug)
-        }); // end chrome.storage.sync.remove() callback.
-      } // if (obsoleteKeys.length)
-      _config = config;
-    } // end of else block (got config items from storage).
+    } // else (chrome.runtime.lastError)
     setIcon(!!_config.isEnabled);
   }); // end of chrome.storage.sync.get() callback.
 
@@ -87,7 +87,7 @@ chrome.runtime.onMessage.addListener(msg => {
 /**
  * Sets the extension icon based on the value of the parameter.
  * @param {Boolean} isEnabled - Whether the extension is actively processing
- * new links (i.e., checkInterval is zero).
+ * new links.
  */
 function setIcon(isEnabled) {
   // removeIf(!allowDebug)
@@ -99,33 +99,33 @@ function setIcon(isEnabled) {
       currentWindow: true,
     },
     tabs => {
-      if (chrome.runtime.lastError) {
+      if (!chrome.runtime.lastError) {
+        if (tabs[0]) {
+          // removeIf(!allowDebug)
+          _config.doDebug && console.debug(`--> Setting icon.`);
+          // endRemoveIf(!allowDebug)
+          chrome.pageAction.setIcon({
+            tabId: tabs[0].id,
+            path: isEnabled
+              ? "images/disqus_eye_16.png"
+              : "images/disqus_eye_16_paused.png",
+          });
+          chrome.pageAction.setTitle({
+            tabId: tabs[0].id,
+            title: `${_manifest.page_action.default_title}${
+              isEnabled ? "" : " (paused)"
+            }`,
+          });
+        } else {
+          console.info("No active tab; aborting.");
+        }
+      } else {
         console.info(
           `setIcon(): couldn't get active tab to send message: ${
             chrome.runtime.lastError.message
           }.`
         );
-        return;
-      }
-      if (tabs[0]) {
-        // removeIf(!allowDebug)
-        _config.doDebug && console.debug(`--> Setting icon.`);
-        // endRemoveIf(!allowDebug)
-        chrome.pageAction.setIcon({
-          tabId: tabs[0].id,
-          path: isEnabled
-            ? "images/disqus_eye_16.png"
-            : "images/disqus_eye_16_paused.png",
-        });
-        chrome.pageAction.setTitle({
-          tabId: tabs[0].id,
-          title: `${_manifest.page_action.default_title}${
-            isEnabled ? "" : " (paused)"
-          }`,
-        });
-      } else {
-        console.info("No active tab; aborting.");
-      }
+      } // end chrome.tabs.query() error handling.
     } // end of chrome.tabs.query() callback.
   ); // end of chrome.tabs.query().
 } // end of setIcon().
