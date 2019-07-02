@@ -13,7 +13,7 @@ const gulp = require("gulp"),
   zip = require("gulp-zip");
 
 // Options specified at the command line.
-const taskName = argv._[0],
+const taskName = argv._[0] || argv.$0,
   optDebug = false || !!argv.debug,
   optMinify = false || !!argv.minify,
   optZip = taskName.startsWith("zip") || !!argv.zip;
@@ -29,7 +29,8 @@ const targetChrome = function(done) {
   packed = "./dist/packed/Chrome/";
   done();
 };
-targetChrome.description = 'Targets the "Chrome" src and dist directories.';
+targetChrome.description =
+  "Targets the Chrome src and dist directories for subsequent tasks.";
 
 const targetFirefox = function(done) {
   src = "./src/Firefox/";
@@ -37,7 +38,8 @@ const targetFirefox = function(done) {
   packed = "./dist/packed/Firefox/";
   done();
 };
-targetFirefox.description = 'Targets the "Firefox" src and dist directories.';
+targetFirefox.description =
+  "Targets the Firefox src and dist directories for subsequent tasks.";
 
 const makeDistWritable = function(done) {
   childProc.exec(`attrib -r ${dist}*.* /s`, done);
@@ -49,7 +51,7 @@ const makeDistReadOnly = function(done) {
   childProc.exec(`attrib +r ${dist}*.* /s`, done);
 };
 makeDistReadOnly.description =
-  "Makes the files in the targeted disd directory read-only.";
+  "Makes the files in the targeted dist directory read-only.";
 
 const copyScripts = function() {
   return gulp
@@ -88,21 +90,21 @@ const copyScripts = function() {
     .pipe(gulpIf(optMinify, terser()))
     .pipe(gulp.dest(dist));
 };
-copyScripts.description = `Process and deploy Javascript files (${src}*.js).`;
+copyScripts.description = "Deploys the Javascript files (src/*.js).";
 copyScripts.flags = {
   "--debug": "Keep debug related logic in the JavaScript (default: false)",
   "--minify": "Minify the Javascript source code (default: false)",
 };
 
-const copyStyles = function() {
+const copyCss = function() {
   return gulp
     .src(`${src}*.css`)
     .pipe(gulpIf(optMinify, csso()))
     .pipe(gulp.dest(dist));
 };
-copyStyles.description = `Process and deploy CSS files (${src}*.css).`;
-copyStyles.flags = {
-  "--minify": "optMinify the CSS source code (default: false)",
+copyCss.description = "Deploys the CSS files (src/*.css).";
+copyCss.flags = {
+  "--minify": "Minify the CSS source code (default: false)",
 };
 
 const copyHtml = function() {
@@ -120,7 +122,7 @@ const copyHtml = function() {
     )
     .pipe(gulp.dest(dist));
 };
-copyHtml.description = `Process and deploy HTML files (${src}*.html).`;
+copyHtml.description = "Deploys the HTML files (src/*.html).";
 copyHtml.flags = {
   "--debug": "Keep debug related logic in the HTML (default: false)",
   "--minify": "Minify the HTML source code (default: false)",
@@ -131,7 +133,7 @@ const copyFiles = function() {
     .src([`${src}manifest.json`, `${src}images/*`], { base: src })
     .pipe(gulp.dest(dist));
 };
-copyFiles.description = `Copies ${src}images/* and ${src}manifest.json to ${dist}.`;
+copyFiles.description = "Copies src/images/* and src/manifest.json to dist.";
 
 const zipTarget = function(done) {
   if (!optZip) {
@@ -177,13 +179,12 @@ const buildChrome = function(done) {
     targetChrome,
     makeDistWritable,
     cleanTarget,
-    gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
+    gulp.parallel(copyScripts, copyCss, copyHtml, copyFiles),
     zipTarget,
     makeDistReadOnly
   )(done);
 };
-buildChrome.description =
-  "Cleans and builds the Chrome version of the extension.";
+buildChrome.description = "Cleans and builds the Chrome extension.";
 buildChrome.flags = {
   "--debug": "Keep debug related logic in the extension (default: false)",
   "--minify": "Minify the extension's source code (default: false)",
@@ -196,13 +197,12 @@ const buildFirefox = function(done) {
     targetFirefox,
     makeDistWritable,
     cleanTarget,
-    gulp.parallel(copyScripts, copyStyles, copyHtml, copyFiles),
+    gulp.parallel(copyScripts, copyCss, copyHtml, copyFiles),
     zipTarget,
     makeDistReadOnly
   )(done);
 };
-buildFirefox.description =
-  "Cleans and builds the Firefox version of the extension.";
+buildFirefox.description = "Cleans and builds the Firefox extension.";
 buildFirefox.flags = {
   "--debug": "Keep debug related logic in the extension (default: false)",
   "--minify": "Minify the extension's source code (default: false)",
