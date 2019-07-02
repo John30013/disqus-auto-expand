@@ -402,16 +402,10 @@ function unobserveLink(link, removeDaxTags) {
  */
 function findNewLinks(config) {
   const newLinks = [];
-  /* const handleCloseReplyLi = evt => {
-      const { target } = evt;
-      unobserveLink(target);
-      target.removeEventListener(handleCloseReplyLi);
-    }; */
   // Find any active (open) "reply/edit" textareas. When one of these is
   // visible, the operation pauses immediately.
   document.querySelectorAll("li.reply.active, li.edit.active").forEach(elt => {
     newLinks.push(elt);
-    /*    elt.addEventListener("click", handleCloseReplyLi); */
   });
 
   // Find new "See more replies" links.

@@ -32,49 +32,49 @@ function initUiText() {
  */
 function getCurrentConfig() {
   chrome.storage.sync.get(defaultConfig, config => {
-    if (chrome.runtime.lastError) {
+    if (!chrome.runtime.lastError) {
+      // removeIf(!allowDebug)
+      logDebug("config.js loaded.");
+      logDebug("Setting config from storage: %o", config);
+      // endRemoveIf(!allowDebug)
+      for (let key in config) {
+        let input = document.getElementById(key);
+        if (!input) {
+          // removeIf(!allowDebug)
+          logDebug('--> Skipped config option "%s" with no control.', key);
+          // endRemoveIf(!allowDebug)
+          continue;
+        }
+        if (input.type === "checkbox") {
+          input.checked = config[key];
+          if (key === "useDarkTheme") {
+            document.body.classList.toggle("theme-dark", input.checked);
+            // removeIf(!allowDebug)
+            logDebug("--> document.body class: %s", document.body.className);
+            // endRemoveIf(!allowDebug)
+          } else if (key === "isEnabled") {
+            setEnabledStateUi(input.checked);
+          }
+          // removeIf(!allowDebug)
+          logDebug(
+            "--> %s checkbox %s.",
+            input.checked ? "Checked" : "Unchecked",
+            key
+          );
+          // endRemoveIf(!allowDebug)
+        } else if (key === "checkInterval") {
+          input.value = "" + config[key];
+          // removeIf(!allowDebug)
+          logDebug("--> %s set to %s.", key, input.value);
+          // endRemoveIf(!allowDebug)
+        }
+      } // end for (let key in config).
+    } else {
       console.info(
         "Couldn't initialize config from storage: %s",
         chrome.runtime.lastError.message
       );
-      return;
-    }
-    // removeIf(!allowDebug)
-    logDebug("config.js loaded.");
-    logDebug("Setting config from storage: %o", config);
-    // endRemoveIf(!allowDebug)
-    for (let key in config) {
-      let input = document.getElementById(key);
-      if (!input) {
-        // removeIf(!allowDebug)
-        logDebug('--> Skipped config option "%s" with no control.', key);
-        // endRemoveIf(!allowDebug)
-        continue;
-      }
-      if (input.type === "checkbox") {
-        input.checked = config[key];
-        if (key === "useDarkTheme") {
-          document.body.classList.toggle("theme-dark", input.checked);
-          // removeIf(!allowDebug)
-          logDebug("--> document.body class: %s", document.body.className);
-          // endRemoveIf(!allowDebug)
-        } else if (key === "isEnabled") {
-          setEnabledStateUi(input.checked);
-        }
-        // removeIf(!allowDebug)
-        logDebug(
-          "--> %s checkbox %s.",
-          input.checked ? "Checked" : "Unchecked",
-          key
-        );
-        // endRemoveIf(!allowDebug)
-      } else if (key === "checkInterval") {
-        input.value = "" + config[key];
-        // removeIf(!allowDebug)
-        logDebug("--> %s set to %s.", key, input.value);
-        // endRemoveIf(!allowDebug)
-      }
-    }
+    } // end chrome.storage.sync.get() error handler.
   });
 } // end of getCurrentConfig().
 
@@ -101,15 +101,15 @@ function listenForUpdates() {
           } else {
             // Restore the previous value after debounceDelay (msecs).
             chrome.storage.sync.get(target.id, value => {
-              if (chrome.runtime.lastError) {
+              if (!chrome.runtime.lastError) {
+                target.value = value[target.id];
+              } else {
                 console.info(
                   "Couldn't get config value %s from storage: %s",
                   target.id,
                   chrome.runtime.lastError.message
                 );
-                return;
               }
-              target.value = value[target.id];
             });
             return;
           }
@@ -141,7 +141,16 @@ function listenForUpdates() {
         [key]: value,
       },
       () => {
-        if (chrome.runtime.lastError) {
+        if (!chrome.runtime.lastError) {
+          // removeIf(!allowDebug)
+          logDebug(
+            '--> Updated config option "%s" to (%s) "%s"',
+            key,
+            typeof value,
+            value
+          );
+          // endRemoveIf(!allowDebug)
+        } else {
           console.info(
             `Couldn't store config option ${key} with value ${value}: ${
               chrome.runtime.lastError.message
@@ -149,17 +158,10 @@ function listenForUpdates() {
           );
           return;
         }
-        // removeIf(!allowDebug)
-        logDebug(
-          '--> Updated config option "%s" to (%s) "%s"',
-          key,
-          typeof value,
-          value
-        );
-        // endRemoveIf(!allowDebug)
       }
-    ); // chrome.storage.sync.set() callback.
-    // Notify other scripts about the new config value.
+    ); // storage.sync.set() callback.
+
+    // Notify content and background scripts about the new config value.
     if (key !== "useDarkTheme") {
       const updateConfigCommand = {
         action: "updateConfig",
@@ -175,6 +177,11 @@ function listenForUpdates() {
   } // end of updateConfigValue().
 } // end of listenForUpdates().
 
+/**
+ * Enables or disables the "Content options" toggles.
+ * @param {Boolean} isEnabled - whether the toggles should be enabled or
+ * disabled.
+ */
 function setEnabledStateUi(isEnabled) {
   document
     .querySelectorAll("section:first-of-type > div input")
@@ -190,30 +197,28 @@ function setEnabledStateUi(isEnabled) {
  */
 function sendContentCommand(commandData, responseCallback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-    if (chrome.runtime.lastError) {
+    if (!chrome.runtime.lastError) {
+      chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
+        if (!chrome.runtime.lastError) {
+          if (responseCallback) {
+            responseCallback(response);
+          }
+        } else {
+          console.info(
+            `sendContentCommand(): couldn't send command: ${
+              chrome.runtime.lastError.message
+            }.`
+          );
+        } // tabs.sendMessage() error handler.
+      }); // tabs.sendMessage() callback.
+    } else {
       console.info(
         `sendContentCommand(): couldn't get active tab for sendMessage: ${
           chrome.runtime.lastError.message
         }.`
       );
-      return;
-    }
-    if (!commandData.sender) {
-      commandData.sender = "config";
-    }
-    chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
-      if (chrome.runtime.lastError) {
-        console.info(
-          `sendContentCommand(): couldn't send command: ${
-            chrome.runtime.lastError.message
-          }.`
-        );
-      }
-      if (responseCallback) {
-        responseCallback(response);
-      }
-    });
-  });
+    } // chrome.tabs.query() error handler.
+  }); // chrome.tabs.query() callback.
 } // end of sendContentCommand().
 
 // removeIf(!allowDebug)
