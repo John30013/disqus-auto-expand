@@ -149,9 +149,13 @@ If you encounter a bug, please create an Issue in this repository. Be sure inclu
 
 ## Changelog
 
+### Version 1.1.1
+
+Bug fix for the Firefox add-on.
+
 ### Version 1.1
 
-- The **Load entire discussion** button has moved to the main web page to make the feature available on mobile browsers.
+- The **Load entire discussion** button now appears on the main web page to make the feature available on mobile browsers.
 - New **Enabled** option on the Configuration page to control whether the extension operates on the current page. Such control was previously possible by setting the “Check for new content” option to 0 (zero). With the new “Enabled” option, 0 is no longer an allowed value for “Check for new content”.
 - Content processing pauses when an open reply field is visible on the page. This is to prevent links above the reply field from expanding and pushing the reply field down (or possibly off the end of) the browser windown. Processing resumes when the reply field is closed or scrolled off the screen.
 - Various bug fixes and improvements in functionality.

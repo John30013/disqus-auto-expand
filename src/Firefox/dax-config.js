@@ -65,7 +65,6 @@ async function getCurrentConfig() {
         // endRemoveIf(!allowDebug)
       } else if (key === "checkInterval") {
         input.value = "" + config[key];
-        setIcon(!!config[key]);
         // removeIf(!allowDebug)
         logDebug("--> %s set to %s.", key, input.value);
         // endRemoveIf(!allowDebug)
