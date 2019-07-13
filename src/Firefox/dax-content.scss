@@ -62,9 +62,13 @@ $background-color: #282828;
   }
 }
 
-/* On the Disqus site (on small screens at least) the Disqus ad iframe above the
-Disqus discussion iframe cuts off the top of the discussion iframe. This rule 
-adds some top padding to fix that. */
-#layout {
-  padding-top: 1rem;
+/* On small screens the Disqus ad iframe above the Disqus discussion iframe can 
+cut off the top of the discussion iframe. This rule adds some top padding to fix 
+that, as well as some left/right margin to ensure small screens have some 
+margin. */
+@media screen and (device-max-width: 1023px) {
+  #layout {
+    margin: 0 0.5rem;
+    padding-top: 1rem;
+  }
 }
