@@ -494,6 +494,7 @@ function loadAllContent(iteration) {
   _timer && clearTimeout(_timer);
 
   iteration = iteration || 0;
+  const button = document.getElementById("dax-loadAll");
   if (iteration === 0) {
     /* Try to get the number of comments. When Disqus is embedded on a page, the
     comment count is in a div.comment-count element within the iframe; when on
@@ -513,6 +514,7 @@ function loadAllContent(iteration) {
     }
     if (commentCount > 500 && !_warnedAboutLoadAll) {
       _warnedAboutLoadAll = true;
+      button.style.willChange = "background-position-x, width";
       if (
         !confirm(
           `Loading this entire discussion will take some time and
@@ -522,12 +524,12 @@ function loadAllContent(iteration) {
 Do you want to proceed?`
         )
       ) {
+        button.style.willChange = "";
         return;
       }
     }
   } // end of block to handle first iteration.
-  const button = document.getElementById("dax-loadAll"),
-    newLinks = findNewLinks(),
+  const newLinks = findNewLinks(),
     animDelaySecs = 1,
     animDurationSecs = 3,
     opacDelaySecs = 3,
@@ -565,6 +567,7 @@ Do you want to proceed?`
   } else {
     button.classList.add("complete");
     button.innerText = "The entire discussion is now loaded.";
+    button.style.willChange = "";
     setTimeout(
       button => {
         button.classList.remove("processing", "complete");

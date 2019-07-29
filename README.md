@@ -149,6 +149,10 @@ If you encounter a bug, please create an Issue in this repository. Be sure inclu
 
 ## Changelog
 
+### Version 1.1.2
+
+Adds left and right margins on small screens to make it easier to tap the up-vote link, and generally easier to read.
+
 ### Version 1.1.1
 
 Bug fix for the Firefox add-on.

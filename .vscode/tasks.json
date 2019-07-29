@@ -4,6 +4,14 @@
       "type": "gulp",
       "task": "buildChrome",
       "problemMatcher": []
+    },
+    {
+      "type": "gulp",
+      "task": "default",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

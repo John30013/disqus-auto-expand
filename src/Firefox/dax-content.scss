@@ -66,7 +66,7 @@ $background-color: #282828;
 cut off the top of the discussion iframe. This rule adds some top padding to fix 
 that, as well as some left/right margin to ensure small screens have some 
 margin. */
-@media screen and (device-max-width: 1023px) {
+@media screen and (max-width: 1023px) {
   #layout {
     margin: 0 0.5rem;
     padding-top: 1rem;
