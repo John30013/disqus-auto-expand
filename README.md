@@ -87,7 +87,7 @@ These are the links Disqus displays when a comment has more than 6 replies (“M
 
 #### Expand long items
 
-Disqus displays a “See more” link at the bottom of when a comment or media item that it considers too long. This option automatically shows the full item when it comes into view.
+Disqus displays a “See more” link at the bottom of a comment or media item that it considers too long. This option automatically shows the full item when it comes into view.
 
 #### A note about hidden media items
 
