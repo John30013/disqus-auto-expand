@@ -1,3 +1,4 @@
+import { defaultConfig } from "./dax-defaultConfig.js";
 let _config = { ...defaultConfig };
 
 // Initialize some text in the UI.
@@ -17,10 +18,11 @@ listenForUpdates();
  */
 function initUiText() {
   const manifest = chrome.runtime.getManifest();
-  document.querySelectorAll(".version").forEach(elt => {
+  logDebug("Manifest: %o", manifest);
+  document.querySelectorAll(".version").forEach((elt) => {
     elt.innerHTML = manifest.version;
   });
-  document.querySelectorAll("a.extensionStore").forEach(link => {
+  document.querySelectorAll("a.extensionStore").forEach((link) => {
     link.href =
       "https://chrome.google.com/webstore/detail/disqus-auto-expander/fpbfgpbppogiblppnplbkkcdmnklnbao?hl=en&gl=US";
     link.innerText = "Chrome Web Store";
@@ -31,7 +33,7 @@ function initUiText() {
  * Retrieves the current configuration values from storage.
  */
 function getCurrentConfig() {
-  chrome.storage.sync.get(defaultConfig, config => {
+  chrome.storage.sync.get(defaultConfig, (config) => {
     if (!chrome.runtime.lastError) {
       // removeIf(!allowDebug)
       logDebug("config.js loaded.");
@@ -82,7 +84,7 @@ function getCurrentConfig() {
  * Handles changes in the configuration values.
  */
 function listenForUpdates() {
-  document.body.addEventListener("input", event => {
+  document.body.addEventListener("input", (event) => {
     // removeIf(!allowDebug)
     logDebug("Handling change event on %s", event.target.id, event);
     // endRemoveIf(!allowDebug)
@@ -95,12 +97,12 @@ function listenForUpdates() {
         clearTimeout(typingDebounceTimer);
       }
       typingDebounceTimer = setTimeout(
-        target => {
+        (target) => {
           if (target.validity.valid) {
             updateConfigValue(target.id, +target.value);
           } else {
             // Restore the previous value after debounceDelay (msecs).
-            chrome.storage.sync.get(target.id, value => {
+            chrome.storage.sync.get(target.id, (value) => {
               if (!chrome.runtime.lastError) {
                 target.value = value[target.id];
               } else {
@@ -152,9 +154,7 @@ function listenForUpdates() {
           // endRemoveIf(!allowDebug)
         } else {
           console.info(
-            `Couldn't store config option ${key} with value ${value}: ${
-              chrome.runtime.lastError.message
-            }.`
+            `Couldn't store config option ${key} with value ${value}: ${chrome.runtime.lastError.message}.`
           );
           return;
         }
@@ -185,7 +185,7 @@ function listenForUpdates() {
 function setEnabledStateUi(isEnabled) {
   document
     .querySelectorAll("section:first-of-type > div input")
-    .forEach(elt => (elt.disabled = !isEnabled));
+    .forEach((elt) => (elt.disabled = !isEnabled));
 } // end of setEnabledStateUi().
 
 /**
@@ -196,26 +196,22 @@ function setEnabledStateUi(isEnabled) {
  * be called if the content script replies to this message.
  */
 function sendContentCommand(commandData, responseCallback) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (!chrome.runtime.lastError) {
-      chrome.tabs.sendMessage(tabs[0].id, commandData, response => {
+      chrome.tabs.sendMessage(tabs[0].id, commandData, (response) => {
         if (!chrome.runtime.lastError) {
           if (responseCallback) {
             responseCallback(response);
           }
         } else {
           console.info(
-            `sendContentCommand(): couldn't send command: ${
-              chrome.runtime.lastError.message
-            }.`
+            `sendContentCommand(): couldn't send command: ${chrome.runtime.lastError.message}.`
           );
         } // tabs.sendMessage() error handler.
       }); // tabs.sendMessage() callback.
     } else {
       console.info(
-        `sendContentCommand(): couldn't get active tab for sendMessage: ${
-          chrome.runtime.lastError.message
-        }.`
+        `sendContentCommand(): couldn't get active tab for sendMessage: ${chrome.runtime.lastError.message}.`
       );
     } // chrome.tabs.query() error handler.
   }); // chrome.tabs.query() callback.

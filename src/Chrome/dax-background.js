@@ -1,3 +1,18 @@
+import { defaultConfig } from "./dax-defaultConfig.js";
+// const defaultConfig = {
+//   isEnabled: true,
+//   moreReplies: true,
+//   newReplies: true,
+//   longItems: true,
+//   moreComments: true,
+//   newComments: true,
+//   checkInterval: 5,
+//   stopAutoplay: true,
+//   openInNewWindow: true,
+//   useDarkTheme: false,
+//   doDebug: false,
+// };
+
 let _config = defaultConfig,
   _manifest = chrome.runtime.getManifest();
 
@@ -5,7 +20,7 @@ chrome.runtime.onInstalled.addListener(() => {
   /* Make sure the extension's options are stored when the extension starts up.
   Pass `null` so we get everything in storage. This allows us to clean up
   obsolete config values (see the `else` block below). */
-  chrome.storage.sync.get(null, config => {
+  chrome.storage.sync.get(null, (config) => {
     if (!chrome.runtime.lastError) {
       if (!Object.keys(config).length) {
         // removeIf(!allowDebug)
@@ -37,9 +52,7 @@ chrome.runtime.onInstalled.addListener(() => {
               // endRemoveIf(!allowDebug)
             } else {
               console.info(
-                `Couldn't remove obsolete keys from storage: ${
-                  chrome.runtime.lastError.message
-                }.`
+                `Couldn't remove obsolete keys from storage: ${chrome.runtime.lastError.message}.`
               );
             }
           }); // end chrome.storage.sync.remove() callback.
@@ -51,30 +64,12 @@ chrome.runtime.onInstalled.addListener(() => {
         // See if we need to add any new keys to config.
         if (Object.keys(_config).length < Object.keys(defaultConfig).length) {
           _config = { ...defaultConfig, ..._config };
-          chrome.storage.sync.set(_config, () => {
-            if (!chrome.runtime.lastError) {
-              // removeIf(!allowDebug)
-              _config.doDebug &&
-                console.debug(
-                  "--> added new config values to storage",
-                  _config
-                );
-              // endRemoveIf(!allowDebug)
-            } else {
-              console.info(
-                `Couldn't update config in storage: ${
-                  chrome.runtime.lastError.message
-                }`
-              );
-            } // end error handling for storage.sync.set() callback.
-          }); // chrome.storage.sync.set() callback.
+          updateSyncedConfig(_config);
         } // if ([fewer _config keys than defaultConfig keys]).
       } // end of else block (got config items from storage).
     } else {
       console.info(
-        `Couldn't get configuration options from storage: ${
-          chrome.runtime.lastError.message
-        }`
+        `Couldn't get configuration options from storage: ${chrome.runtime.lastError.message}`
       );
       return;
     } // else (chrome.runtime.lastError)
@@ -82,7 +77,7 @@ chrome.runtime.onInstalled.addListener(() => {
   }); // end of chrome.storage.sync.get() callback.
 
   // Reset & reinstall PageStateMatcher.
-  chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
+  chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
     chrome.declarativeContent.onPageChanged.addRules([
       {
         conditions: [
@@ -97,14 +92,14 @@ chrome.runtime.onInstalled.addListener(() => {
 }); // chrome.runtime.onInstalled.addListener()
 
 // Listen for messages from other DAX scripts.
-chrome.runtime.onMessage.addListener(msg => {
+chrome.runtime.onMessage.addListener((msg) => {
   // removeIf(!allowDebug)
   _config.doDebug && console.debug("Got message: %o", msg);
   // endRemoveIf(!allowDebug)
   if (msg.action === "setIcon" && typeof msg.data !== "undefined") {
     setIcon(msg.data);
   } else if (msg.action === "updateConfig" && typeof msg.data === "object") {
-    updateConfig(msg.data);
+    updateConfigValue(msg.data);
   }
 });
 
@@ -123,19 +118,19 @@ function setIcon(isEnabled) {
       active: true,
       currentWindow: true,
     },
-    tabs => {
+    (tabs) => {
       if (!chrome.runtime.lastError) {
         if (tabs[0]) {
           // removeIf(!allowDebug)
           _config.doDebug && console.debug(`--> Setting icon.`);
           // endRemoveIf(!allowDebug)
-          chrome.pageAction.setIcon({
+          chrome.action.setIcon({
             tabId: tabs[0].id,
             path: isEnabled
               ? "images/disqus_eye_16.png"
               : "images/disqus_eye_16_paused.png",
           });
-          chrome.pageAction.setTitle({
+          chrome.action.setTitle({
             tabId: tabs[0].id,
             title: `${_manifest.page_action.default_title}${
               isEnabled ? "" : " (paused)"
@@ -146,9 +141,7 @@ function setIcon(isEnabled) {
         }
       } else {
         console.info(
-          `setIcon(): couldn't get active tab to send message: ${
-            chrome.runtime.lastError.message
-          }.`
+          `setIcon(): couldn't get active tab to send message: ${chrome.runtime.lastError.message}.`
         );
       } // end chrome.tabs.query() error handling.
     } // end of chrome.tabs.query() callback.
@@ -161,13 +154,31 @@ function setIcon(isEnabled) {
  * @param {Object} newConfigData - an object containing the configuration key
  * and value to update.
  */
-function updateConfig(newConfigData) {
+function updateConfigValue(newConfigData) {
   const { key, value } = newConfigData;
-  _config[key] = value;
-  // removeIf(!allowDebug)
-  _config.doDebug && console.debug("Updated _config.%s to %s", key, value);
-  // endRemoveIf(!allowDebug)
-  if (key === "isEnabled") {
-    setIcon(value);
-  }
-} // end of updateConfig().
+  chrome.extension.sync.get(null, (config) => {
+    config[key] = value;
+    // removeIf(!allowDebug)
+    // endRemoveIf(!allowDebug)
+    if (key === "isEnabled") {
+      setIcon(value);
+    }
+    updateSyncedConfig(config);
+    _config.doDebug && console.debug("Updated config.%s to %s", key, value);
+  });
+} // end of updateConfigValue().
+
+function updateSyncedConfig(config) {
+  chrome.storage.sync.set(config, () => {
+    if (!chrome.runtime.lastError) {
+      // removeIf(!allowDebug)
+      config.doDebug &&
+        console.debug("--> added new config values to storage", config);
+      // endRemoveIf(!allowDebug)
+    } else {
+      console.info(
+        `Couldn't update config in storage: ${chrome.runtime.lastError.message}`
+      );
+    } // end error handling for storage.sync.set() callback.
+  }); // chrome.storage.sync.set() callback.
+}

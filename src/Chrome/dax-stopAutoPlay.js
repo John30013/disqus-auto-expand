@@ -1,3 +1,4 @@
+// import { defaultConfig } from "./dax-defaultConfig.js";
 // Blocking this in the browser doesn't seem to work consistently. So this code
 // will rewrite these URLs in the <iframe src> attribute to remove the &auto_play
 // and &autoplay query parameters.
@@ -11,31 +12,37 @@
 //   &type=text%2Fhtml
 //   &schema=youtube
 //   &auto_play=true&autoplay=1
-const origLocation = window.location.href;
-chrome.storage.sync.get(defaultConfig, config => {
-  if (chrome.runtime.lastError) {
-    console.info(
-      `Couldn't get configuration from storage: ${chrome.runtime.lastError}.`
-    );
-  } else {
-    // removeIf(!allowDebug)
-    config.doDebug &&
-      console.debug(
-        `dax-stopAutoPlay.js: running in iframe ${window.name || origLocation}.`
+// export function main() {
+  const origLocation = window.location.href;
+  chrome.storage.sync.get(null, (config) => {
+    if (chrome.runtime.lastError) {
+      console.info(
+        `Couldn't get configuration from storage: ${chrome.runtime.lastError}.`
       );
-    // endRemoveIf(!allowDebug)
-    if (config.stopAutoplay) {
-      const newLocation = origLocation.replace(
-        /[?&]auto[_-]?(?:play|start)=[^&]+/gi,
-        ""
-      );
-      if (newLocation !== origLocation) {
-        // removeIf(!allowDebug)
-        config.doDebug &&
-          console.debug(`Autoplay media found; reloading to: ${newLocation}.`);
-        // endRemoveIf(!allowDebug)
-        window.location.href = newLocation;
+    } else {
+      // removeIf(!allowDebug)
+      config.doDebug &&
+        console.debug(
+          `dax-stopAutoPlay.js: running in iframe ${
+            window.name || origLocation
+          }.`
+        );
+      // endRemoveIf(!allowDebug)
+      if (config.stopAutoplay) {
+        const newLocation = origLocation.replace(
+          /[?&]auto[_-]?(?:play|start)=[^&]+/gi,
+          ""
+        );
+        if (newLocation !== origLocation) {
+          // removeIf(!allowDebug)
+          config.doDebug &&
+            console.debug(
+              `Autoplay media found; reloading to: ${newLocation}.`
+            );
+          // endRemoveIf(!allowDebug)
+          window.location.href = newLocation;
+        }
       }
     }
-  }
-});
+  });
+// }

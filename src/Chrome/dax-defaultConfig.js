@@ -11,3 +11,5 @@ const defaultConfig = {
   useDarkTheme: false,
   doDebug: false,
 };
+
+export { defaultConfig };

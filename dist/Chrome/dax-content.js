@@ -1,5 +1,8 @@
 // "Global" variables and flags.
-let _config = defaultConfig,
+// import { defaultConfig } from "./dax-defaultConfig.js";
+
+// export function main() {
+let _config = {},
   _timer = null,
   _observer = null,
   _observedLinks = {},
@@ -32,6 +35,7 @@ let _config = defaultConfig,
   // Start processing.
   processNewLinks();
 })();
+// }
 /* ===== End of main code. ===== */
 
 /* ===== Helper functions. ===== */
@@ -189,7 +193,7 @@ function createObserver() {
       const now = Date.now(),
         maxAge = 5 * 60 * 1000;
       Object.keys(_observedLinks)
-        .filter((luid) => now - luid.substr(0, luid.indexOf("-")) >= maxAge)
+        .filter((luid) => now - luid.substring(0, luid.indexOf("-")) >= maxAge)
         .forEach((oldLuid) => unobserveLink(_observedLinks[oldLuid], true));
     } // end of link cleanup block.
   } // end of processObservedEntries().
@@ -322,7 +326,6 @@ function processNewLinks() {
 function updateConfig(newConfigData) {
   const { key, value } = newConfigData,
     oldValue = _config[key];
-
   _config[key] = value;
   // removeIf(!allowDebug)
   _config.doDebug &&
@@ -334,16 +337,20 @@ function updateConfig(newConfigData) {
     );
   // endRemoveIf(!allowDebug)
 
-  // Check if we need to resume processing content links.
-  if (key === "isEnabled" && !oldValue && value) {
-    // removeIf(!allowDebug)
-    _config.doDebug &&
-      console.debug("Restarting content processing: %o", {
-        oldIsEnabled: oldValue,
-        newIsEnabled: value,
-      });
-    // endRemoveIf(!allowDebug)
-    processNewLinks();
+  if (key === "isEnabled") {
+    chrome.runtime.sendMessage({ action: "setIcon", data: value });
+
+    // Check if we need to resume processing content links.
+    if (!oldValue && value) {
+      // removeIf(!allowDebug)
+      _config.doDebug &&
+        console.debug("Restarting content processing: %o", {
+          oldIsEnabled: oldValue,
+          newIsEnabled: value,
+        });
+      // endRemoveIf(!allowDebug)
+      processNewLinks();
+    }
   }
 } // end of updateConfig().
 
@@ -352,7 +359,7 @@ function updateConfig(newConfigData) {
  */
 async function getCurrentConfig() {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(defaultConfig, (config) => {
+    chrome.storage.sync.get(null, (config) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError.message);
       } else {
@@ -439,7 +446,7 @@ function findNewLinks(config) {
     document
       .querySelectorAll(
         'div.load-more:not([style*="none"]) > a.load-more__button, div.load-more-refresh:not([style*="none"]) > a.load-more-refresh__button'
-    )
+      )
       .forEach((elt) => newLinks.push(elt));
   }
   // Find the active "Show # New Comments" button at the top of the comments.
