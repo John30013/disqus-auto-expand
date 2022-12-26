@@ -39,7 +39,7 @@ let _config = defaultConfig,
  * Listens for messages from other scripts in the extension.
  */
 function listenForMessages() {
-  chrome.runtime.onMessage.addListener(msg => {
+  chrome.runtime.onMessage.addListener((msg) => {
     if (msg.action === "updateConfig") {
       updateConfig(msg.data);
     } else if (msg.action === "logDebug" && msg.message) {
@@ -52,7 +52,7 @@ function listenForMessages() {
 } // end of listenForMessages().
 
 /**
- * Creates the IntersectionObserver that handles collapes replies and new
+ * Creates the IntersectionObserver that handles collasped replies and new
  * comments links that enter the viewport.
  */
 function createObserver() {
@@ -122,7 +122,7 @@ function createObserver() {
     } // end of while loop to process edit/reply 'LI' entries.
 
     // Handle comment/reply loading/expanding links.
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (Object.keys(_activeTextareasInView).length) {
         // There is an active reply/edit link in view, so we unobserve this
         // content link (since it only lands here when its intersection status
@@ -177,8 +177,8 @@ function createObserver() {
     });
 
     if (foundIntersects) {
-      /* Clean up old observed links. Disqus seems to output some (mostly "
-      see more") links that become hidden before they are clicked (a/k/a, 
+      /* Clean up old observed links. Disqus seems to output some (mostly 
+      "see more") links that become hidden before they are clicked (a/k/a, 
       "zombie" links). This block unobserves all observed links that haven't 
       been clicked after five minutes. If some non-zombie links get unobserved,
       they will be observed again the next time the processNewLinks() timer 
@@ -189,8 +189,8 @@ function createObserver() {
       const now = Date.now(),
         maxAge = 5 * 60 * 1000;
       Object.keys(_observedLinks)
-        .filter(luid => now - luid.substr(0, luid.indexOf("-")) >= maxAge)
-        .forEach(oldLuid => unobserveLink(_observedLinks[oldLuid], true));
+        .filter((luid) => now - luid.substr(0, luid.indexOf("-")) >= maxAge)
+        .forEach((oldLuid) => unobserveLink(_observedLinks[oldLuid], true));
     } // end of link cleanup block.
   } // end of processObservedEntries().
 } // end of createObserver().
@@ -223,7 +223,7 @@ function processNewLinks() {
   // that by polling, and since this is the main logic loop it's the best place
   // to do it.
   if (_config.isEnabled) {
-    Object.keys(_activeTextareasInView).forEach(tid => {
+    Object.keys(_activeTextareasInView).forEach((tid) => {
       const liElt = _activeTextareasInView[tid];
       if (false === liElt.classList.contains("active")) {
         // removeIf(!allowDebug)
@@ -266,7 +266,7 @@ function processNewLinks() {
   if (_config.isEnabled && _config.openInNewWindow) {
     const extLinkSelector =
       "a[href*='disq.us/url?'][rel*='noopener']:not([target])";
-    document.querySelectorAll(extLinkSelector).forEach(link => {
+    document.querySelectorAll(extLinkSelector).forEach((link) => {
       link.target = "_blank";
       link.title = "[new window] " + link.title;
       // removeIf(!allowDebug)
@@ -352,7 +352,7 @@ function updateConfig(newConfigData) {
  */
 async function getCurrentConfig() {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(defaultConfig, config => {
+    chrome.storage.sync.get(defaultConfig, (config) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError.message);
       } else {
@@ -404,9 +404,11 @@ function findNewLinks(config) {
   const newLinks = [];
   // Find any active (open) "reply/edit" textareas. When one of these is
   // visible, the operation pauses immediately.
-  document.querySelectorAll("li.reply.active, li.edit.active").forEach(elt => {
-    newLinks.push(elt);
-  });
+  document
+    .querySelectorAll("li.reply.active, li.edit.active")
+    .forEach((elt) => {
+      newLinks.push(elt);
+    });
 
   // Find new "See more replies" links.
   if (!config || config.moreReplies) {
@@ -414,7 +416,7 @@ function findNewLinks(config) {
       .querySelectorAll(
         "div.show-children-wrapper:not(.hidden) > a.show-children:not(.busy):not([data-luid])"
       )
-      .forEach(elt => newLinks.push(elt));
+      .forEach((elt) => newLinks.push(elt));
   }
   // Find new "See ### new replies" links.
   if (!config || config.newReplies) {
@@ -422,7 +424,7 @@ function findNewLinks(config) {
       .querySelectorAll(
         'a.realtime-button.reveal:not([style*="display: none;"]):not([data-luid])'
       )
-      .forEach(elt => newLinks.push(elt));
+      .forEach((elt) => newLinks.push(elt));
   }
   // Find new "see more" links.
   if (!config || config.longItems) {
@@ -430,21 +432,21 @@ function findNewLinks(config) {
       .querySelectorAll(
         'div.post-message-container:not([style*="max-height: none;"]) + a.see-more:not(.hidden):not([data-luid]), a.curtain-truncate:not(.hidden):not([data-luid])'
       )
-      .forEach(elt => newLinks.push(elt));
+      .forEach((elt) => newLinks.push(elt));
   }
   // Find the active "Load more comments" "button" at the bottom of the comments.
   if (!config || config.moreComments) {
     document
       .querySelectorAll(
-        'div.load-more:not([style*="none"]) > a.load-more__button'
-      )
-      .forEach(elt => newLinks.push(elt));
+        'div.load-more:not([style*="none"]) > a.load-more__button, div.load-more-refresh:not([style*="none"]) > a.load-more-refresh__button'
+    )
+      .forEach((elt) => newLinks.push(elt));
   }
   // Find the active "Show # New Comments" button at the top of the comments.
   if (!config || config.newComments) {
     document
       .querySelectorAll('button.alert--realtime:not([style*="none"])')
-      .forEach(elt => newLinks.push(elt));
+      .forEach((elt) => newLinks.push(elt));
   }
 
   return newLinks;
@@ -565,7 +567,7 @@ Do you want to proceed?`
     } else if (iteration < 30) {
       button.innerText = "Looks like the end is in sight…";
     }
-    newLinks.forEach(link => {
+    newLinks.forEach((link) => {
       unobserveLink(link);
       tagLink(link);
       activateLink(link);
@@ -578,7 +580,7 @@ Do you want to proceed?`
     button.innerText = "The entire discussion is now loaded.";
     button.style.willChange = "";
     setTimeout(
-      button => {
+      (button) => {
         button.classList.remove("processing", "complete");
         button.innerText = "Load entire discussion";
         button.blur();
