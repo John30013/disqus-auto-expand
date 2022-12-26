@@ -14,5 +14,8 @@
     "gulp-terser": "^1.2.0",
     "gulp-zip": "^5.0.0",
     "yargs": "^13.2.4"
+  },
+  "dependencies": {
+    "node": "^16.13.0"
   }
 }
