@@ -85,7 +85,7 @@ chrome.runtime.onInstalled.addListener(() => {
             css: ["#disqus_thread"],
           }),
         ],
-        actions: [new chrome.declarativeContent.ShowPageAction()],
+        actions: [new chrome.declarativeContent.ShowAction()],
       },
     ]); // chrome.declarativeContent.onPageChanged.addRules()
   }); // chrome.declarativeContent.onPageChanged.removeRules()
@@ -100,6 +100,16 @@ chrome.runtime.onMessage.addListener((msg) => {
     setIcon(msg.data);
   } else if (msg.action === "updateConfig" && typeof msg.data === "object") {
     updateConfigValue(msg.data);
+    if (msg.data.key === "isEnabled") {
+      // removeIf(!allowDebug)
+      _config.doDebug &&
+        console.debug(
+          "--> config value `isEnabled` updated to %o; calling setIcon().",
+          msg.data.value
+        );
+      // endRemoveIf(!allowDebug)
+      setIcon(msg.data.value);
+    }
   }
 });
 
@@ -118,33 +128,35 @@ function setIcon(isEnabled) {
       active: true,
       currentWindow: true,
     },
-    (tabs) => {
-      if (!chrome.runtime.lastError) {
-        if (tabs[0]) {
-          // removeIf(!allowDebug)
-          _config.doDebug && console.debug(`--> Setting icon.`);
-          // endRemoveIf(!allowDebug)
-          chrome.action.setIcon({
-            tabId: tabs[0].id,
-            path: isEnabled
-              ? "images/disqus_eye_16.png"
-              : "images/disqus_eye_16_paused.png",
-          });
-          chrome.action.setTitle({
-            tabId: tabs[0].id,
-            title: `${_manifest.page_action.default_title}${
-              isEnabled ? "" : " (paused)"
-            }`,
-          });
-        } else {
-          console.info("No active tab; aborting.");
-        }
-      } else {
+    ([tab]) => {
+      if (chrome.runtime.lastError) {
         console.info(
-          `setIcon(): couldn't get active tab to send message: ${chrome.runtime.lastError.message}.`
+          `--> Couldn't get active tab to send message: ${chrome.runtime.lastError.message}.`
         );
-      } // end chrome.tabs.query() error handling.
-    } // end of chrome.tabs.query() callback.
+        return;
+      }
+
+      if (!tab) {
+        console.info("--> No active tab; aborting.");
+        return;
+      }
+
+      // removeIf(!allowDebug)
+      _config.doDebug && console.debug(`--> Setting icon.`);
+      // endRemoveIf(!allowDebug)
+      chrome.action.setIcon({
+        tabId: tab.id,
+        path: isEnabled
+          ? "images/disqus_eye_16.png"
+          : "images/disqus_eye_16_paused.png",
+      });
+      chrome.action.setTitle({
+        tabId: tab.id,
+        title: `${_manifest.page_action.default_title}${
+          isEnabled ? "" : " (paused)"
+        }`,
+      });
+    }
   ); // end of chrome.tabs.query().
 } // end of setIcon().
 
@@ -156,29 +168,23 @@ function setIcon(isEnabled) {
  */
 function updateConfigValue(newConfigData) {
   const { key, value } = newConfigData;
-  chrome.extension.sync.get(null, (config) => {
+  chrome.storage.sync.get(null, (config) => {
     config[key] = value;
-    // removeIf(!allowDebug)
-    // endRemoveIf(!allowDebug)
-    if (key === "isEnabled") {
-      setIcon(value);
-    }
     updateSyncedConfig(config);
-    _config.doDebug && console.debug("Updated config.%s to %s", key, value);
   });
 } // end of updateConfigValue().
 
 function updateSyncedConfig(config) {
   chrome.storage.sync.set(config, () => {
-    if (!chrome.runtime.lastError) {
-      // removeIf(!allowDebug)
-      config.doDebug &&
-        console.debug("--> added new config values to storage", config);
-      // endRemoveIf(!allowDebug)
-    } else {
-      console.info(
+    if (chrome.runtime.lastError) {
+      console.error(
         `Couldn't update config in storage: ${chrome.runtime.lastError.message}`
       );
-    } // end error handling for storage.sync.set() callback.
+      return;
+    }
+    // removeIf(!allowDebug)
+    config.doDebug &&
+      console.debug("--> added updated config values to storage: %o", config);
+    // endRemoveIf(!allowDebug)
   }); // chrome.storage.sync.set() callback.
 }

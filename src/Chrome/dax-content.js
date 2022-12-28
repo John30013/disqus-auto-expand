@@ -22,13 +22,10 @@ let _config = {},
     console.debug(`content.js is running in iframe ${window.name}.`);
   // endRemoveIf(!allowDebug)
 
-  // The content script has to set the icon because Chrome changes it to the
-  // default (active) icon when a matched page comes into view. After this, the
-  // config script handles updating the icon.
-  chrome.runtime.sendMessage({ action: "setIcon", data: _config.isEnabled });
-
-  // Listen for option updates and debug messages from config page.
+  // Listen for debug messages from config page.
   listenForMessages();
+  // Listen for storage (config data) updates.
+  listenForStorageChanges();
   // Set up the IntersectionObserver to watch for auto-expand links entering the
   // viewport.
   createObserver();
@@ -44,9 +41,7 @@ let _config = {},
  */
 function listenForMessages() {
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.action === "updateConfig") {
-      updateConfig(msg.data);
-    } else if (msg.action === "logDebug" && msg.message) {
+    if (msg.action === "logDebug" && msg.message) {
       // removeIf(!allowDebug)
       _config.doDebug &&
         console.debug(`[${msg.caller}] ${msg.message}`, ...msg.data);
@@ -54,6 +49,33 @@ function listenForMessages() {
     }
   });
 } // end of listenForMessages().
+
+function listenForStorageChanges() {
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace !== "sync") {
+      return;
+    }
+
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      _config[key] = newValue;
+      // removeIf(!allowDebug)
+      _config.doDebug &&
+        console.debug(`Updated _config.${key} to %o`, newValue);
+      // endRemoveIf(!allowDebug)
+
+      if (key === "isEnabled") {
+        // Check if we need to resume processing content links.
+        if (!oldValue && newValue) {
+          // removeIf(!allowDebug)
+          _config.doDebug &&
+            console.debug(`--> Restarting content processing.`);
+          // endRemoveIf(!allowDebug)
+          processNewLinks(true);
+        }
+      }
+    }
+  });
+}
 
 /**
  * Creates the IntersectionObserver that handles collasped replies and new
@@ -204,8 +226,14 @@ function createObserver() {
  * This function also executes the main logic loop, depending on the value of
  * the checkInterval configuration option.
  */
-function processNewLinks() {
-  /* Since processNewLinks() is called by updateConfig() when isEnabled becomes
+function processNewLinks(updateIconState) {
+  // The content script has to set the icon because Chrome changes it to the
+  // default (active) icon when a matched page comes into view.
+  if (updateIconState) {
+    chrome.runtime.sendMessage({ action: "setIcon", data: _config.isEnabled });
+  }
+
+  /* Since processNewLinks() is called by the storage listener when isEnabled becomes
   true, clear any pending timeout first. It's a no-op if this call is due to 
   the timer timing out.
     Note: if _loadAllInitialized is `false`, we keep the loop going until the
@@ -215,6 +243,7 @@ function processNewLinks() {
   if (!_config.isEnabled && _loadAllInitialized) {
     // removeIf(!allowDebug)
     _config.doDebug && console.debug("Stopping the timeout loop.");
+    chrome.runtime.sendMessage({ action: "setIcon", data: _config.isEnabled });
     // endRemoveIf(!allowDebug)
     return;
   }
@@ -315,44 +344,6 @@ function processNewLinks() {
     // endRemoveIf(!allowDebug)
   } // end of observeLink().
 } // end of processNewLinks().
-
-/**
- * Updates the local copy of the config with the key and value identified in
- * the parameter. If the key is "isEnabled", also checks whether to resume
- * processing content links.
- * @param {Object} newConfigData - an object containing the configuration key
- * and value to update.
- */
-function updateConfig(newConfigData) {
-  const { key, value } = newConfigData,
-    oldValue = _config[key];
-  _config[key] = value;
-  // removeIf(!allowDebug)
-  _config.doDebug &&
-    console.debug(
-      "Updated _config.%s to %s. _config is now:",
-      key,
-      value,
-      _config
-    );
-  // endRemoveIf(!allowDebug)
-
-  if (key === "isEnabled") {
-    chrome.runtime.sendMessage({ action: "setIcon", data: value });
-
-    // Check if we need to resume processing content links.
-    if (!oldValue && value) {
-      // removeIf(!allowDebug)
-      _config.doDebug &&
-        console.debug("Restarting content processing: %o", {
-          oldIsEnabled: oldValue,
-          newIsEnabled: value,
-        });
-      // endRemoveIf(!allowDebug)
-      processNewLinks();
-    }
-  }
-} // end of updateConfig().
 
 /**
  * Gets the curreent configuration values from storage.
