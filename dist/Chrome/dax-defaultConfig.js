@@ -1,15 +1,1 @@
-const defaultConfig = {
-  isEnabled: true,
-  moreReplies: true,
-  newReplies: true,
-  longItems: true,
-  moreComments: true,
-  newComments: true,
-  checkInterval: 5,
-  stopAutoplay: true,
-  openInNewWindow: true,
-  useDarkTheme: false,
-  doDebug: false,
-};
-
-export { defaultConfig };
+const defaultConfig={isEnabled:!0,moreReplies:!0,newReplies:!0,longItems:!0,moreComments:!0,newComments:!0,checkInterval:5,stopAutoplay:!0,openInNewWindow:!0,useDarkTheme:!1,doDebug:!1};export{defaultConfig};
