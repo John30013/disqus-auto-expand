@@ -1,6 +1,6 @@
 # Disqus Auto Expander
 
-Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 1.1 (see the [changelog](#changelog)).
+Disqus Auto Expander is a browser extensions for Chrome and Firefox that automatically expands collapsed replies and long posts and media items in Disqus discussions. The latest version is 1.1.3.1 (see the [changelog](#changelog)).
 
 ---
 
