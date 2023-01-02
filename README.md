@@ -149,13 +149,13 @@ If you encounter a bug, please create an Issue in this repository. Be sure inclu
 
 ## Changelog
 
-## Version 1.1.3.1 (Chrome only)
+### Version 1.1.3.1 (Chrome only)
 
 Bug fixes.
 
-### Version 1.1.3 (Chrome only)
+### Version 1.1.3
 
-Allows the extension to work correctly with Disqus' new visual design (which broke the "Load more comments" auto-expanding function). Also migrates to version 3 of the the browser extension manifest format, which is required for extensions to be supported in Chrome after January 1, 2023.
+Allows the extension to work correctly with Disqus' new visual design (which broke the "Load more comments" auto-expanding function). Also migrates the Chrome extension to version 3 of the the browser extension manifest format, which is required for extensions to be supported in Chrome after January 1, 2023. (Firefox extension is still using manifest version 2 for now.)
 
 ### Version 1.1.2
 
