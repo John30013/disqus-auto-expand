@@ -427,7 +427,7 @@ function findNewLinks(config) {
   if (!config || config.moreComments) {
     document
       .querySelectorAll(
-        'div.load-more:not([style*="none"]) > a.load-more__button'
+        'div.load-more:not([style*="none"]) > a.load-more__button, div.load-more-refresh:not([style*="none"]) > a.load-more-refresh__button'
       )
       .forEach(elt => newLinks.push(elt));
   }
